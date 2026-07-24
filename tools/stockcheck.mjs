@@ -56,7 +56,7 @@ await page.evaluate(() => window.PW.hud.refresh());
 console.log('\nSEEING the engines:');
 // open the engine works
 const works = await page.evaluate(() => {
-  const d = document.querySelector('details.works');
+  const d = document.querySelector('details.engWorks');
   if (!d) return null;
   d.open = true;
   return {

@@ -645,7 +645,10 @@ function installMethods(s) {
         if (worst && worstE > 0) {
           H.raids++;
           // A fortified road is cut for a week. An unfortified one is destroyed.
-          if (worst.fortified) { worst.closed = 1; }
+          // `closed` is a QUANTITY melted by clearRate, not a boolean — winter uses
+          // 26. A raid on a held road closes it for a real stretch; 1 evaporated in
+          // about a second and read as nothing having happened.
+          if (worst.fortified) { worst.closed = Math.max(worst.closed || 0, 8); s.markDirty(); }
           else { worst.destroyed = true; s.markDirty(); }
           worst.peril = clamp((worst.peril || 0) + 0.25, 0, 3);
           s.emit('host', {
@@ -708,7 +711,7 @@ function installMethods(s) {
         if (!L) continue;
         run += L.length;
         if (run <= H.dist) {
-          if (!L.taken) { L.taken = true; L.closed = 1; }
+          if (!L.taken) { L.taken = true; L.closed = 1; s.markDirty(); }
           H.frontIndex = i + 1;
         } else break;
       }
@@ -993,9 +996,18 @@ function installMethods(s) {
     if (!line) return { ok: false, reason: 'no such service' };
     if (line.stops.includes(siteId)) return { ok: false, reason: 'already a stop on this service' };
     if (line.stops.length >= 9) return { ok: false, reason: 'nine calls is enough for one service' };
+    // Join at whichever END is actually nearer by rail. End-first meant a call
+    // adjacent to the FIRST stop was still appended at the tail whenever the
+    // network happened to connect it there too, and the service ran the whole line,
+    // doubled back, and hairpinned — a route no railway would timetable.
     const first = line.stops[0], last = line.stops[line.stops.length - 1];
-    if (hopsTo(last, siteId)) { line.stops.push(siteId); return { ok: true, at: 'end' }; }
-    if (hopsTo(first, siteId)) { line.stops.unshift(siteId); return { ok: true, at: 'start' }; }
+    const toLast = hopsTo(last, siteId);
+    const toFirst = hopsTo(first, siteId);
+    if (toLast && (!toFirst || toLast.time <= toFirst.time)) {
+      line.stops.push(siteId);
+      return { ok: true, at: 'end' };
+    }
+    if (toFirst) { line.stops.unshift(siteId); return { ok: true, at: 'start' }; }
     return { ok: false, reason: 'no track joins it to either end of this service' };
   };
 
@@ -1040,6 +1052,11 @@ function installMethods(s) {
       const move = Math.floor(line.trains / 2);
       line.trains -= move;
       r.line.trains = move;
+      // Move the ENGINES, not just the counter. Splitting used to leave every
+      // engine's lineId on the old service, so the new half had a trains count and
+      // zero capacity — a service that existed on paper and carried nothing.
+      const crews = s.enginesOf(line.id);
+      for (const e of crews.slice(0, move)) e.lineId = r.line.id;
     }
     return r;
   };
@@ -1284,7 +1301,16 @@ function installMethods(s) {
         // routine haulage of a trickle of it more profitable than the entire grain
         // trade. Its real payoff is the Council's commission fee, not the freight rate.
         const valueMul = Math.min(3.2, (VALUE[g] || 3) / 3.4);
-        const fare = raw * (1.1 + 0.024 * fareLen) * valueMul * terms.fareMul;
+        let fare = raw * (1.1 + 0.024 * fareLen) * valueMul * terms.fareMul;
+        // The Greenhollow's rebate. The petition wrote s.fareRebate and nothing read
+        // it, so "Grant the rebate" was an option that did nothing — a lie in the
+        // one place the game asks the player to weigh a cost. The rebate is charged
+        // here and remembered below, in halfling regard, which is what they promised.
+        if (s.fareRebate && p.st.culture === 'halfling') {
+          const rebate = fare * s.fareRebate;
+          fare -= rebate;
+          s.rebatePaid = (s.rebatePaid || 0) + rebate;
+        }
         s.treasury += fare;
         s.stats.fares += fare;
         s.stats.loadsMoved += raw;
@@ -1756,6 +1782,16 @@ function installMethods(s) {
         drift += (ownPros - 50) * 0.045;
       }
       if (cKey === 'orc') drift -= 1.2;
+      // "The Halflings will remember it." They do: the standing rebate is worth a
+      // steady warmth for as long as it is actually being paid.
+      if (cKey === 'halfling' && s.fareRebate && (s.rebatePaid || 0) > 0) drift += 0.9;
+      // The Crown remembers its advances too. Each outstanding favour tilts Men's
+      // regard toward the Authority needing to stay useful — warmth while solvent,
+      // and a colder ledger than anyone else's if the Authority is not.
+      if (cKey === 'men' && (s.crownFavours || 0) > 0) {
+        drift += s.treasury >= 0 ? 0.3 * Math.min(3, s.crownFavours)
+          : -0.8 * Math.min(3, s.crownFavours);
+      }
       // The Dwarves are contractors before they are a people. Every crown spent
       // on works is a crown spent on them, and they are content accordingly.
       if (cKey === 'dwarf') drift += clamp(s.buildSpendWeek / 260, 0, 2.2);
@@ -1767,6 +1803,15 @@ function installMethods(s) {
     }
     s.smokeIndex *= 0.86;
     s.buildSpendWeek = 0;
+    s.rebatePaid = 0;   // "being paid" means this week, not once ever
+    // Congestion decays, because the register reads it as CURRENT state. It was a
+    // lifetime counter: once three links had ever been tight, the "carrying
+    // everything it can" report stayed armed for the rest of the run, naming
+    // whichever link had been busiest in some forgotten week.
+    for (const [id, n] of s.congestion) {
+      if (n <= 1) s.congestion.delete(id);
+      else s.congestion.set(id, Math.floor(n / 2));
+    }
 
     // The Elves take ship. Requires sustained despair, not one bad week — losing
     // them is the heaviest thing that can happen and it should never feel like a
@@ -2135,9 +2180,13 @@ function installMethods(s) {
     s.t += dt;
     perilTick(dt);
 
-    // reopen closed track
+    // reopen closed track — except what the host holds. This loop melts `closed`
+    // by clearRate per second, which is right for a rockfall and wrong for an
+    // occupying army: the Muster's captures were reopening themselves about one
+    // simulated second after being taken, so the march never actually cost the
+    // player their road.
     for (const L of s.links) {
-      if (L.closed > 0) {
+      if (L.closed > 0 && !L.taken) {
         L.closed = Math.max(0, L.closed - dt * s.clearRate);
         if (L.closed === 0) s.markDirty();
       }
@@ -2314,6 +2363,11 @@ function installMethods(s) {
 
   s.note = (text, tone = 'plain', opts = {}) => {
     const entry = { week: s.week, text, tone, ...opts };
+    // A monotonic sequence number, because the log CAPS at 220 and shifts old
+    // entries off the front. Anything tracking "what have I already shown" by array
+    // length stops dead the moment the cap is reached — which is how the on-screen
+    // Register silently froze for the rest of every long game.
+    entry.seq = s.noteSeq = (s.noteSeq || 0) + 1;
     s.log.push(entry);
     if (s.log.length > 220) s.log.shift();
     if (opts.chronicle) s.chronicle.push(entry);

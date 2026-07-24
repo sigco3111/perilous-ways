@@ -85,9 +85,16 @@ export function createControls(canvas, camera, world, opts = {}) {
   }, { passive: false });
 
   addEventListener('keydown', (e) => {
+    // Typing must never steer the camera. This handler tracked WASD/Q/E for every
+    // keystroke — so renaming a service panned and spun the view with each letter —
+    // and preventDefault on Space meant a space could not be typed into any field.
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
     keys.add(e.code);
     if (e.code === 'Space') e.preventDefault();
   });
+  // keyup stays unguarded: a key pressed before focusing an input must still be
+  // released from the set, or the camera keeps drifting while you type.
   addEventListener('keyup', (e) => keys.delete(e.code));
   addEventListener('blur', () => keys.clear());
 

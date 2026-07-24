@@ -487,11 +487,16 @@ ${log(fs)}`.trim().slice(0, 1400));
 
   // keyboard
   addEventListener('keydown', (e) => {
+    // Typing is typing. Without this, renaming a service fired every hotkey the
+    // name contained — Space paused the game, L opened the Ledger — and the space
+    // bar could not be typed into the field at all.
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
     if (e.code === 'Space') { setSpeed(speed === 0 ? 1 : 0); }
     else if (e.code === 'Digit1') setSpeed(1);
     else if (e.code === 'Digit2') setSpeed(2);
     else if (e.code === 'Digit3') setSpeed(4);
-    else if (e.code === 'Escape') { clearSelection(); hud.closeModal(); }
+    else if (e.code === 'Escape') { clearSelection(); hud.dismissModal(); }
     else if (e.code === 'KeyL') $('ledgerBtn').click();
     else if (e.code === 'KeyC') $('commBtn').click();
     else if (e.code === 'KeyF' && selectedEngine !== null) hud && G && controls.follow(

@@ -71,6 +71,8 @@ const BENIGN = new Set([
   // 'signed for' inside a comment; the // stripper leaves comment bodies that
   // follow a sentence-ending period, and 'signed' is a real export in ornament.js.
   'src/sim/sim.js|signed',
+  // "was signed on the Thursday" in petition prose, same single-quote limitation
+  'src/sim/events.js|signed',
 ]);
 const key = (f, name) => `${f.slice(f.indexOf('src')).replace(/\\/g, '/')}|${name}`;
 

@@ -36,7 +36,9 @@ function consistFor(line, nCars) {
   }
   // Passengers are a claim on the train too, and how loud that claim is depends on
   // what the line is run for — this is what finally makes `policy` visible.
-  const paxW = (st.pax || 0) * (pol === 'passengers' ? 0.10 : pol === 'freight' ? 0.02 : 0.05);
+  // 'passenger', singular — the POLICIES key. This compared against 'passengers'
+  // and never matched, so passenger trunks drew carriages at the mixed-line weight.
+  const paxW = (st.pax || 0) * (pol === 'passenger' ? 0.10 : pol === 'freight' ? 0.02 : 0.05);
   if (paxW > 0.02) claims.push({ kind: 'passenger', w: paxW });
   if (pol === 'troop') claims.push({ kind: 'arms', w: Math.max(0.4, paxW) });
 

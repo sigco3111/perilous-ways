@@ -1331,7 +1331,7 @@ button.ghost.sm { padding: 0 0.3rem; font-size: 0.72rem; line-height: 1.35; }
   grid-template-columns: minmax(8em, auto) 1fr auto;
   border-top: 1px solid rgba(29, 23, 16, 0.16); padding-top: 0.34rem;
 }
-.lenderRow .lb { color: var(--ink-1); }
+.lenderRow .lb { color: var(--ink); }
 /* the condition attached to the money, on its own line across the full width */
 .lenderRow .ln {
   grid-column: 1 / -1; color: var(--ink-2); font-style: italic;
@@ -1343,8 +1343,8 @@ button.ghost.sm { padding: 0 0.3rem; font-size: 0.72rem; line-height: 1.35; }
 /* ── the engine works ──────────────────────────────────────────────────────
    Buying a locomotive is the game's one real purchase decision, so the classes
    have to be comparable at a glance: four bars, same scale, same order. */
-.works { margin-top: 0.55rem; border-top: 1px solid rgba(29, 23, 16, 0.28); }
-.works > summary {
+.engWorks { margin-top: 0.55rem; border-top: 1px solid rgba(29, 23, 16, 0.28); }
+.engWorks > summary {
   cursor: pointer; font-size: 0.72rem; font-variant: small-caps;
   letter-spacing: 0.09em; color: var(--ink-2); padding: 0.28rem 0;
 }
@@ -1363,7 +1363,7 @@ button.ghost.sm { padding: 0 0.3rem; font-size: 0.72rem; line-height: 1.35; }
   display: block; width: 16px; height: 7px;
   border: 1px solid rgba(29, 23, 16, 0.45);
   background: linear-gradient(to right,
-    var(--ink-1) 0 var(--w), transparent var(--w) 100%);
+    var(--ink) 0 var(--w), transparent var(--w) 100%);
 }
 .engBuy .bar.hi { border-color: var(--red); }
 .engBuy.shut { opacity: 0.55; }
@@ -1386,7 +1386,7 @@ button.ghost.sm { padding: 0 0.3rem; font-size: 0.72rem; line-height: 1.35; }
   align-self: center; height: 7px; border: 1px solid rgba(29, 23, 16, 0.45);
   display: block;
 }
-.engClass .condBar i { display: block; height: 100%; background: var(--ink-1); }
+.engClass .condBar i { display: block; height: 100%; background: var(--ink); }
 .engClass .engStats, .engClass .refuses {
   grid-column: 1 / -1; color: var(--ink-2); font-size: 0.73rem;
 }

@@ -314,7 +314,11 @@ export const LENDERS = {
     rate: 0.0, maxMul: 0.8, term: 40,
     blurb: 'No interest is asked. A condition is attached instead.',
     note: 'While the debt stands, nothing is to be carried for the orcs, and nothing bored beneath the Peaks.',
-    onTake: (s) => { s.havenBond = true; },
+    // The baseline must be stamped WHEN THE BOND IS TAKEN. Without it, the weekly
+    // check compared orc tonnage against itself (`?? s.orcTradeTotal`) and the
+    // condition could never fire — an interest-free loan with an unenforceable
+    // condition is just free money, and the Havens deserve better than that.
+    onTake: (s) => { s.havenBond = true; s.havenBondOrcMark = s.orcTradeTotal ?? 0; },
   },
 };
 export const LENDER_KEYS = Object.keys(LENDERS);

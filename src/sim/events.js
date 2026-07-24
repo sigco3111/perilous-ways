@@ -213,7 +213,7 @@ const FLAVOUR = [
       const Cap = (t) => String(t).charAt(0).toUpperCase() + String(t).slice(1);
       return pick(s.rng, [
         `Lost property, quarter to Michaelmas. Held: ${a}; ${b}. Claimed: none of it. The room is full and the surplus has been put in the room next door, which was also full.`,
-        `Lost property. The clerk asks for a ruling on ${a}, which has been on the shelf eleven months, and on ${b}, which he would like to take home. Ruling: no to both, and he is not to ask again in writing.`,
+        `Lost property. The clerk asks for a ruling on ${a}, eleven months on the shelf now, and on ${b}, which he would like to take home. Ruling: no to both, and he is not to ask again in writing.`,
         `Lost property, and a complaint attached. Handed in at the halt: ${a}. Handed in at the same halt, by the same man: ${b}. He says he found them on the train. The guard says he came in with them.`,
       ]);
     },
@@ -433,7 +433,7 @@ They wish it recorded that the wood is not available. They are willing to discus
           s.treasury -= 180;
           s.regard.elf += 9;
           s.woodCare = Math.min(0.9, s.woodCare + 0.15);
-          s.note('The line will go around Wodenholt. The delegation has expressed satisfaction, and is expected to finish expressing it by the autumn.', 'good', { chronicle: true });
+          s.note('The line will go around Wodenholt. The resurvey is charged at 180 crowns, and the wood is entered on the working plans under its own name, at the delegation’s request, in full.', 'good', { chronicle: true });
         },
       },
       {
@@ -462,7 +462,7 @@ They have costed their proposal. The costing is legible and, irritatingly, corre
         apply: (s) => {
           s.fareRebate = 0.12;
           s.regard.halfling += 16;
-          s.note('The rebate is granted. A barrel arrived at the office by way of thanks and has been entered in the register as “equipment”.', 'good', { chronicle: true });
+          s.note('The rebate is granted: a twelfth part of the fare on Greenhollow grain, standing until revoked. A barrel arrived at the office by way of thanks. Ale, dark, nine gallons.', 'good', { chronicle: true });
         },
       },
       {
@@ -471,7 +471,7 @@ They have costed their proposal. The costing is legible and, irritatingly, corre
         apply: (s) => {
           s.regard.halfling -= 15;
           for (const st of s.sites) if (st.culture === 'halfling') st.unrest = Math.min(1, st.unrest + 0.3);
-          s.note('The petition is declined with regret. The regret was drafted by the Secretary and is considered one of his better ones.', 'bad', { chronicle: true });
+          s.note('The petition is declined with regret. The regret runs to a page and a half, was signed on the Thursday, and went down to the Greenhollow by the morning service.', 'bad', { chronicle: true });
         },
       },
     ],
@@ -495,7 +495,7 @@ There is no signature. There is a mark.`,
           s.treasury += 400;
           s.shadow += 6;
           s.regard.elf -= 10;
-          s.note('The concession is accepted. The advance has cleared. The Authority has had a profitable week and has not slept well.', 'grave', { chronicle: true });
+          s.note('The concession is accepted. The advance has cleared: 400 crowns, entered under eastern receipts, a head of account that did not exist last week.', 'grave', { chronicle: true });
         },
       },
       {
@@ -539,7 +539,7 @@ The Surgeons request closure of the affected stations. Traffic points out that c
           for (const st of s.sites) if (st.plague > 0.15) st.plague += 0.25;
           s.regard.halfling -= 8;
           s.regard.men -= 4;
-          s.note('The line stays open. The Authority has recorded its reasoning at some length, in case it is ever asked.', 'bad', { chronicle: true });
+          s.note('The line stays open. The reasoning is recorded in the minute book. It runs to four pages.', 'bad', { chronicle: true });
         },
       },
     ],
@@ -723,8 +723,8 @@ export function createEvents() {
         const site = s2.byId.get(c.to);
         s2.regard.men = Math.min(100, s2.regard.men + 14);
         s2.note(`The siege of ${site?.name ?? 'the watch'} is lifted. The arms went up in ordinary `
-          + 'goods wagons under a tarpaulin marked AGRICULTURAL IMPLEMENTS, which was the '
-          + 'Secretary’s idea and which he has been insufferable about since.', 'good', { chronicle: true });
+          + 'goods wagons under a tarpaulin marked AGRICULTURAL IMPLEMENTS. The garrison '
+          + 'commander has asked for the tarpaulin to keep.', 'good', { chronicle: true });
       },
       onFail: (s2, c) => {
         const site = s2.byId.get(c.to);
@@ -914,7 +914,10 @@ export function createEvents() {
     const reachable = s.sites.filter((x) => x.connected && !x.abandoned);
     if (reachable.length) {
       const near = reachable.reduce((best, x) =>
-        (Math.hypot(x.x - wrack.x, x.y - wrack.y) < Math.hypot(best.x - wrack.x, best.y - wrack.y) ? x : best));
+        // .z, not .y — sites lie in the X/Z plane and .y is HEIGHT. The same axis
+        // bug that broke seven harnesses had also reached here, so the advance was
+        // sized from the survey of whatever settlement won a nonsense comparison.
+        (Math.hypot(x.x - wrack.x, x.z - wrack.z) < Math.hypot(best.x - wrack.x, best.z - wrack.z) ? x : best));
       const probe = s.survey(near.id, wrack.id);
       if (probe && probe.ok) road = probe.price;
     }
@@ -925,11 +928,12 @@ export function createEvents() {
       `A consignment has been booked with the Authority. One item, small, carried by hand. `
       + `Origin ${west.name}. Destination Mount Wrack. The booking is countersigned by the Council, by the Havens, and by a third party whose seal the clerk did not recognise and has been told not to ask about.\n\n`
       + `The docket specifies: do not weigh it, do not open it, do not leave it standing on a platform. `
-      + `Under "value" the shipper has written "no".\n\n`
+      + `Under “value” the shipper has written “no”.\n\n`
       + `Enclosed with the docket, without explanation or conditions, is a draft on the Treasury `
       + `for ${advance} crowns. The Secretary observes that this is roughly what it would cost to `
       + `build a railway to Mount Wrack, and that nobody has said so.`,
-      'grave', { chronicle: true, big: true },
+      // the errand plate was engraved at the start of the project and never attached
+      'grave', { chronicle: true, big: true, plate: 'errand' },
     );
   }
 
@@ -1134,7 +1138,7 @@ export function createEvents() {
               + 'so at a length that has been minuted.', 'good');
             s.audio?.('build_works');
           } else if (data.kind === 'regrade') {
-            s.note(`Gradients eased on the ${where} section. Nine chains of it are now level who `
+            s.note(`Gradients eased on the ${where} section. Nine chains of it are now level that `
               + 'were not level before.', 'good');
           } else if (data.kind === 'fortify') {
             s.note(`Blockhouses on the ${where} section, and the cuttings walled. `
@@ -1205,9 +1209,15 @@ export function createEvents() {
           // queued and filed once a week; see drainDeclines
           abandonQueue.push({ name: data.site.name, site: data.site });
           break;
-        case 'charter':
-          s.note(`Charter granted: ${data.charter.name}. ${data.charter.note ?? ''}`.trim(), 'good', { chronicle: true });
+        case 'charter': {
+          // The charter plate, on the first grant only — the same engraving on all
+          // sixteen charters would be wallpaper rather than an occasion.
+          const firstCharter = !s._charterPlateShown;
+          s._charterPlateShown = true;
+          s.note(`Charter granted: ${data.charter.name}. ${data.charter.note ?? ''}`.trim(), 'good',
+            firstCharter ? { chronicle: true, plate: 'charter' } : { chronicle: true });
           break;
+        }
         case 'insolvent':
           if (data.weeks === 1) s.note('The Authority is overdrawn. The Council has been informed by the Council\'s own auditors, which is the worst way for the Council to be informed of anything.', 'bad');
           else if (data.weeks >= 4 && !s.over) { s.over = 'dismissed'; }
@@ -1225,10 +1235,12 @@ export function createEvents() {
           });
           if (roll < 0.68) {
             L.closed = 5 + s.rng() * 9;
+            s.markDirty();
             s.note(incC ? incC.text : pick(s.rng, INCIDENT_BLOCK)(rn), 'bad');
             s.audio?.('incident');
           } else if (roll < 0.90) {
             L.closed = 3 + s.rng() * 5;
+            s.markDirty();
             s.treasury -= 26;
             s.note(incC ? incC.text : pick(s.rng, INCIDENT_BEAST)(rn), 'bad');
             s.audio?.('dragon');
@@ -1270,7 +1282,7 @@ export function createEvents() {
         }
         case 'age':
           if (data.age === 2) {
-            s.note('The Authority has been reconstituted with an enlarged mandate and a smaller building. Traffic is up. Everything is up. The Council has begun using the word "Age", capitalised, which is never a good sign in a minute.', 'plain', { chronicle: true, big: true });
+            s.note('The Authority has been reconstituted with an enlarged mandate and a smaller building. Traffic is up. Everything is up. The Council has begun using the word “Age”, capitalised, which is never a good sign in a minute.', 'plain', { chronicle: true, big: true });
           } else if (data.age === 3) {
             s.note(
               'A memorandum has been circulated to all stationmasters. It is one page. It concerns what to do if the eastern services do not stop where they are timetabled to stop.\n\n'
@@ -1342,7 +1354,7 @@ export function createEvents() {
           if (data.stage === 2) s.regard.dwarf += 4;
           if (data.stage === 3) {
             // a permanent price for having gone that deep
-            for (const L of s.links) if ((L.boreDepth || 0) > 22) L.peril = Math.min(1, L.peril + 0.30);
+            for (const L of s.links) if ((L.boreDepth || 0) > 22) L.peril = Math.min(3, L.peril + 0.30);
             s.audio?.('doom');
           }
           break;
@@ -1425,7 +1437,7 @@ export function createEvents() {
           s.audio?.('dragon');
           // everything touching that delve becomes markedly less safe
           for (const L of s.links) {
-            if (L.a === st.id || L.b === st.id) L.peril = Math.min(1, L.peril + 0.34);
+            if (L.a === st.id || L.b === st.id) L.peril = Math.min(3, L.peril + 0.34);
           }
           st.unrest = Math.min(1, st.unrest + 0.4);
         }
@@ -1443,6 +1455,11 @@ export function createEvents() {
       // the realm falls
       if (!s.over && s.shadow >= 100) s.over = 'shadow';
       if (!s.over && s.concordAvg() < 8 && s.week > 12) s.over = 'concord';
+      // The quiet ending. ENDINGS.survived existed from the start and no code path
+      // ever set it — the only ways out were doom or the errand. A railway that has
+      // outlasted the whole arc of the age deserves to close its own book: five
+      // years in, still solvent, still running, the chronicle ends on a timetable.
+      if (!s.over && s.week >= 60) s.over = 'survived';
     },
   };
 }

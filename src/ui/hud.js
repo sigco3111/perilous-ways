@@ -46,6 +46,7 @@ export function createHud(sim, hooks) {
   let openLine = null;      // id of the service whose dossier is open
   let modalOpen = false;
   let deferred = false;
+  let deferredAt = -1;   // which council sitting was deferred (sim.charterSat)
   let ledgerOpen = false;
   let commOpen = false;
   let fleetShopOpen = false;
@@ -108,6 +109,13 @@ export function createHud(sim, hooks) {
 
   // ── fleet list ─────────────────────────────────────────────────────────
   function refreshFleet() {
+    // This panel is re-rendered from scratch every 0.28s, which destroyed the
+    // engine-works <details> drawer's open state: it snapped shut a quarter-second
+    // after being opened, every time, and buying an engine was effectively
+    // impossible unless you had just clicked Buy (the only path that set the flag).
+    // Read the player's actual choice from the DOM before wiping it.
+    const worksEl = $('lineList').querySelector('details.engWorks');
+    if (worksEl) fleetShopOpen = worksEl.open;
     $('fEngines').textContent = `${sim.enginesInUse()} of ${sim.stock.engines}`;
     $('fCars').textContent = sim.stock.cars;
     const got = Object.entries(sim.can).filter(([, v]) => v).map(([k]) => k);
@@ -160,7 +168,7 @@ export function createHud(sim, hooks) {
                title="${esc(o.builder)} · ${o.upkeep} cr/week upkeep">Buy · ${o.price} cr</button>`}
       </div>`;
     }).join('');
-    rows.push(`<details class="works"${fleetShopOpen ? ' open' : ''}>
+    rows.push(`<details class="engWorks"${fleetShopOpen ? ' open' : ''}>
       <summary>The engine works</summary>${buyable}
       <p class="ledNote">Haul · speed · appeal · endurance. An engine wears with the work
       it does; a worn one hauls less and can be put right in the shed.</p>
@@ -177,6 +185,12 @@ export function createHud(sim, hooks) {
     const el = $('linePanel');
     const line = sim.lines.find((l) => l.id === openLine);
     if (!line) { el.hidden = true; return; }
+    // Never re-render while the player is typing in this panel: the rebuild
+    // destroys the rename input mid-word about once a second, which made naming a
+    // service nearly impossible. The panel catches up on the next tick after focus
+    // leaves.
+    if (el.contains(document.activeElement)
+        && document.activeElement.tagName === 'INPUT') return;
     el.hidden = false;
     const st = line.stats || {};
     const idle = sim.enginesFree();
@@ -501,8 +515,13 @@ export function createHud(sim, hooks) {
   // ── the register ───────────────────────────────────────────────────────
   function refreshLog() {
     const list = $('logList');
-    while (logShown < sim.log.length) {
-      const e = sim.log[logShown++];
+    // Track by each entry's monotonic seq, NOT by array position: the sim's log is
+    // capped at 220 and shifts, so a position cursor pins at 220 and the Register
+    // silently freezes for the rest of a long game. (The same bug bit the test
+    // harnesses; the UI had it too.)
+    for (const e of sim.log) {
+      if ((e.seq ?? 0) <= logShown) continue;
+      logShown = e.seq;
       const div = document.createElement('div');
       div.className = `logEntry ${e.tone || 'plain'}${e.big ? ' big' : ''}`;
       const body = e.big ? illuminate(e.text) : paras(e.text);
@@ -513,7 +532,9 @@ export function createHud(sim, hooks) {
   }
 
   // ── settlement dossier ─────────────────────────────────────────────────
+  let openSiteId = null;   // which settlement dossier is on screen, for live refresh
   function showSite(site) {
+    openSiteId = site ? site.id : null;
     const el = $('inspector');
     el.hidden = false;
     const pct = (v) => `${Math.round(v * 100)}%`;
@@ -607,6 +628,7 @@ export function createHud(sim, hooks) {
   };
 
   function showEngine(eng, ctx = {}) {
+    openSiteId = null;
     if (!eng) { $('inspector').hidden = true; return; }
     const cls = sim.engineClass(eng);
     const cond = clamp(eng.condition ?? 1, 0, 1);
@@ -664,6 +686,7 @@ export function createHud(sim, hooks) {
   // ── survey card ────────────────────────────────────────────────────────
   let svcChoice = 'new';
   function showSurvey(a, b, survey) {
+    openSiteId = null;
     const el = $('inspector');
     el.hidden = false;
     if (!survey.ok) {
@@ -712,16 +735,36 @@ export function createHud(sim, hooks) {
       </div>`;
   }
 
-  function hideInspector() { $('inspector').hidden = true; }
+  function hideInspector() { openSiteId = null; $('inspector').hidden = true; }
 
   // ── modals ─────────────────────────────────────────────────────────────
-  function openModal(html, cls = '') {
+  let modalKind = '';
+  function openModal(html, cls = '', kind = '') {
     modalOpen = true;
+    modalKind = kind;
     $('modalCard').className = `modal-card ${cls}`;
     $('modalCard').innerHTML = html;
     $('modal').hidden = false;
   }
-  function closeModal() { modalOpen = false; $('modal').hidden = true; }
+  function closeModal() { modalOpen = false; modalKind = ''; $('modal').hidden = true; }
+
+  /**
+   * What Escape means depends on what the modal is.
+   *
+   * Escape used to call closeModal() unconditionally, and the main loop re-raises
+   * an unanswered charter or petition every 0.28s — so the card blinked shut and
+   * reopened, forever. Now: a charter dismissed this way is DEFERRED (the same as
+   * clicking "leave it on the table"), a petition stays put because it is a
+   * decision the realm is waiting on, and anything else simply closes.
+   */
+  function dismissModal() {
+    if (!modalOpen) return false;
+    if (modalKind === 'petition') return false;   // it must be answered
+    if (modalKind === 'charter') { deferred = true; deferredAt = sim.charterSat ?? -1; }
+    closeModal();
+    refreshTop();
+    return true;
+  }
 
   function showCharters(offer) {
     const cards = offer.map((c) => `
@@ -736,7 +779,7 @@ export function createHud(sim, hooks) {
       <h2>The Council Will Grant One Charter</h2>
       <p class="from">Minuted, and not open to further discussion this quarter.</p>
       <div class="charters">${cards}</div>
-      <div class="deferrow"><button class="ghost" data-act="defer">Leave it on the table for now</button></div>`);
+      <div class="deferrow"><button class="ghost" data-act="defer">Leave it on the table for now</button></div>`, '', 'charter');
   }
 
   function showPetition(p) {
@@ -749,7 +792,7 @@ export function createHud(sim, hooks) {
       <h2>${esc(p.title)}</h2>
       <p class="from">from ${esc(p.from)}</p>
       <div class="body">${illuminate(p.body)}</div>
-      <div class="choices">${opts}</div>`);
+      <div class="choices">${opts}</div>`, '', 'petition');
   }
 
   function showEnding(id) {
@@ -805,10 +848,17 @@ export function createHud(sim, hooks) {
   let ledgerSeen = false;
   let ordersDone = false;
 
+  // Completed orders LATCH. The predicates read live state, so losing your only
+  // link to an incident marched the guide back to step one — a tutorial that
+  // un-completes itself reads as the game forgetting what you did.
+  const ordersLatched = new Set();
   function refreshGuide() {
     const el = $('guide');
     if (ordersDone) { el.hidden = true; return; }
-    const step = ORDERS.find((o) => !o.done(sim));
+    for (const o of ORDERS) {
+      if (!ordersLatched.has(o.id) && o.done(sim)) ordersLatched.add(o.id);
+    }
+    const step = ORDERS.find((o) => !ordersLatched.has(o.id));
     if (!step) {
       ordersDone = true;
       el.hidden = true;
@@ -857,7 +907,7 @@ export function createHud(sim, hooks) {
     const op = ev.target.closest('[data-opt]');
     if (op) { hooks.answerPetition(+op.dataset.opt); closeModal(); return; }
     if (ev.target.closest('[data-act="restart"]')) { hooks.restart(); return; }
-    if (ev.target.closest('[data-act="defer"]')) { deferred = true; closeModal(); refreshTop(); return; }
+    if (ev.target.closest('[data-act="defer"]')) { deferred = true; deferredAt = sim.charterSat ?? -1; closeModal(); refreshTop(); return; }
   });
 
   $('inspector').addEventListener('click', (ev) => {
@@ -1008,14 +1058,23 @@ export function createHud(sim, hooks) {
   return {
     refresh() {
       refreshTop(); refreshConcord(); refreshFleet(); refreshLog();
+      // The settlement dossier re-renders live. It used to be a snapshot, so a
+      // works button disabled for want of money stayed disabled after the money
+      // arrived, and "On the platform" figures froze at whatever they were when
+      // the card was opened.
+      if (openSiteId !== null) {
+        const st = sim.byId.get(openSiteId);
+        if (st) showSite(st); else hideInspector();
+      }
       refreshLinePanel(); refreshLedger(); refreshCommissions(); refreshGuide();
     },
     refreshTop, refreshFleet, refreshLog, refreshLinePanel, refreshLedger,
     refreshCommissions, refreshGuide,
     showSite, showSurvey, showEngine, hideInspector,
-    showCharters, showPetition, showEnding, closeModal,
+    showCharters, showPetition, showEnding, closeModal, dismissModal,
     get modalOpen() { return modalOpen; },
-    get charterDeferred() { return deferred; },
+    // deferral binds to ONE council sitting; a new offer raises the card again
+    get charterDeferred() { return deferred && deferredAt === (sim.charterSat ?? -1); },
     get openLine() { return openLine; },
     get surveyChoice() { return svcChoice; },
     hint, showRegion,

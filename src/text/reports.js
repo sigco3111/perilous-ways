@@ -992,7 +992,7 @@ export const DECLINED = [
   },
   {
     id: 'd_verse_fewer', form: 'verse', voice: 'elf', weight: 4, tone: 'grave',
-    text: 'Fewer lamps this year than last year.\nWe counted them last year also.\nWe did not tell you we were counting.',
+    text: 'Fewer lamps this year than last year.\nWe counted them last year also.\nForty-one, then. Thirty-four.',
   },
 ];
 
@@ -1023,6 +1023,6 @@ export const ABANDONED = [
   },
   {
     id: 'z_ret_households', form: 'return', voice: 'authority', weight: 5, tone: 'grave',
-    text: (c) => `Households struck from the rate book at ${P(c)}, being the last of them. Bramble. Chaffey. Two of Cropp. Grubb. Hardy. Nubbin. Pipp. Three of Tarrow. Tunnelly. Wick.\n\nFourteen. Where they have gone is not the Authority’s to record, and has not been recorded.`,
+    text: (c) => `Households struck from the rate book at ${P(c)}, being the last of them. Bramble. Chaffey. Three of Cropp. Grubb. Hardy. Nubbin. Pipp. Three of Tarrow. Tunnelly. Wick.\n\nFourteen. Where they have gone is not the Authority’s to record, and has not been recorded.`,
   },
 ];
