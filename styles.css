@@ -1,0 +1,1425 @@
+@charset "UTF-8";
+
+/* Perilous Ways — the paperwork.
+   Set like one of Tolkien's own title pages: two inks only, black and vermilion,
+   on cream. Paired rules with a hairline gap between them frame everything.
+   Anglo-Saxon runes are the ornament, because he used them for the Dwarves and
+   because they are in Unicode and cost nothing to load. Red carries initials,
+   rules, marginal marks, headings and losses — never a third hue, never a glow,
+   never a rounded corner.
+
+   Legibility beats atmosphere wherever they disagree: this is a management game
+   played over a bright landscape, and the numbers must read at a glance. */
+
+/* ── the two inks ───────────────────────────────────────────────── */
+:root {
+  --ink: #1d1710;            /* black ink */
+  --ink-2: #3b3125;          /* the same ink, worn */
+  --ink-soft: #5b4e3a;       /* secondary matter; still 7:1 on cream */
+  --red: #ab2c17;            /* vermilion */
+  --red-deep: #7d1d0e;       /* vermilion in shadow, for fills under cream type */
+
+  --paper: #f1e7d2;
+  --paper-2: #e6d9bd;
+  --paper-3: #d9c9a8;        /* the deeper fold, for wells and empty bars */
+  --edge: #a4906c;           /* hairlines that would be too loud in full black */
+  --rule: #1d1710;           /* kept as an alias: every printed rule is ink */
+
+  --good: #1d1710;           /* a gain is set in black, as in any ledger */
+  --bad: #ab2c17;            /* a loss is set in red */
+  --grave: #14100a;          /* the gravest entries: deepest black, red marks */
+  --shadow-c: #ab2c17;       /* the east, in red ink */
+  --gold: #ab2c17;           /* legacy alias; there is no gold in a two-colour book */
+
+  --panel: rgba(241, 231, 210, 0.965);
+  --panel-2: rgba(241, 231, 210, 0.99);
+
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua',
+           Georgia, 'Times New Roman', serif;
+  --mono: 'Iosevka', 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+  --rune: 'Segoe UI Historic', 'Segoe UI Symbol', 'Noto Sans Runic',
+          'Apple Symbols', var(--serif);
+
+  /* the frame: outer black rule, hairline paper gap, inner black rule */
+  --frame: inset 0 0 0 2px var(--paper), inset 0 0 0 3px var(--ink);
+  --lift: 0 1px 0 rgba(20, 14, 8, 0.35), 0 12px 26px rgba(20, 14, 8, 0.30);
+  --lift-lg: 0 1px 0 rgba(20, 14, 8, 0.4), 0 28px 66px rgba(8, 6, 4, 0.55);
+}
+
+* { box-sizing: border-box; }
+
+/* The `hidden` attribute is only `display: none` in the UA stylesheet, so any
+   author rule that sets `display` beats it. #boot, #title and #modal all set
+   `display: grid`, which meant hiding them did nothing at all and the loading
+   overlay sat on top of the game for ever. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  background: #10141c;
+  font-family: var(--serif);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+#view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+button { font-family: var(--serif); cursor: pointer; color: var(--ink); }
+:focus-visible { outline: 1px solid var(--red); outline-offset: 2px; }
+input[type="checkbox"] { accent-color: var(--red); }
+
+/* <s> is used throughout as a swatch or a unit, never as a strikethrough. */
+s { text-decoration: none; }
+
+/* thin, printed scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--edge); border: 3px solid transparent; background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-soft); background-clip: content-box; }
+
+/* ── ornament ───────────────────────────────────────────────────── */
+/* Runes as sigils and marginal marks. Ornament, not decoration. */
+.rune {
+  font-family: var(--rune); font-style: normal; font-weight: 400;
+  color: var(--red); line-height: 1;
+}
+
+/* A rule broken by a rune: black hairline, gap, vermilion hairline. */
+.runeRule {
+  display: flex; align-items: center; gap: 0.55rem;
+  margin: 0.85rem auto; max-width: 100%;
+}
+.runeRule i {
+  flex: 1 1 auto; height: 4px; min-width: 8px;
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--red);
+}
+.runeRule span, .runeRule .rune {
+  font-family: var(--rune); color: var(--red); font-size: 0.82rem;
+  font-style: normal; letter-spacing: 0.1em; line-height: 1;
+}
+
+/* The illuminated initial that opens a report. */
+.initial {
+  float: left; font-family: var(--serif); color: var(--red);
+  font-size: 3.15em; line-height: 0.78; font-weight: 400;
+  margin: 0.06em 0.09em -0.06em 0; text-transform: uppercase;
+}
+.hasInitial::after { content: ''; display: block; clear: both; }
+/* …and the same by hand, for a report that was not put through illuminate(). */
+.ending .body > p:first-child:not(.hasInitial)::first-letter {
+  float: left; font-size: 3.15em; line-height: 0.78; color: var(--red);
+  padding: 0.04em 0.09em 0 0;
+}
+
+/* Structural lettering. */
+.sc {
+  font-variant: small-caps; letter-spacing: 0.14em; font-style: normal;
+}
+
+/* ── boot ───────────────────────────────────────────────────────── */
+#boot {
+  position: fixed; inset: 0; z-index: 90;
+  display: grid; place-items: center;
+  background: #14110c;
+}
+.boot-inner { text-align: center; color: var(--paper); }
+#boot h1 {
+  position: relative;
+  font-size: clamp(2rem, 6vw, 3.6rem); margin: 0; letter-spacing: 0.34em;
+  font-weight: 400; text-indent: 0.34em;
+  border-top: 1px solid rgba(241, 231, 210, 0.5);
+  border-bottom: 1px solid rgba(241, 231, 210, 0.5);
+  padding: 0.5rem 0 0.55rem;
+}
+/* The vermilion of the pair, drawn rather than cast: a shadow behind a
+   transparent element shows through it. Two pixels, not one — the heading is
+   centred on a fractional line and a hairline there halves into grey. */
+#boot h1::before, #boot h1::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 2px;
+  background: var(--red);
+}
+#boot h1::before { top: -5px; }
+#boot h1::after { bottom: -5px; }
+#boot .sub {
+  margin: 1.3rem 0 2.2rem; letter-spacing: 0.16em; opacity: 0.66; font-size: 0.9rem;
+  font-variant: small-caps;
+}
+.boot-bar {
+  width: min(340px, 60vw); height: 5px; margin: 0 auto;
+  background: rgba(241, 231, 210, 0.1);
+  box-shadow: 0 0 0 1px rgba(241, 231, 210, 0.35);
+}
+.boot-bar i { display: block; height: 100%; width: 0%; background: var(--red); transition: width 0.3s; }
+.boot-status {
+  margin-top: 1.1rem; font-size: 0.8rem; letter-spacing: 0.12em;
+  opacity: 0.55; font-variant: small-caps;
+}
+.boot-status::before, .boot-status::after {
+  content: 'ᛜ'; font-family: var(--rune); color: var(--red);
+  margin: 0 0.6em; font-size: 0.72rem; opacity: 0.85;
+}
+
+/* ── title ──────────────────────────────────────────────────────── */
+#title {
+  position: fixed; inset: 0; z-index: 80;
+  display: grid; place-items: center; padding: 4vh 4vw;
+  background: rgba(12, 10, 7, 0.6);
+  overflow: auto;
+}
+.title-card {
+  max-width: 610px; width: 100%;
+  background: var(--panel-2);
+  border: 1px solid var(--ink);
+  box-shadow: var(--frame), var(--lift-lg);
+  padding: 1.5rem 2.6rem 1.9rem;
+  text-align: center;
+}
+/* the runic band across the head of the card, after the Ring-verse pages */
+.title-card::before {
+  content: 'ᛈᛖᚱᛁᛚᚢᛋ ᛜ ᚹᚨᚣᛋ ᛜ ᚱᛖᚨᛚᛗ ᛏᚱᚨᚾᛋᛁᛏ ᚨᚢᚦᛟᚱᛁᛏᚣ';
+  display: block; font-family: var(--rune); color: var(--red);
+  font-size: 0.66rem; letter-spacing: 0.3em; line-height: 1;
+  margin: 0 0 1.5rem;
+  white-space: nowrap; overflow: hidden;
+}
+.title-card h1 {
+  margin: 0; font-size: clamp(1.9rem, 5vw, 2.9rem); font-weight: 400;
+  letter-spacing: 0.24em; text-indent: 0.24em;
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  padding: 0.55rem 0 0.6rem;
+  box-shadow: 0 3px 0 var(--panel-2), 0 4px 0 var(--red),
+              0 -3px 0 var(--panel-2), 0 -4px 0 var(--red);
+}
+.title-card .sub {
+  margin: 1.15rem 0 1.5rem; font-size: 0.94rem; line-height: 1.55;
+  font-style: italic; color: var(--ink-2);
+}
+.brief { text-align: left; font-size: 0.96rem; line-height: 1.62; }
+.brief p { margin: 0 0 0.8rem; }
+.brief p:first-child::first-letter {
+  float: left; font-size: 2.85em; line-height: 0.8; color: var(--red);
+  padding: 0.05em 0.1em 0 0;
+}
+.brief .dim { color: var(--ink-soft); font-style: italic; }
+.seedrow {
+  display: flex; gap: 0.5rem; align-items: center; justify-content: center;
+  margin: 1.5rem 0 1.2rem; font-variant: small-caps; letter-spacing: 0.14em;
+  font-size: 0.84rem; color: var(--ink-soft);
+  border-top: 1px solid var(--edge); padding-top: 1.1rem;
+}
+.seedrow input {
+  font-family: var(--mono); font-size: 0.9rem; width: 11ch;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--ink); box-shadow: inset 0 1px 0 rgba(29, 23, 16, 0.14);
+  padding: 0.3rem 0.5rem; color: var(--ink); margin-left: 0.45rem;
+  letter-spacing: 0.06em;
+}
+.seedrow input:focus { outline: none; border-color: var(--red); }
+button.big {
+  font-size: 1.05rem; letter-spacing: 0.2em; font-variant: small-caps;
+  padding: 0.66rem 2.2rem; background: var(--ink); color: var(--paper);
+  border: 1px solid var(--ink);
+  box-shadow: 0 0 0 2px var(--panel-2), 0 0 0 3px var(--ink);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+button.big:hover {
+  background: var(--red-deep);
+  box-shadow: 0 0 0 2px var(--panel-2), 0 0 0 3px var(--red);
+}
+button.ghost {
+  background: transparent; border: 1px solid var(--edge); color: var(--ink-2);
+  padding: 0.18rem 0.5rem; font-size: 0.85rem; letter-spacing: 0.06em;
+}
+button.ghost:hover { background: rgba(29, 23, 16, 0.07); border-color: var(--ink); color: var(--ink); }
+button.ghost.sm { padding: 0 0.3rem; font-size: 0.72rem; line-height: 1.35; }
+.creds {
+  margin: 1.4rem 0 0; font-size: 0.74rem; letter-spacing: 0.06em;
+  color: var(--ink-soft); font-style: italic;
+  border-top: 1px solid var(--edge); padding-top: 0.8rem;
+}
+
+/* ── hud frame ──────────────────────────────────────────────────── */
+#hud { position: fixed; inset: 0; z-index: 20; pointer-events: none; }
+#hud > * { pointer-events: auto; }
+
+#topbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 46px;
+  display: flex; align-items: stretch; gap: 0;
+  background: var(--panel-2);
+  border-bottom: 1px solid var(--ink);
+  box-shadow: 0 3px 0 var(--paper-2), 0 4px 0 var(--red),
+              0 12px 22px rgba(20, 14, 8, 0.28);
+}
+.brand {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0 0.95rem;
+  font-size: 0.76rem; letter-spacing: 0.24em; border-right: 1px solid var(--edge);
+  color: var(--ink); font-variant: small-caps;
+}
+.brand::before {
+  content: 'ᚱ'; font-family: var(--rune); color: var(--red);
+  font-size: 0.95rem; letter-spacing: 0;
+}
+.stat {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 0.9rem; border-right: 1px solid var(--edge); min-width: 74px;
+}
+.stat b {
+  font-size: 1.02rem; line-height: 1.05; font-weight: 600;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+}
+.stat span {
+  font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-soft); margin-top: 1px;
+}
+.stat span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat.money b { color: var(--ink); }
+.stat.money.broke b { color: var(--bad); }
+.stat.neg b { color: var(--bad); }
+.stat.shadow { border-right: 1px solid var(--red); }
+.stat.shadow b { color: var(--shadow-c); }
+.spacer { flex: 1; }
+.speeds { display: flex; align-items: center; padding: 0 0.45rem; gap: 3px; }
+.speeds button {
+  background: transparent; border: 1px solid var(--edge); color: var(--ink-2);
+  font-size: 0.76rem; padding: 0.24rem 0.5rem; min-width: 34px;
+  letter-spacing: 0.06em;
+}
+.speeds button:hover { border-color: var(--ink); background: rgba(29, 23, 16, 0.06); }
+.speeds button.on {
+  background: var(--ink); color: var(--paper); border-color: var(--ink);
+}
+#muteBtn { align-self: center; margin: 0 0.6rem 0 0.2rem; }
+#charterBtn, #ledgerBtn {
+  align-self: center; margin-right: 0.5rem;
+  border: 1px solid var(--ink); background: transparent; color: var(--ink);
+  font-size: 0.76rem; letter-spacing: 0.13em; font-variant: small-caps;
+  padding: 0.24rem 0.75rem;
+}
+#charterBtn { border-color: var(--red); color: var(--red-deep); }
+#charterBtn::before, #ledgerBtn::before {
+  content: 'ᛝ'; font-family: var(--rune); color: var(--red);
+  margin-right: 0.45em; font-size: 0.78rem; letter-spacing: 0;
+}
+#ledgerBtn::before { content: 'ᚠ'; }
+#charterBtn:hover { background: rgba(171, 44, 23, 0.12); }
+#ledgerBtn:hover { background: rgba(29, 23, 16, 0.07); }
+#ledgerBtn.on { background: var(--ink); color: var(--paper); }
+#ledgerBtn.on::before { color: var(--paper); }
+#charterBtn.pulse { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { background: rgba(171, 44, 23, 0.06); }
+  50% { background: rgba(171, 44, 23, 0.28); }
+}
+.deferrow { margin-top: 1rem; text-align: center; }
+.deferrow button { font-size: 0.78rem; letter-spacing: 0.09em; font-variant: small-caps; }
+
+/* ── panels ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--panel); border: 1px solid var(--ink);
+  box-shadow: var(--frame), var(--lift);
+  padding: 0.55rem 0.7rem 0.65rem; margin-bottom: 0.6rem;
+}
+.card h3, #register h3, #ledger h3 {
+  position: relative;
+  margin: 0 0 0.55rem; font-size: 0.64rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink); font-weight: 600;
+  border-bottom: 1px solid var(--ink); padding-bottom: 0.3rem;
+  display: flex; align-items: center; gap: 0.45rem;
+}
+.card h3::after, #register h3::after, #ledger h3::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -3px;
+  height: 1px; background: var(--red);
+}
+.card h3 button, #register h3 button, #ledger h3 button { margin-left: auto; }
+.card h3::before, #register h3::before, #ledger h3::before {
+  font-family: var(--rune); color: var(--red); font-size: 0.85rem;
+  letter-spacing: 0; margin-top: -1px;
+}
+#concordCard h3::before { content: 'ᛗ'; }
+#fleetCard h3::before { content: 'ᛏ'; }
+#register h3::before { content: 'ᛞ'; }
+#ledger h3::before { content: 'ᚠ'; }
+#guide h3::before { content: 'ᛟ'; }
+
+#leftpanel {
+  position: absolute; top: 58px; left: 10px; width: 226px;
+  max-height: calc(100vh - 150px); overflow: auto;
+}
+/* The dossier stands in the same column, at the foot of it. Both heights are
+   derived from the one figure so they cannot overlap at any window size. */
+#hud:has(#linePanel:not([hidden])) #leftpanel {
+  max-height: calc(100vh - min(52vh, 430px) - 80px);
+}
+
+/* ── standing orders ───────────────────────────────────────────── */
+/* The first card in the left column, and the only place in the interface that
+   addresses the player directly. Red marks the thing to go and press. */
+#guide h3 { margin-bottom: 0.45rem; }
+/* No trailing rule here: the heading above already carries one, and two paired
+   rules eight pixels apart is fussing. */
+.guideStep {
+  margin: 0 0 0.3rem; font-size: 0.57rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--red-deep);
+}
+.guideText { margin: 0; font-size: 0.81rem; line-height: 1.48; color: var(--ink); }
+.guideText b {
+  font-weight: 600; font-variant: small-caps; letter-spacing: 0.05em;
+  color: var(--red-deep);
+}
+
+/* ── concord ────────────────────────────────────────────────────── */
+.regard { margin-bottom: 0.45rem; }
+.regard:last-child { margin-bottom: 0.1rem; }
+/* the row is sigil · people · mood, the mood set out to the right margin */
+.regard .rl { display: flex; align-items: baseline; font-size: 0.82rem; gap: 0.34rem; }
+.regard .rl .rune { font-size: 0.9rem; flex: 0 0 auto; }
+.regard .rl span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.regard .rl i {
+  font-style: italic; color: var(--ink-soft); font-variant-numeric: tabular-nums;
+  font-size: 0.75rem; white-space: nowrap; margin-left: auto; padding-left: 0.3rem;
+}
+.meter {
+  height: 5px; background: var(--paper-3); margin-top: 3px;
+  box-shadow: inset 0 0 0 1px rgba(29, 23, 16, 0.34);
+}
+.meter i { display: block; height: 100%; transition: width 0.5s; }
+.regard.gone .rl { opacity: 0.5; text-decoration: line-through; }
+.regard.gone .rl i { text-decoration: none; color: var(--red); font-variant: small-caps; }
+
+/* ── the fleet and its services ─────────────────────────────────── */
+.fleetline {
+  display: flex; justify-content: space-between; font-size: 0.82rem;
+  padding: 0.09rem 0; gap: 0.5rem;
+}
+.fleetline b { font-variant-numeric: tabular-nums; text-align: right; }
+#lineList {
+  margin-top: 0.5rem; padding-top: 0.45rem;
+  border-top: 1px solid var(--ink);
+  box-shadow: 0 -3px 0 var(--panel), 0 -4px 0 var(--red);
+}
+.nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* the older one-row-per-line list */
+.lineRow {
+  display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem;
+  padding: 0.22rem 0.2rem; cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.lineRow:hover { background: rgba(29, 23, 16, 0.07); }
+.lineRow.sel { background: rgba(29, 23, 16, 0.12); border-left-color: var(--red); }
+.swatch {
+  width: 8px; height: 8px; flex: 0 0 8px; display: block;
+  border: 1px solid rgba(29, 23, 16, 0.65);
+}
+.lineRow .nm { flex: 1; }
+.lineRow .tn { font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.lineRow .adj { display: flex; gap: 2px; }
+.lineRow .adj button {
+  border: 1px solid var(--edge); background: rgba(255, 255, 255, 0.35);
+  width: 17px; height: 17px; line-height: 1; font-size: 0.7rem; padding: 0; color: var(--ink);
+}
+.lineRow .adj button:hover { border-color: var(--ink); background: var(--paper); }
+
+/* the dossier list */
+.svc {
+  padding: 0.26rem 0.25rem; cursor: pointer;
+  border-left: 2px solid transparent;
+  border-bottom: 1px dotted var(--edge);
+}
+.svc:last-child { border-bottom: 0; }
+.svc:hover { background: rgba(29, 23, 16, 0.07); }
+.svc.sel, .svc.on {
+  background: rgba(29, 23, 16, 0.11); border-left-color: var(--red);
+}
+.svcHead { display: flex; align-items: center; gap: 0.3rem; font-size: 0.79rem; }
+.svcHead .nm { flex: 1 1 auto; }
+.svcHead .tn {
+  font-variant-numeric: tabular-nums; color: var(--ink-soft); font-size: 0.72rem;
+  flex: 0 0 auto;
+}
+.svcNet {
+  font-size: 0.71rem; font-variant-numeric: tabular-nums; font-weight: 600;
+  min-width: 2.3em; text-align: right; flex: 0 0 auto;
+}
+.svcNet.good { color: var(--good); }
+.svcNet.bad { color: var(--bad); }
+#lineList .empty {
+  font-size: 0.76rem; font-style: italic; color: var(--ink-soft);
+  line-height: 1.4; padding: 0.15rem 0.1rem;
+}
+.svcBadge {
+  font-size: 0.5rem; letter-spacing: 0.09em; text-transform: uppercase;
+  padding: 0.08rem 0.22rem 0.04rem; border: 1px solid var(--edge);
+  color: var(--ink-2); white-space: nowrap; line-height: 1.25; flex: 0 0 auto;
+}
+.svcBadge.passenger { border-color: var(--ink-soft); }
+.svcBadge.mixed { border-style: dashed; border-color: var(--ink-soft); }
+.svcBadge.freight { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.svcBadge.troop { background: var(--red-deep); border-color: var(--red-deep); color: var(--paper); }
+
+/* ── the line dossier ───────────────────────────────────────────── */
+#linePanel {
+  position: absolute; left: 10px; bottom: 12px; width: 330px; z-index: 4;
+  max-height: min(52vh, 430px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--ink);
+  box-shadow: var(--frame), var(--lift);
+  padding: 0.6rem 0.75rem 0.7rem;
+}
+.lpHead {
+  display: flex; align-items: center; gap: 0.45rem;
+  border-bottom: 1px solid var(--ink); padding-bottom: 0.4rem;
+  box-shadow: 0 3px 0 var(--panel), 0 4px 0 var(--red);
+  margin-bottom: 0.65rem;
+}
+.lpHead .swatch { width: 10px; height: 10px; flex: 0 0 10px; }
+.lpName {
+  flex: 1; min-width: 0; font-family: var(--serif); font-size: 0.98rem;
+  color: var(--ink); background: transparent; border: 0;
+  border-bottom: 1px solid transparent; padding: 0.05rem 0.1rem;
+  letter-spacing: 0.01em;
+}
+.lpName:hover { border-bottom-color: var(--edge); }
+.lpName:focus { outline: none; border-bottom-color: var(--red); background: rgba(255, 255, 255, 0.4); }
+
+.lpRow {
+  display: grid; grid-template-columns: 4.2em 1fr; gap: 0.28rem 0.45rem;
+  align-items: center; margin-bottom: 0.34rem;
+}
+.lpLabel {
+  font-size: 0.58rem; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--ink-soft); line-height: 1.3;
+}
+
+/* segmented choice: buttons joined by a single shared rule */
+.seg { display: flex; flex-wrap: wrap; }
+.seg button {
+  flex: 1 1 auto; background: rgba(255, 255, 255, 0.32);
+  border: 1px solid var(--ink); margin-left: -1px;
+  font-size: 0.68rem; letter-spacing: 0.04em; font-variant: small-caps;
+  padding: 0.2rem 0.3rem; color: var(--ink-2); white-space: nowrap;
+}
+.seg button:first-child { margin-left: 0; }
+.seg button:hover { background: var(--paper); color: var(--ink); }
+.seg button.on {
+  background: var(--ink); border-color: var(--ink); color: var(--paper);
+  position: relative; z-index: 1;
+}
+.seg button s.swatch {
+  display: inline-block; vertical-align: 0.04em; margin-right: 0.35em;
+}
+.seg button.on s.swatch { border-color: rgba(241, 231, 210, 0.7); }
+
+.stepper { display: flex; align-items: center; gap: 0.35rem; }
+.stepper button {
+  width: 19px; height: 19px; padding: 0; line-height: 1; font-size: 0.8rem;
+  border: 1px solid var(--ink); background: rgba(255, 255, 255, 0.32); color: var(--ink);
+}
+.stepper button:hover { background: var(--ink); color: var(--paper); }
+.stepper b {
+  min-width: 1.9ch; text-align: center; font-variant-numeric: tabular-nums;
+  font-size: 0.92rem; font-weight: 600;
+}
+.stepper i {
+  font-style: italic; color: var(--ink-soft); font-size: 0.72rem; margin-left: 0.25rem;
+}
+
+.chk {
+  display: flex; align-items: center; gap: 0.35rem; font-size: 0.73rem;
+  color: var(--ink-2); cursor: pointer; line-height: 1.3;
+}
+.chk input { margin: 0; }
+
+.lpStops { margin: 0.6rem 0 0.2rem; }
+.lpStops ol, .lpStops li { list-style: none; }
+.lpStops ol {
+  margin: 0.3rem 0 0; padding: 0 0 0 1.15rem; position: relative;
+}
+/* the line itself, drawn down the margin, with a tick at every call */
+.lpStops ol::before {
+  content: ''; position: absolute; left: 4px; top: 0.62rem; bottom: 0.62rem;
+  width: 1px; background: var(--ink);
+}
+.lpStops li {
+  position: relative; display: flex; align-items: center; gap: 0.3rem;
+  font-size: 0.79rem; padding: 0.13rem 0;
+}
+.lpStops li::before {
+  content: ''; position: absolute; left: -1.15rem; top: 0.44rem;
+  width: 7px; height: 7px; background: var(--paper);
+  border: 1px solid var(--ink);
+}
+.lpStops li .rune { font-size: 0.86rem; flex: 0 0 auto; }
+.lpStops li .nm { flex: 1; }
+.flag {
+  font-size: 0.66rem; font-style: italic; color: var(--ink-soft); white-space: nowrap;
+}
+.flag.short, .flag.warn { color: var(--red); font-style: normal; font-variant: small-caps; letter-spacing: 0.06em; }
+.ops { display: flex; gap: 1px; flex: 0 0 auto; }
+.ops button {
+  width: 16px; height: 16px; padding: 0; line-height: 1; font-size: 0.64rem;
+  border: 1px solid var(--edge); background: transparent; color: var(--ink-2);
+  opacity: 0.5; transition: opacity 0.12s;
+}
+.lpStops li:hover .ops button { opacity: 1; }
+.ops button:hover { border-color: var(--ink); background: var(--paper); color: var(--ink); }
+.ops button:disabled {
+  opacity: 0.22; cursor: not-allowed; border-color: var(--edge);
+  background: transparent; color: var(--ink-soft);
+}
+.lpStops li:hover .ops button:disabled { opacity: 0.28; }
+.stepper button:disabled {
+  color: rgba(29, 23, 16, 0.3); border-color: var(--edge);
+  background: transparent; cursor: not-allowed;
+}
+.stepper button:disabled:hover { background: transparent; color: rgba(29, 23, 16, 0.3); }
+.lpAdd {
+  font-size: 0.71rem; font-style: italic; color: var(--ink-soft);
+  margin: 0.4rem 0 0; padding-left: 1.15rem; line-height: 1.38;
+}
+.lpAdd::before {
+  content: '¶'; font-style: normal; color: var(--red);
+  margin-left: -1.15rem; margin-right: 0.45rem;
+}
+
+/* The figures at the foot of the sheet, set as one row of four like the totals
+   on a form. Two columns when the panel is narrow. */
+.lpStats {
+  display: grid; gap: 0.3rem 0.5rem;
+  /* minmax(0, …) or the long place name in the last cell widens its column and
+     squeezes the figures out of true */
+  grid-template-columns: minmax(0, 4fr) minmax(0, 4fr) minmax(0, 4fr) minmax(0, 7fr);
+  margin-top: 0.6rem; padding-top: 0.5rem;
+  border-top: 3px double var(--ink);
+}
+.lpStats div { display: flex; flex-direction: column; min-width: 0; }
+.lpStats i {
+  font-style: normal; font-size: 0.55rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+.lpStats b { font-size: 0.96rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.12; }
+.lpStats s {
+  display: block; font-size: 0.66rem; color: var(--ink-soft); font-style: italic;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lpStats s.warn { color: var(--red); font-style: normal; font-variant: small-caps; letter-spacing: 0.05em; }
+
+.lpActions {
+  display: flex; gap: 0.4rem; margin-top: 0.55rem; flex-wrap: wrap;
+  border-top: 1px solid var(--edge); padding-top: 0.45rem;
+}
+.lpActions button {
+  font-size: 0.73rem; letter-spacing: 0.1em; font-variant: small-caps;
+  padding: 0.24rem 0.7rem; background: var(--ink); color: var(--paper);
+  border: 1px solid var(--ink);
+}
+.lpActions button:hover { background: var(--ink-2); }
+.lpActions button.alt {
+  background: transparent; border-color: var(--red); color: var(--red-deep);
+}
+.lpActions button.alt:hover { background: rgba(171, 44, 23, 0.12); }
+
+/* ── register ───────────────────────────────────────────────────── */
+#register {
+  position: absolute; right: 10px; top: 58px; width: 324px;
+  max-height: calc(100vh - 150px); display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--ink);
+  box-shadow: var(--frame), var(--lift);
+  padding: 0.6rem 0.2rem 0.5rem 0.75rem;
+}
+#register h3 { margin-right: 0.55rem; }
+#logList { overflow-y: auto; padding-right: 0.55rem; }
+#register.collapsed #logList { display: none; }
+.logEntry {
+  position: relative; font-size: 0.83rem; line-height: 1.46;
+  padding: 0.42rem 0 0.46rem 0.85rem;
+  border-bottom: 1px solid rgba(164, 144, 108, 0.45);
+  animation: slidein 0.35s ease-out;
+}
+@keyframes slidein { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+/* the marginal mark: hollow for the ordinary week, filled black for a gain,
+   red for a loss, ringed in red for the graver entries */
+.logEntry::before {
+  content: ''; position: absolute; left: 0; top: 0.72rem;
+  width: 5px; height: 5px; border: 1px solid var(--edge);
+}
+.logEntry .wk {
+  font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-soft); display: block; margin-bottom: 0.12rem;
+}
+.logEntry.good::before { background: var(--ink); border-color: var(--ink); }
+.logEntry.good .wk { color: var(--ink); }
+.logEntry.bad::before { background: var(--red); border-color: var(--red); }
+.logEntry.bad .wk { color: var(--bad); }
+.logEntry.grave {
+  color: var(--grave); padding-left: 1rem;
+}
+.logEntry.grave::before {
+  left: 2px; background: var(--red); border-color: var(--red);
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 3px var(--red);
+}
+.logEntry.grave .wk { color: var(--red); font-weight: 600; }
+.logEntry.big { font-size: 0.92rem; }
+.logEntry.big .wk { color: var(--red); }
+.logEntry p { margin: 0 0 0.4rem; }
+.logEntry p:last-child { margin: 0; }
+
+/* ── the ledger ─────────────────────────────────────────────────── */
+/* A sheet laid over the register column. It takes the register's full height
+   rather than its own, so no half-hidden log entry shows below its foot; the
+   ornament at the bottom fills the sheet when the week was a quiet one. */
+#ledger {
+  position: absolute; right: 10px; top: 58px; width: 344px; z-index: 6;
+  height: calc(100vh - 150px); overflow: auto;
+  display: flex; flex-direction: column;
+  background: var(--panel-2); border: 1px solid var(--ink);
+  box-shadow: var(--frame), var(--lift);
+  padding: 0.6rem 0.8rem 0.8rem;
+}
+#ledger > * { flex: 0 0 auto; }
+#ledger::after {
+  content: 'ᛜ'; flex: 0 0 auto; margin-top: auto; padding-top: 0.9rem;
+  font-family: var(--rune); color: var(--red); font-size: 0.72rem;
+  letter-spacing: 0.3em; text-align: center;
+  border-top: 1px solid var(--edge);
+}
+#ledger h3 { font-size: 0.66rem; }
+.ledSection { margin-top: 0.85rem; }
+.ledSection:first-of-type { margin-top: 0.2rem; }
+.ledSection h4 {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin: 0 0 0.35rem; font-size: 0.58rem; font-weight: 600;
+  letter-spacing: 0.17em; text-transform: uppercase; color: var(--red-deep);
+}
+.ledSection h4::after {
+  content: ''; flex: 1 1 auto; height: 4px;
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--red);
+}
+
+.ledTable { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
+.ledTable td {
+  padding: 0.13rem 0 0.15rem; vertical-align: baseline;
+  border-bottom: 1px dotted rgba(164, 144, 108, 0.55);
+}
+.ledTable tr:last-child td { border-bottom: 0; }
+.ledTable td:first-child { padding-right: 0.5rem; }
+.ledTable .swatch { display: inline-block; margin-right: 0.4rem; vertical-align: 0.02rem; }
+.num {
+  text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+  padding-left: 0.45rem !important; font-style: normal;
+}
+.dim, .num.dim { color: var(--ink-soft); }
+.ledTable td.dim { font-style: italic; }
+.num.good { color: var(--good); font-weight: 600; }
+.num.bad { color: var(--bad); font-weight: 600; }
+/* a total is ruled off twice, as a total should be */
+.ledTable .ledTotal td {
+  border-top: 3px double var(--ink); border-bottom: 0;
+  padding-top: 0.22rem; font-variant: small-caps; letter-spacing: 0.07em;
+}
+.ledTable .ledTotal td:first-child { font-size: 0.84rem; }
+.ledTable .ledTotal .num { font-size: 0.9rem; }
+
+.flowRow {
+  display: grid;
+  grid-template-columns: 9px 2.3em minmax(4.2em, auto) minmax(0, 1fr) auto;
+  gap: 0.4rem; align-items: baseline; font-size: 0.78rem; padding: 0.11rem 0;
+}
+.goodDot {
+  width: 7px; height: 7px; display: block; align-self: center;
+  border: 1px solid rgba(29, 23, 16, 0.65);
+}
+.fq { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; }
+.fg { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp { font-style: italic; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fx {
+  font-size: 0.62rem; letter-spacing: 0.1em; font-variant: small-caps;
+  color: var(--ink-soft); white-space: nowrap;
+}
+
+.botRow {
+  display: grid; grid-template-columns: minmax(0, 1fr) 5.5em 2.6em;
+  gap: 0.5rem; align-items: center; font-size: 0.78rem; padding: 0.13rem 0;
+}
+.bar {
+  height: 7px; background: var(--paper-3);
+  box-shadow: inset 0 0 0 1px rgba(29, 23, 16, 0.45);
+}
+.bar i { display: block; height: 100%; background: var(--red); }
+.pc {
+  text-align: right; font-variant-numeric: tabular-nums; font-size: 0.74rem;
+  color: var(--ink-2);
+}
+.ledNote {
+  margin: 0.4rem 0 0; font-size: 0.74rem; font-style: italic;
+  color: var(--ink-2); line-height: 1.45; padding-left: 1rem;
+}
+.ledNote::before {
+  content: '¶'; font-style: normal; color: var(--red);
+  margin-left: -1rem; margin-right: 0.4rem;
+}
+
+.wantRow {
+  display: grid;
+  grid-template-columns: 1.1em minmax(0, auto) minmax(3.5em, auto) minmax(0, 1fr);
+  gap: 0.4rem; align-items: baseline; font-size: 0.78rem; padding: 0.11rem 0;
+}
+.wantRow .rune { font-size: 0.88rem; }
+.wg { white-space: nowrap; }
+.wr { font-style: italic; color: var(--red); text-align: right; }
+
+/* the gazetteer at the foot of the ledger: a region, its people, its character */
+.landRow {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 0.5rem; align-items: baseline; padding: 0.28rem 0 0.32rem;
+  border-bottom: 1px dotted rgba(164, 144, 108, 0.5);
+}
+.landRow:last-child { border-bottom: 0; }
+.landRow .nm { font-size: 0.85rem; }
+.lp {
+  font-size: 0.56rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-soft); white-space: nowrap;
+}
+.lr {
+  grid-column: 1 / -1; font-size: 0.75rem; font-style: italic;
+  color: var(--ink-2); line-height: 1.42; margin-top: 0.06rem;
+}
+
+/* ── inspector ──────────────────────────────────────────────────── */
+#inspector {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 12px;
+  min-width: 380px; max-width: min(660px, 92vw);
+  background: var(--panel); border: 1px solid var(--ink);
+  box-shadow: var(--frame), var(--lift);
+  padding: 0.7rem 0.95rem 0.8rem;
+}
+#inspector h4 {
+  margin: 0 0 0.18rem; font-size: 1.06rem; font-weight: 600;
+  display: flex; align-items: baseline; gap: 0.36rem; letter-spacing: 0.01em;
+}
+#inspector h4 .rune { font-size: 1.05rem; }
+#inspector h4 em { margin-left: 0.2rem; }
+#inspector h4 em {
+  font-style: normal; font-size: 0.62rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+#inspector .sub2 {
+  font-size: 0.78rem; color: var(--ink-soft); margin: 0 0 0.5rem;
+  font-style: italic; border-bottom: 1px solid var(--edge); padding-bottom: 0.4rem;
+}
+#inspector .sub2.warn { color: var(--bad); font-style: normal; }
+.kv { display: flex; flex-wrap: wrap; gap: 0.2rem 1.15rem; font-size: 0.82rem; }
+.kv div { display: flex; gap: 0.35rem; align-items: baseline; }
+.kv i {
+  font-style: normal; color: var(--ink-soft); font-size: 0.72rem;
+  letter-spacing: 0.09em; font-variant: small-caps;
+}
+.kv b { font-variant-numeric: tabular-nums; font-weight: 600; }
+.kv i.warn, .kv b.warn { color: var(--bad); }
+/* what a place is known for: set as marginal notes, not as more chips */
+.traits {
+  display: flex; flex-wrap: wrap; gap: 0.15rem 0.7rem; margin: 0.4rem 0 0;
+}
+.trait {
+  font-size: 0.68rem; font-variant: small-caps; letter-spacing: 0.09em;
+  color: var(--red-deep); white-space: nowrap;
+}
+.trait::before {
+  content: 'ᛜ'; font-family: var(--rune); font-size: 0.56rem;
+  font-variant: normal; letter-spacing: 0; margin-right: 0.4em;
+  vertical-align: 0.05em; color: var(--red);
+}
+
+.goods, .makes { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.5rem; }
+.chip {
+  font-size: 0.7rem; padding: 0.08rem 0.36rem; border: 1px solid var(--edge);
+  background: rgba(255, 255, 255, 0.36); display: flex; gap: 0.3rem; align-items: center;
+  white-space: nowrap;
+}
+.chip s { width: 7px; height: 7px; display: block; border: 1px solid rgba(29, 23, 16, 0.5); }
+.chip.short { border-color: var(--red); color: var(--red-deep); background: rgba(171, 44, 23, 0.07); }
+
+/* what a place wants, and why it is not getting it */
+.needs { display: grid; gap: 1px; margin-top: 0.5rem; }
+.need {
+  display: grid; grid-template-columns: 9px minmax(4.6em, auto) 6.4em minmax(0, 1fr);
+  gap: 0.45rem; align-items: baseline; font-size: 0.79rem;
+  padding: 0.1rem 0.3rem 0.1rem 0.3rem; border-left: 2px solid transparent;
+}
+.need:nth-child(odd) { background: rgba(29, 23, 16, 0.045); }
+.need s {
+  width: 7px; height: 7px; display: block; align-self: center;
+  border: 1px solid rgba(29, 23, 16, 0.6);
+}
+.ng { white-space: nowrap; }
+.nq {
+  font-variant-numeric: tabular-nums; color: var(--ink-2); font-size: 0.76rem;
+  text-align: right; white-space: nowrap;
+}
+.nwhy {
+  font-style: italic; color: var(--ink-soft); font-size: 0.74rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.need.short { border-left-color: var(--red); }
+.need.short .nq, .need.short .nwhy { color: var(--red); }
+.need.short .nwhy { font-style: normal; font-variant: small-caps; letter-spacing: 0.05em; }
+
+.actions { display: flex; gap: 0.4rem; margin-top: 0.65rem; align-items: center; flex-wrap: wrap; }
+.actions button {
+  font-size: 0.8rem; letter-spacing: 0.11em; font-variant: small-caps;
+  padding: 0.3rem 0.85rem; background: var(--ink); color: var(--paper);
+  border: 1px solid var(--ink);
+}
+.actions button:hover { background: var(--ink-2); }
+.actions button.alt { background: transparent; border: 1px solid var(--edge); color: var(--ink-2); }
+.actions button.alt:hover { border-color: var(--ink); background: rgba(29, 23, 16, 0.06); color: var(--ink); }
+.actions button:disabled {
+  background: transparent; border-color: var(--edge);
+  color: rgba(29, 23, 16, 0.34); cursor: not-allowed;
+}
+.actions .note { font-size: 0.76rem; color: var(--ink-soft); font-style: italic; }
+.warn { color: var(--bad); }
+.worksrow { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.45rem; }
+.works {
+  font-size: 0.66rem; padding: 0.08rem 0.36rem; border: 1px solid var(--ink-soft);
+  letter-spacing: 0.09em; font-variant: small-caps; white-space: nowrap;
+}
+/* The engineering works are tinted like the wash on a survey drawing — paper
+   tones only, so they read as shading and not as a third ink. */
+.works.tunnel { background: #d8c9ab; }
+.works.viaduct, .works.bridge, .works.span { background: #d2d0c2; }
+.works.causeway { background: #d0cbb2; }
+
+/* run it as a new service, or as an extension of an old one */
+.svcChoice {
+  display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;
+  margin-top: 0.6rem; padding-top: 0.55rem; border-top: 1px solid var(--edge);
+}
+.svcChoice .seg { flex: 1 1 14em; }
+.svcChoice .seg button { flex: 0 1 auto; padding: 0.22rem 0.7rem; font-size: 0.72rem; }
+
+/* ── hint ───────────────────────────────────────────────────────── */
+#hint {
+  position: absolute; left: 50%; transform: translateX(-50%); top: 60px; z-index: 8;
+  font-size: 0.82rem; letter-spacing: 0.05em;
+  background: var(--ink); color: var(--paper);
+  box-shadow: 0 0 0 1px var(--ink), inset 0 0 0 1px rgba(241, 231, 210, 0.28);
+  padding: 0.36rem 1rem; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none; max-width: 70vw; text-align: center;
+}
+#hint.show { opacity: 1; }
+
+/* ── modal ──────────────────────────────────────────────────────── */
+#modal {
+  position: absolute; inset: 0; z-index: 40;
+  display: grid; place-items: center; padding: 5vh 4vw;
+  background: rgba(12, 10, 7, 0.66);
+  overflow: auto;
+}
+.modal-card {
+  max-width: 620px; width: 100%; background: var(--panel-2);
+  border: 1px solid var(--ink);
+  box-shadow: var(--frame), var(--lift-lg);
+  padding: 1.5rem 1.9rem 1.5rem;
+}
+.modal-card .eyebrow {
+  font-size: 0.6rem; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--red-deep); margin: 0 0 0.4rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.modal-card .eyebrow::after {
+  content: ''; flex: 1 1 auto; height: 4px;
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--red);
+}
+.modal-card h2 {
+  margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 400; letter-spacing: 0.04em;
+}
+.modal-card .from {
+  font-size: 0.8rem; font-style: italic; color: var(--ink-soft);
+  border-bottom: 1px solid var(--ink); padding-bottom: 0.55rem; margin: 0 0 1rem;
+  box-shadow: 0 3px 0 var(--panel-2), 0 4px 0 var(--red);
+}
+.modal-card .body { font-size: 0.95rem; line-height: 1.64; }
+.modal-card .body p { margin: 0 0 0.75rem; }
+.choices { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.15rem; }
+.choice {
+  text-align: left; background: rgba(255, 255, 255, 0.38);
+  border: 1px solid var(--ink); padding: 0.6rem 0.8rem; width: 100%;
+  transition: background 0.12s, box-shadow 0.12s;
+}
+.choice:hover {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--paper), inset 0 0 0 2px var(--ink);
+}
+.choice b { display: block; font-size: 0.96rem; font-weight: 600; margin-bottom: 0.12rem; }
+.choice span { font-size: 0.8rem; color: var(--ink-soft); font-style: italic; }
+.choice.ominous { border-left: 4px double var(--red); padding-left: 0.72rem; }
+.choice.ominous b { color: var(--red-deep); }
+
+/* charter offer grid */
+.charters { display: grid; gap: 0.55rem; grid-template-columns: 1fr; margin-top: 1.1rem; }
+@media (min-width: 700px) { .charters { grid-template-columns: repeat(3, 1fr); } }
+.charter {
+  text-align: left; background: rgba(255, 255, 255, 0.38);
+  border: 1px solid var(--ink); padding: 0.65rem 0.7rem; display: flex;
+  flex-direction: column; gap: 0.32rem; min-height: 132px;
+  transition: background 0.12s, box-shadow 0.12s;
+}
+.charter:hover {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--paper), inset 0 0 0 2px var(--ink);
+}
+.charter .tag {
+  font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--red-deep); border-bottom: 1px solid var(--edge); padding-bottom: 0.3rem;
+}
+.charter b { font-size: 0.9rem; font-weight: 600; line-height: 1.28; }
+.charter .bl { font-size: 0.79rem; line-height: 1.44; flex: 1; }
+.charter .nt { font-size: 0.73rem; font-style: italic; color: var(--ink-soft); }
+
+/* ending */
+.ending .body { font-size: 1rem; }
+.ending h2 { font-size: 1.75rem; letter-spacing: 0.06em; }
+.tally {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.55rem 1.1rem; margin: 1.2rem 0 0.4rem;
+  border-top: 3px double var(--ink); padding-top: 0.9rem;
+}
+.tally div { font-size: 0.84rem; }
+.tally i {
+  font-style: normal; color: var(--ink-soft); display: block; font-size: 0.58rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+}
+.tally b { font-variant-numeric: tabular-nums; font-size: 1.1rem; font-weight: 600; }
+
+/* ── lettering over the 3D ──────────────────────────────────────── */
+/* Place names as they are drawn on a hand-drawn map: letterspaced, with a fine
+   ink keyline rather than a drop shadow. */
+#labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.plabel {
+  position: absolute; transform: translate(-50%, -100%);
+  font-size: 0.74rem; letter-spacing: 0.13em; white-space: nowrap;
+  color: #fdf6e4; padding-bottom: 3px; font-weight: 400;
+  text-shadow:
+    1px 0 0 rgba(24, 18, 11, 0.92), -1px 0 0 rgba(24, 18, 11, 0.92),
+    0 1px 0 rgba(24, 18, 11, 0.92), 0 -1px 0 rgba(24, 18, 11, 0.92),
+    1px 1px 0 rgba(24, 18, 11, 0.72), -1px 1px 0 rgba(24, 18, 11, 0.72),
+    1px -1px 0 rgba(24, 18, 11, 0.72), -1px -1px 0 rgba(24, 18, 11, 0.72);
+}
+.plabel.big {
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.22em;
+}
+.plabel s {
+  display: block; text-decoration: none; font-size: 0.58rem; opacity: 0.8;
+  letter-spacing: 0.16em; text-transform: uppercase; margin-top: 1px;
+}
+.plabel .rune { color: #f6c9b4; margin-right: 0.25em; }
+.plabel.sel {
+  color: #fff6de;
+  border-bottom: 1px solid rgba(220, 96, 60, 0.95);
+}
+.plabel.warn { color: #ffd2c2; }
+
+/* ── narrow ─────────────────────────────────────────────────────── */
+/* The top bar carries six figures and four buttons, so it is compacted in two
+   stages before anything is dropped. */
+@media (max-width: 1180px) {
+  .brand { padding: 0 0.7rem; letter-spacing: 0.16em; }
+  .stat { min-width: 66px; padding: 0 0.7rem; }
+  .stat b { font-size: 0.96rem; }
+  .stat span { font-size: 0.55rem; letter-spacing: 0.12em; }
+  #charterBtn, #ledgerBtn { padding: 0.22rem 0.55rem; letter-spacing: 0.08em; }
+  .speeds { padding: 0 0.3rem; }
+  .speeds button { min-width: 30px; padding: 0.22rem 0.35rem; }
+}
+@media (max-width: 900px) {
+  #leftpanel { width: 176px; }
+  #register { width: 252px; }
+  #ledger { width: 268px; }
+  #linePanel { width: 262px; max-height: min(52vh, 380px); }
+  #hud:has(#linePanel:not([hidden])) #leftpanel {
+    max-height: calc(100vh - min(52vh, 380px) - 80px);
+  }
+  #guide { width: min(430px, 78vw); }
+  .stat { min-width: 0; padding: 0 0.5rem; }
+  .stat b { font-size: 0.9rem; }
+  #charterBtn::before, #ledgerBtn::before { display: none; }
+  .brand { display: none; }
+  .title-card { padding: 1.3rem 1.4rem 1.5rem; }
+  .title-card::before { letter-spacing: 0.16em; font-size: 0.58rem; }
+  .modal-card { padding: 1.2rem 1.2rem 1.2rem; }
+  #inspector { min-width: 0; width: calc(100vw - 20px); max-width: none; }
+  .lpRow { grid-template-columns: 1fr; gap: 0.15rem; }
+  .lpStats { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .need { grid-template-columns: 9px minmax(4.2em, auto) 1fr; }
+  .need .nwhy { grid-column: 2 / -1; }
+  /* two lines apiece: quantity and goods, then the journey and the changes */
+  .flowRow { grid-template-columns: 9px 2.3em 1fr auto; }
+  .flowRow .fg { grid-area: 1 / 3 / 2 / 5; }
+  .flowRow .fp { grid-area: 2 / 2 / 3 / 4; }
+  .flowRow .fx { grid-area: 2 / 4 / 3 / 5; }
+}
+
+/* ── wide ───────────────────────────────────────────────────────── */
+/* At 1440p and up the panels would otherwise sit like postage stamps. */
+@media (min-width: 1800px) {
+  :root { font-size: 17.5px; }
+  #leftpanel { width: 252px; }
+  #register { width: 372px; }
+  #ledger { width: 392px; }
+  #linePanel { width: 372px; max-height: min(58vh, 560px); }
+  #hud:has(#linePanel:not([hidden])) #leftpanel {
+    max-height: calc(100vh - min(58vh, 560px) - 88px);
+  }
+  #topbar { height: 52px; }
+  #leftpanel, #register, #ledger { top: 66px; }
+  #hint { top: 68px; }
+}
+
+/* Note: the place labels are kept clear of the chrome by a screen-space test in
+   world3d.js. Offsetting #labels here as well would shift every label by the
+   height of the top bar. */
+
+/* ── the cartouche: the land under the camera, lettered as on a map ── */
+#cartouche {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: 88px; text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity 0.6s ease;
+}
+#cartouche.show { opacity: 1; }
+#cartouche b {
+  display: block; font-size: 1.25rem; font-weight: 400;
+  letter-spacing: 0.30em; text-indent: 0.30em; text-transform: uppercase;
+  color: #fdf4e0; text-shadow: 0 1px 4px rgba(0,0,0,0.95), 0 0 18px rgba(0,0,0,0.8);
+}
+#cartouche i {
+  display: block; margin-top: 0.2rem; font-size: 0.78rem; font-style: italic;
+  letter-spacing: 0.04em; color: #f0e2c4;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.95);
+}
+
+/* ── settlement traits and the ledger's list of lands ── */
+.traits { margin: 0.35rem 0 0.1rem; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.trait {
+  font-size: 0.71rem; font-style: italic; padding: 0.02rem 0.34rem;
+  border-left: 2px solid var(--red, #9d3a2c); color: var(--ink-soft, #4d4234);
+}
+.landRow {
+  display: grid; grid-template-columns: 1fr auto; gap: 0 0.5rem;
+  padding: 0.32rem 0; border-bottom: 1px solid rgba(156,135,96,0.28);
+}
+.landRow .nm { font-size: 0.84rem; }
+.landRow .lp {
+  font-size: 0.68rem; font-style: italic; color: var(--ink-soft, #4d4234);
+  align-self: baseline;
+}
+.landRow .lr {
+  grid-column: 1 / -1; font-size: 0.76rem; line-height: 1.45;
+  color: var(--ink-soft, #4d4234);
+}
+
+/* ── plates ─────────────────────────────────────────────────────── */
+/* The illustrations, tipped in. A printed plate sits on slightly heavier stock
+   than the text block, so it is set on the deeper paper tone with a hairline
+   round it; the engraved frame and the legend belong to the SVG itself, which
+   keeps the picture and its caption together at any width. */
+.plate {
+  display: block;
+  margin: 0.9rem 0 1rem;
+  padding: 0.45rem 0.5rem 0.35rem;
+  background: var(--paper-2);
+  border: 1px solid var(--edge);
+  box-shadow: 0 1px 0 rgba(20, 14, 8, 0.16);
+}
+.plate svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* A caption set in the document rather than in the plate: the legend under the
+   picture is engraved, this is the printer's note beside it. */
+.plateCap {
+  display: block;
+  margin: 0.4rem 0.1rem 0.1rem;
+  font-size: 0.6rem;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.plateCap em { font-style: normal; color: var(--red); }
+
+/* In a report or an ending, the plate takes the measure of the text block. */
+.modal-card .plate {
+  max-width: 620px;
+  margin: 1.05rem auto 1.15rem;
+  padding: 0.55rem 0.6rem 0.45rem;
+}
+
+/* In the Register column there is a third of the width, so the mount closes up
+   and the printer's note goes to the smallest legible size. */
+.plate.inline {
+  max-width: 100%;
+  margin: 0.5rem 0 0.55rem;
+  padding: 0.25rem 0.28rem 0.2rem;
+  background: var(--paper);
+  border-color: rgba(164, 144, 108, 0.7);
+  box-shadow: none;
+}
+.plate.inline .plateCap {
+  margin: 0.24rem 0 0;
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+}
+
+/* ── the engine card and the shed ────────────────────────────────────── */
+.engRec {
+  margin: 0.4rem 0 0; font-size: 0.76rem; font-style: italic;
+  color: var(--ink-soft, #4d4234);
+  border-top: 1px solid var(--edge, #b8a37c); padding-top: 0.35rem;
+}
+#inspector h4 .rune { margin-right: 0.3rem; }
+
+.shed {
+  margin-top: 0.45rem; padding-top: 0.4rem;
+  border-top: 1px solid var(--edge, #b8a37c);
+  display: flex; flex-wrap: wrap; gap: 0.22rem; align-items: baseline;
+}
+.shed > i {
+  flex: 0 0 100%; font-style: normal; font-size: 0.6rem;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-soft, #4d4234); margin-bottom: 0.12rem;
+}
+.engChip {
+  font-family: inherit; font-size: 0.72rem; padding: 0.04rem 0.34rem;
+  border: 1px solid var(--edge, #b8a37c); background: rgba(255,255,255,0.42);
+  color: var(--ink, #241d15); cursor: pointer;
+}
+.engChip:hover { background: rgba(255,255,255,0.8); border-color: var(--red, #ab2c17); }
+.shed .more { font-size: 0.7rem; color: var(--ink-soft, #4d4234); }
+
+/* ── commissions: what the realm is asking for ─────────────────────────── */
+#commissions {
+  position: absolute; right: 10px; top: 58px; width: 340px; z-index: 6;
+  max-height: calc(100vh - 150px); overflow-y: auto;
+  background: var(--panel, rgba(239,227,202,0.96));
+  border: 1px solid var(--ink, #241d15);
+  box-shadow: 0 0 0 1px var(--paper, #efe3ca) inset,
+              0 0 0 2px var(--ink, #241d15), 0 14px 34px rgba(0,0,0,0.34);
+  padding: 0.6rem 0.75rem 0.7rem;
+}
+#commBtn {
+  align-self: center; margin-right: 0.4rem;
+  border: 1px solid var(--edge, #b8a37c); background: transparent;
+  color: var(--ink, #241d15); font-size: 0.78rem;
+  letter-spacing: 0.1em; font-variant: small-caps; padding: 0.3rem 0.7rem;
+}
+#commBtn.on { background: var(--ink, #241d15); color: var(--paper, #efe3ca); }
+#commBtn.pulse { border-color: var(--red, #ab2c17); animation: pulse 2.4s ease-in-out infinite; }
+
+.comm {
+  border-top: 1px solid var(--ink, #241d15);
+  border-bottom: 1px solid rgba(156,135,96,0.5);
+  padding: 0.45rem 0 0.55rem; margin-bottom: 0.45rem;
+}
+.comm.urgent { border-left: 3px solid var(--red, #ab2c17); padding-left: 0.5rem; }
+.comm.done { opacity: 0.62; }
+.comm.failed { opacity: 0.62; border-left: 3px solid var(--red, #ab2c17); padding-left: 0.5rem; }
+.commHead { display: flex; justify-content: space-between; align-items: baseline; gap: 0.4rem; }
+.commHead b { font-size: 0.92rem; font-weight: 600; line-height: 1.25; }
+.commFee {
+  font-variant-numeric: tabular-nums; font-size: 0.84rem; white-space: nowrap;
+  font-weight: 600;
+}
+.commClient {
+  margin: 0.1rem 0 0; font-size: 0.68rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-soft, #4d4234);
+}
+.commWhat { margin: 0.25rem 0 0; font-size: 0.84rem; font-weight: 600; }
+.commBody { margin: 0.3rem 0 0; font-size: 0.8rem; line-height: 1.5; }
+.commBar {
+  height: 5px; background: rgba(0,0,0,0.14); margin: 0.4rem 0 0.2rem;
+  border: 1px solid var(--edge, #b8a37c);
+}
+.commBar i { display: block; height: 100%; background: var(--ink, #241d15); transition: width 0.6s; }
+.commProg { margin: 0.1rem 0 0; font-size: 0.76rem; color: var(--ink-soft, #4d4234); }
+.commProg.good { color: var(--ink, #241d15); font-weight: 600; }
+.commProg.bad { color: var(--red, #ab2c17); font-weight: 600; }
+.commActs { display: flex; gap: 0.35rem; margin-top: 0.5rem; }
+.commActs button {
+  font-size: 0.78rem; letter-spacing: 0.08em; font-variant: small-caps;
+  padding: 0.26rem 0.7rem; background: var(--ink, #241d15);
+  color: var(--paper, #efe3ca); border: none;
+}
+.commActs button.alt {
+  background: transparent; border: 1px solid var(--edge, #b8a37c); color: var(--ink, #241d15);
+}
+
+/* ── improvements: what a rich Authority spends money on ──────────────── */
+.botRow { flex-wrap: wrap; }
+.botFix, .worksRow button {
+  font-family: inherit; font-size: 0.74rem; letter-spacing: 0.06em;
+  font-variant: small-caps; padding: 0.14rem 0.5rem;
+  background: var(--ink, #241d15); color: var(--paper, #efe3ca); border: none;
+  cursor: pointer;
+}
+.botFix { flex: 0 0 auto; margin-top: 0.2rem; }
+.botFix:disabled, .worksRow button:disabled {
+  background: rgba(0,0,0,0.14); color: rgba(0,0,0,0.38); cursor: not-allowed;
+}
+.botDone {
+  font-size: 0.7rem; font-style: italic; color: var(--ink-soft, #4d4234);
+  flex: 0 0 auto; margin-top: 0.2rem;
+}
+.worksRow {
+  display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;
+  margin-top: 0.45rem; padding-top: 0.4rem;
+  border-top: 1px solid var(--edge, #b8a37c);
+}
+.worksRow i { font-style: italic; font-size: 0.72rem; color: var(--ink-soft, #4d4234); }
+.worksNote {
+  margin: 0.4rem 0 0; font-size: 0.74rem; font-style: italic;
+  color: var(--ink-soft, #4d4234);
+}
+
+/* ── on the platform ───────────────────────────────────────────────────────
+   What is standing at a settlement waiting for a wagon, and how many people
+   want to travel. Deliberately built from the same parts as .needs so the two
+   read as one document: needs are what a place is owed, this is what it has to
+   give. Two colours only, per UI-SPEC. */
+.platform { margin-top: 0.6rem; }
+.platform h5 {
+  font-size: 0.7rem; font-variant: small-caps; letter-spacing: 0.09em;
+  color: var(--ink-2); font-weight: 600; margin: 0 0 0.25rem 0;
+  border-bottom: 1px solid rgba(29, 23, 16, 0.28);
+  padding-bottom: 0.12rem;
+}
+.waitRow {
+  display: grid; grid-template-columns: 9px minmax(4.6em, auto) minmax(0, 1fr);
+  gap: 0.45rem; align-items: baseline; font-size: 0.79rem;
+  padding: 0.1rem 0.3rem;
+}
+.waitRow:nth-child(odd) { background: rgba(29, 23, 16, 0.045); }
+.waitRow s {
+  width: 7px; height: 7px; display: block; align-self: center;
+  border: 1px solid rgba(29, 23, 16, 0.6);
+}
+.waitRow .nq { text-align: right; }
+/* people are not tonnage; mark them without inventing a third colour */
+.waitRow.people .ng { font-variant: small-caps; letter-spacing: 0.04em; }
+.waitRow.people s { border-radius: 50%; }
+
+/* ── raising money ─────────────────────────────────────────────────────────
+   Three lenders, three currencies: interest, obligation, restraint. Built from
+   the same parts as the rest of the ledger so it reads as one document. */
+.debts { display: grid; gap: 1px; margin-bottom: 0.5rem; }
+.debtRow, .lenderRow {
+  display: grid; gap: 0.4rem 0.5rem; align-items: baseline;
+  font-size: 0.79rem; padding: 0.22rem 0.3rem;
+}
+.debtRow { grid-template-columns: minmax(6em, auto) 6.5em 5em 1fr auto; }
+.debtRow:nth-child(odd) { background: rgba(29, 23, 16, 0.045); }
+.debtRow .dr { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.debtRow.late { border-left: 2px solid var(--red); }
+.debtRow .lateTag {
+  color: var(--red); font-variant: small-caps; letter-spacing: 0.05em;
+}
+.lenderRow {
+  grid-template-columns: minmax(8em, auto) 1fr auto;
+  border-top: 1px solid rgba(29, 23, 16, 0.16); padding-top: 0.34rem;
+}
+.lenderRow .lb { color: var(--ink-1); }
+/* the condition attached to the money, on its own line across the full width */
+.lenderRow .ln {
+  grid-column: 1 / -1; color: var(--ink-2); font-style: italic;
+  font-size: 0.75rem; margin-top: -0.1rem;
+}
+.lenderRow.shut { opacity: 0.55; }
+.lenderRow.shut .wr { color: var(--red); font-variant: small-caps; }
+
+/* ── the engine works ──────────────────────────────────────────────────────
+   Buying a locomotive is the game's one real purchase decision, so the classes
+   have to be comparable at a glance: four bars, same scale, same order. */
+.works { margin-top: 0.55rem; border-top: 1px solid rgba(29, 23, 16, 0.28); }
+.works > summary {
+  cursor: pointer; font-size: 0.72rem; font-variant: small-caps;
+  letter-spacing: 0.09em; color: var(--ink-2); padding: 0.28rem 0;
+}
+.engBuy {
+  display: grid; grid-template-columns: minmax(6.5em, auto) 1fr auto;
+  gap: 0.2rem 0.5rem; align-items: baseline; font-size: 0.78rem;
+  padding: 0.26rem 0.3rem; border-top: 1px solid rgba(29, 23, 16, 0.12);
+}
+.engBuy .bl {
+  grid-column: 1 / -1; color: var(--ink-2); font-style: italic;
+  font-size: 0.73rem; margin-top: -0.12rem;
+}
+.engBuy .stats { display: flex; gap: 3px; align-items: center; }
+/* one bar per stat: filled portion in ink, the rest hairline */
+.engBuy .bar {
+  display: block; width: 16px; height: 7px;
+  border: 1px solid rgba(29, 23, 16, 0.45);
+  background: linear-gradient(to right,
+    var(--ink-1) 0 var(--w), transparent var(--w) 100%);
+}
+.engBuy .bar.hi { border-color: var(--red); }
+.engBuy.shut { opacity: 0.55; }
+.engBuy.shut .wr { color: var(--red); font-variant: small-caps; font-size: 0.73rem; }
+.engChip.tired { border-style: dashed; }
+.engChip.worn { border-color: var(--red); color: var(--red); }
+
+/* the engine card's class block */
+.engClass {
+  display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.5rem;
+  margin: 0.4rem 0; padding: 0.35rem 0.4rem;
+  background: rgba(29, 23, 16, 0.045);
+  border-left: 2px solid rgba(29, 23, 16, 0.4);
+  font-size: 0.78rem;
+}
+.engClass .nm { font-weight: 600; }
+.engClass .bl { color: var(--ink-2); }
+.engClass .condLabel { font-variant: small-caps; letter-spacing: 0.05em; }
+.engClass .condBar {
+  align-self: center; height: 7px; border: 1px solid rgba(29, 23, 16, 0.45);
+  display: block;
+}
+.engClass .condBar i { display: block; height: 100%; background: var(--ink-1); }
+.engClass .engStats, .engClass .refuses {
+  grid-column: 1 / -1; color: var(--ink-2); font-size: 0.73rem;
+}
+.engClass .refuses { color: var(--red); font-style: italic; }
+
+/* ── locomotive drawings ───────────────────────────────────────────────────
+   The engine works, the engine card portrait, and the rolling stock strip.
+   The SVGs carry their own ink, so all that is needed here is placement. */
+.engBuy { grid-template-columns: minmax(6.5em, auto) 1fr auto; }
+.engBuy .drawing { grid-column: 1 / -1; line-height: 0; margin: 0.1rem 0 0.15rem; }
+.engBuy .drawing svg, .engPortrait svg, .stockStrip svg, .rakeArt svg {
+  max-width: 100%; height: auto; display: block;
+}
+.engPortrait {
+  margin: 0.3rem 0 0.1rem; padding: 0.2rem 0;
+  border-top: 1px solid rgba(29, 23, 16, 0.2);
+  border-bottom: 1px solid rgba(29, 23, 16, 0.2);
+}
+/* the rolling stock, under the portrait: what this engine is pulling now */
+.stockStrip { margin: 0.3rem 0; }
+.stockList {
+  display: block; font-size: 0.72rem; color: var(--ink-2);
+  font-variant: small-caps; letter-spacing: 0.05em;
+}
+/* the rake control on the line dossier */
+.stockRow {
+  display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.5rem;
+  align-items: center; margin: 0.35rem 0;
+}
+.rake { display: flex; align-items: baseline; gap: 0.3rem; }
+.rake b { font-variant-numeric: tabular-nums; min-width: 1.1em; text-align: center; }
+.rake i { color: var(--ink-2); font-size: 0.74rem; font-style: normal; }
+.rake button {
+  min-width: 1.5em; padding: 0 0.25rem; font-size: 0.85rem; line-height: 1.4;
+}
+.rakeArt { grid-column: 1 / -1; line-height: 0; }

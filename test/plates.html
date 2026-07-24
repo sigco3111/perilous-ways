@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Perilous Ways — the plates, proofed</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  /* the stylesheet is written for a fixed-viewport game; this is a proof sheet */
+  html, body { height: auto; overflow: auto; background: var(--paper); }
+  body { padding: 20px 24px 60px; color: var(--ink); }
+  h1 { font-size: 1rem; letter-spacing: 0.22em; font-variant: small-caps; font-weight: 400; margin: 0 0 4px; }
+  .cols { display: flex; gap: 34px; align-items: flex-start; }
+  .colhead {
+    font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-soft); border-bottom: 1px solid var(--ink); padding-bottom: 3px; margin-bottom: 8px;
+  }
+  #wide { width: 620px; }
+  /* the Register column, to the pixel: 324px less its own padding */
+  #reg { width: 324px; padding: 0.6rem 0.2rem 0.5rem 0.75rem; background: var(--panel); border: 1px solid var(--ink); }
+  #small { width: 252px; }
+  .id { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.08em; color: var(--red); }
+</style>
+</head>
+<body>
+<h1>The Plates — proof sheet</h1>
+<div class="cols">
+  <div>
+    <div class="colhead">plate width in a report — 620px</div>
+    <div id="wide"></div>
+  </div>
+  <div>
+    <div class="colhead">inline, register column — 324px</div>
+    <div id="reg"></div>
+  </div>
+  <div>
+    <div class="colhead">inline, narrow register — 252px</div>
+    <div id="small"></div>
+  </div>
+</div>
+
+<script type="module">
+import { PLATES, PLATE_IDS, plate } from '../src/ui/plates.js';
+
+// a fixed generator, so two runs of the checker are comparable
+let s = 20260720;
+const rng = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+
+const CTX = {
+  first_bridge: { place: 'Brackenford', week: 14 },
+  first_bore: { place: 'Dhurunzol', week: 31, culture: 'dwarf' },
+  first_marsh: { place: 'Ostenmoor', region: 'The Weeping Marsh', week: 46 },
+  first_wood: { place: 'Lorindel', region: 'Elderwood', week: 52 },
+  first_east: { place: 'The Sundering Peaks', week: 88 },
+  first_wrack: { place: 'Gorgobal', region: 'The Ashenreach', week: 214 },
+  first_quays: { place: 'Silverhithe', week: 61 },
+  deep_bore: { place: 'Baraz Deep', week: 120, culture: 'dwarf' },
+  elves_depart: { place: 'The Last Quay', week: 168 },
+  dragon: { place: 'Zhaddun', week: 190, culture: 'dwarf' },
+  balrog: { place: 'Karag-Vor', week: 205 },
+  ent: { region: 'Wodenholt', week: 97 },
+  errand: { n: 4, week: 211 },
+  age3: { place: 'Beacon Hardy', week: 233 },
+  charter: { culture: 'men' },
+  dismissed: {},
+};
+
+const mount = (host, ids, inline) => {
+  host.innerHTML = ids.map((id) => {
+    const svg = plate(id, { ...(CTX[id] || {}), rng });
+    return `<figure class="plate${inline ? ' inline' : ''}" id="${inline}${id}">${svg}`
+      + `<figcaption class="plateCap"><em>${id}</em></figcaption></figure>`;
+  }).join('');
+};
+
+mount(document.getElementById('wide'), PLATE_IDS, '');
+mount(document.getElementById('reg'), PLATE_IDS, 'i-');
+mount(document.getElementById('small'), PLATE_IDS, 's-');
+
+window.PLATE_IDS = PLATE_IDS;
+window.PLATE_COUNT = Object.keys(PLATES).length;
+window.PLATE_BYTES = PLATE_IDS.reduce((a, id) => a + plate(id, CTX[id]).length, 0);
+window.PLATES_READY = true;
+</script>
+</body>
+</html>

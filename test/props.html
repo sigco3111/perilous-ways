@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Perilous Ways — props proof sheet</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #e6c8a2;
+    font: 12px/1.35 "Iowan Old Style", "Palatino Linotype", Georgia, serif; color: #2b2118; }
+  canvas { display: block; }
+  #labels { position: fixed; inset: 0; pointer-events: none; }
+  .lab { position: absolute; transform: translate(-50%, 0); white-space: nowrap;
+    text-align: center; text-shadow: 0 1px 0 rgba(255,246,225,.85), 0 0 6px rgba(255,246,225,.7); }
+  .lab b { display: block; font-size: 13px; letter-spacing: .02em; }
+  .lab i { display: block; font-style: normal; font-size: 10px; opacity: .72; }
+  #hud { position: fixed; top: 10px; left: 10px; background: rgba(255,248,234,.86);
+    border: 1px solid rgba(70,55,40,.35); padding: 8px 10px; max-height: 92vh; overflow: auto;
+    box-shadow: 0 2px 10px rgba(60,40,20,.18); }
+  #hud h1 { font-size: 13px; margin: 0 0 4px; letter-spacing: .06em; text-transform: uppercase; }
+  #hud table { border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; }
+  #hud th, #hud td { padding: 1px 5px 1px 0; text-align: right; }
+  #hud th:first-child, #hud td:first-child { text-align: left; }
+  #hud thead th { border-bottom: 1px solid rgba(70,55,40,.3); }
+  #hud .over { color: #9e3b3b; font-weight: bold; }
+  #hud .keys { margin-top: 6px; font-size: 11px; opacity: .8; }
+  #hud .keys kbd { font: inherit; border: 1px solid rgba(70,55,40,.4); padding: 0 3px; }
+  #hud .tot { border-top: 1px solid rgba(70,55,40,.3); }
+</style>
+<script type="importmap">
+{ "imports": {
+    "three": "../vendor/three/three.module.min.js",
+    "three/addons/": "../vendor/three/addons/"
+} }
+</script>
+</head>
+<body>
+<div id="labels"></div>
+<div id="hud"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { buildSettlement, buildStation, buildTunnelPortal, buildBridgePier, PAL } from '../src/gfx/props.js';
+
+// ---------------------------------------------------------------------------
+// scene, ART.md lighting
+// ---------------------------------------------------------------------------
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const FOG_DAY = new THREE.Color(0xe6c8a2), FOG_NIGHT = new THREE.Color(0x2a3345);
+scene.fog = new THREE.FogExp2(FOG_DAY.getHex(), 0.00115);
+
+const camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 1, 5000);
+
+// sun: #ffd7a3, intensity 2.6, elevation 24 degrees
+const SUN_EL = 24 * Math.PI / 180, SUN_AZ = 2.5;
+const sunDir = new THREE.Vector3(Math.cos(SUN_EL) * Math.cos(SUN_AZ), Math.sin(SUN_EL), Math.cos(SUN_EL) * Math.sin(SUN_AZ));
+const sun = new THREE.DirectionalLight(0xffd7a3, 2.6);
+sun.position.copy(sunDir).multiplyScalar(760);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -540; sun.shadow.camera.right = 540;
+sun.shadow.camera.top = 470; sun.shadow.camera.bottom = -470;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 1800;
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.5;
+scene.add(sun, sun.target);
+
+const hemi = new THREE.HemisphereLight(0x9fbde0, 0x6b5a44, 0.55);
+scene.add(hemi);
+
+// gradient sky: zenith #3f74c4 -> horizon #f2c98a
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: {
+    uTop: { value: new THREE.Color(0x3f74c4) },
+    uBot: { value: new THREE.Color(0xf2c98a) },
+    uNight: { value: 0 },
+  },
+  vertexShader: `varying vec3 vW;
+    void main(){ vW = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform vec3 uTop; uniform vec3 uBot; uniform float uNight; varying vec3 vW;
+    void main(){
+      float h = normalize(vW).y;
+      vec3 c = mix(uBot, uTop, smoothstep(-0.06, 0.55, h));
+      c = mix(c, vec3(0.012, 0.020, 0.045) + vec3(0.03,0.05,0.09) * smoothstep(0.6, -0.1, h), uNight);
+      gl_FragColor = vec4(c, 1.0);
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }`,
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(3200, 24, 16), skyMat));
+
+// ground: downs grass, gently mottled so it is not a plastic sheet
+{
+  const g = new THREE.PlaneGeometry(1900, 1500, 60, 48);
+  g.rotateX(-Math.PI / 2);
+  const pos = g.attributes.position, col = [];
+  const cA = new THREE.Color(PAL.grass), cB = new THREE.Color(PAL.grassHi), cC = new THREE.Color(PAL.dry);
+  const t = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i);
+    const n = Math.sin(x * 0.021) * Math.cos(z * 0.017) * 0.5 + Math.sin(x * 0.006 + z * 0.009) * 0.5;
+    t.copy(cA).lerp(cB, Math.max(0, n) * 0.8).lerp(cC, Math.max(0, -n) * 0.35);
+    col.push(t.r, t.g, t.b);
+  }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 }));
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+}
+
+// ---------------------------------------------------------------------------
+// build the proof sheet
+// ---------------------------------------------------------------------------
+const KINDS = ['shire', 'delve', 'haven', 'burg', 'watch', 'hold'];
+const KIND_NAME = { shire: 'Shire', delve: 'Delve', haven: 'Haven', burg: 'Burg', watch: 'Watch', hold: 'Hold' };
+const KIND_WHO = { shire: 'halflings', delve: 'dwarves', haven: 'elves', burg: 'men', watch: 'fortress', hold: 'orcs' };
+const TIER_NAME = ['hamlet', 'village', 'town', 'city', 'great city'];
+const SEEDS = ['nether-wembly', 'dhurunzol', 'lorindel', 'brackenford', 'windwatch', 'gorgobal'];
+
+const COL = 82, ROW = 78;
+const built = [], labels = [], lanterns = [];
+const stats = {};
+let totalTris = 0, totalCalls = 0, totalMs = 0;
+
+const labelBox = document.getElementById('labels');
+function addLabel(x, y, z, title, sub) {
+  const el = document.createElement('div');
+  el.className = 'lab';
+  el.innerHTML = '<b>' + title + '</b>' + (sub ? '<i>' + sub + '</i>' : '');
+  labelBox.appendChild(el);
+  labels.push({ el, p: new THREE.Vector3(x, y, z) });
+}
+
+function place(thing, x, z, yaw) {
+  thing.group.position.set(x, 0, z);
+  if (yaw) thing.group.rotation.y = yaw;
+  scene.add(thing.group);
+  built.push(thing);
+  const m = new THREE.Matrix4().makeRotationY(yaw || 0).setPosition(x, 0, z);
+  const lp = thing.lanternPoints || [], lc = thing.lanternColors || [];
+  for (let i = 0; i < lp.length; i++) {
+    const w = lp[i].clone().applyMatrix4(m);
+    lanterns.push({ p: w, hex: lc[i] === undefined ? PAL.hearth : lc[i] });
+  }
+  return thing;
+}
+
+// 6 kinds x 5 tiers
+KINDS.forEach((kind, ki) => {
+  stats[kind] = [];
+  const x = (ki - (KINDS.length - 1) / 2) * COL;
+  for (let tier = 0; tier < 5; tier++) {
+    const z = tier * ROW;
+    const t0 = performance.now();
+    const s = buildSettlement({ kind, tier, seed: SEEDS[ki] }, THREE);
+    const ms = performance.now() - t0;
+    place(s, x, z, 0);
+    stats[kind].push({ tier, tris: s.stats.tris, calls: s.stats.calls, ms, foot: s.footprint });
+    totalTris += s.stats.tris; totalCalls += s.stats.calls; totalMs += ms;
+    addLabel(x, 0, z - Math.max(s.footprint, 12) - 6,
+      KIND_NAME[kind] + ' &middot; tier ' + tier,
+      TIER_NAME[tier] + ' &middot; ' + s.stats.tris + ' tris &middot; ' + s.stats.calls + ' calls &middot; r' + s.footprint.toFixed(0));
+  }
+  addLabel(x, 30, -46, KIND_NAME[kind].toUpperCase(), KIND_WHO[kind]);
+});
+
+// stations, one per kind, tier 2 — track runs along local X
+const ROW_STATION = -118;
+KINDS.forEach((kind, ki) => {
+  const x = (ki - (KINDS.length - 1) / 2) * COL;
+  const t0 = performance.now();
+  const st = buildStation({ kind, tier: 2, seed: SEEDS[ki] }, THREE);
+  const ms = performance.now() - t0;
+  place(st, x, ROW_STATION, 0);
+  totalTris += st.stats.tris; totalCalls += st.stats.calls; totalMs += ms;
+  // a stub of track so the platform edge means something
+  const rails = new THREE.Group();
+  const sleeperG = new THREE.BoxGeometry(0.34, 0.18, 2.5);
+  const sleeperM = new THREE.MeshStandardMaterial({ color: PAL.darkTimber, roughness: 0.9 });
+  const nS = Math.round(st.platformLength / 1.4) + 6;
+  const inst = new THREE.InstancedMesh(sleeperG, sleeperM, nS);
+  const mm = new THREE.Matrix4();
+  for (let i = 0; i < nS; i++) {
+    mm.setPosition(-st.platformLength / 2 - 4 + i * 1.4, 0.09, 0);
+    inst.setMatrixAt(i, mm);
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  inst.castShadow = inst.receiveShadow = true;
+  rails.add(inst);
+  for (const s of [-1, 1]) {
+    const r = new THREE.Mesh(new THREE.BoxGeometry(st.platformLength + 10, 0.16, 0.18),
+      new THREE.MeshStandardMaterial({ color: PAL.railhead, roughness: 0.35, metalness: 0.75 }));
+    r.position.set(0, 0.25, s * 0.72);
+    r.castShadow = true; rails.add(r);
+  }
+  rails.position.set(x, 0, ROW_STATION);
+  scene.add(rails);
+  addLabel(x, 0, ROW_STATION - 15, 'station &middot; ' + KIND_NAME[kind],
+    'platform ' + st.platformLength.toFixed(0) + ' &middot; ' + st.stats.tris + ' tris &middot; ' + st.stats.calls + ' calls');
+});
+addLabel(-KINDS.length * COL * 0.5 - 26, 26, ROW_STATION, 'STATIONS', 'every kind, tier 2');
+
+// tunnel portals, one per culture — mouth faces -Z
+const ROW_PORTAL = ROW_STATION - 92;
+['dwarf', 'men', 'elf', 'orc', 'halfling'].forEach((culture, i) => {
+  const x = (i - 2) * COL;
+  const t0 = performance.now();
+  const pt = buildTunnelPortal({ culture, seed: 'sundering-' + culture }, THREE);
+  const ms = performance.now() - t0;
+  place(pt, x, ROW_PORTAL, 0);
+  totalTris += pt.stats.tris; totalCalls += pt.stats.calls; totalMs += ms;
+  addLabel(x, 0, ROW_PORTAL - 20, 'portal &middot; ' + culture,
+    pt.stats.tris + ' tris &middot; ' + pt.stats.calls + ' calls');
+});
+addLabel(-3 * COL, 26, ROW_PORTAL, 'TUNNEL PORTALS', 'dwarf-carved by default');
+
+// a viaduct: seven identical piers in a row, carrying a level deck
+const ROW_PIER = ROW_PORTAL - 84;
+{
+  const H = 24, SPAN = 23, N = 7;
+  for (let i = 0; i < N; i++) {
+    const x = (i - (N - 1) / 2) * SPAN;
+    const pier = buildBridgePier({ height: H, seed: 'viaduct-' + i }, THREE);
+    place(pier, x, ROW_PIER, 0);
+    totalTris += pier.stats.tris; totalCalls += pier.stats.calls;
+  }
+  // deck, so the eye can check that every cap lands on the same line
+  const deck = new THREE.Mesh(
+    new THREE.BoxGeometry(SPAN * N + 12, 1.1, 5.2),
+    new THREE.MeshStandardMaterial({ color: PAL.granite, roughness: 0.9 }));
+  deck.position.set(0, H + 0.7, ROW_PIER);
+  deck.castShadow = deck.receiveShadow = true;
+  scene.add(deck);
+  for (const s of [-1, 1]) {
+    const r = new THREE.Mesh(new THREE.BoxGeometry(SPAN * N + 12, 0.16, 0.18),
+      new THREE.MeshStandardMaterial({ color: PAL.railhead, roughness: 0.35, metalness: 0.75 }));
+    r.position.set(0, H + 1.33, ROW_PIER + s * 0.72);
+    scene.add(r);
+  }
+  addLabel(0, 0, ROW_PIER - 14, 'bridge piers &middot; 7 &times; h24 @ 23',
+    'the row is the test: one profile, seeded stone');
+  // and the range of heights, off to one side
+  [6, 13, 40].forEach((h, i) => {
+    const x = (N / 2 + 1.2) * SPAN + i * 14;
+    const pier = buildBridgePier({ height: h, seed: 'tall-' + h }, THREE);
+    place(pier, x, ROW_PIER, 0);
+    totalTris += pier.stats.tris; totalCalls += pier.stats.calls;
+    addLabel(x, 0, ROW_PIER - 14, 'pier h' + h, pier.stats.tris + ' tris');
+  });
+}
+
+// ---------------------------------------------------------------------------
+// lantern points, proof that they are sensible places for night lights
+// ---------------------------------------------------------------------------
+const lanternPts = (() => {
+  const pos = [], col = [], c = new THREE.Color();
+  for (const l of lanterns) {
+    pos.push(l.p.x, l.p.y, l.p.z);
+    c.setHex(l.hex);
+    col.push(c.r, c.g, c.b);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const mat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+    uniforms: { uSize: { value: 190 }, uT: { value: 0 } },
+    vertexShader: `attribute vec3 color; varying vec3 vC; uniform float uSize; uniform float uT;
+      void main(){
+        vC = color;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        float f = 0.85 + 0.15 * sin(uT * 5.0 + position.x * 1.7 + position.y);
+        gl_PointSize = uSize * f / max(1.0, -mv.z);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `varying vec3 vC;
+      void main(){
+        vec2 d = gl_PointCoord - 0.5;
+        float r = length(d);
+        float a = smoothstep(0.5, 0.0, r);
+        gl_FragColor = vec4(vC * (a * 1.6 + pow(a, 8.0) * 2.2), a);
+      }`,
+  });
+  const pts = new THREE.Points(g, mat);
+  pts.frustumCulled = false;
+  pts.visible = false;
+  scene.add(pts);
+  return pts;
+})();
+
+// ---------------------------------------------------------------------------
+// HUD
+// ---------------------------------------------------------------------------
+const hud = document.getElementById('hud');
+function drawHud() {
+  let h = '<h1>Perilous Ways &mdash; props</h1><table><thead><tr><th>kind</th>';
+  for (let t = 0; t < 5; t++) h += '<th>t' + t + '</th>';
+  h += '<th>t4 calls</th><th>t4 ms</th></tr></thead><tbody>';
+  for (const k of KINDS) {
+    const r = stats[k];
+    h += '<tr><td>' + KIND_NAME[k] + '</td>';
+    for (const s of r) h += '<td class="' + (s.tris > 4000 ? 'over' : '') + '">' + s.tris + '</td>';
+    h += '<td class="' + (r[4].calls > 6 ? 'over' : '') + '">' + r[4].calls + '</td><td>' + r[4].ms.toFixed(2) + '</td></tr>';
+  }
+  h += '<tr class="tot"><td>scene</td><td colspan="6">' + totalTris.toLocaleString() + ' tris &middot; '
+    + totalCalls + ' prop draw calls &middot; built in ' + totalMs.toFixed(0) + ' ms &middot; '
+    + lanterns.length + ' lantern points</td></tr>';
+  h += '</tbody></table><div class="keys"><kbd>drag</kbd> orbit &middot; <kbd>right-drag</kbd> pan &middot; '
+    + '<kbd>wheel</kbd> zoom &middot; <kbd>N</kbd> night &middot; <kbd>L</kbd> labels &middot; '
+    + '<kbd>H</kbd> this panel &middot; <kbd>1&ndash;6</kbd> fly to a kind &middot; <kbd>0</kbd> the whole sheet &middot; '
+    + '<kbd>7</kbd> stations &middot; <kbd>8</kbd> portals &middot; <kbd>9</kbd> piers &middot; <kbd>R</kbd> reset</div>';
+  hud.innerHTML = h;
+}
+drawHud();
+
+// ---------------------------------------------------------------------------
+// hand-written orbit
+// ---------------------------------------------------------------------------
+const cam = { target: new THREE.Vector3(0, 6, 50), dist: 780, az: -Math.PI / 2, el: 0.66 };
+const HOME = { t: cam.target.clone(), d: cam.dist, a: cam.az, e: cam.el };
+function applyCam() {
+  cam.el = Math.max(0.06, Math.min(1.52, cam.el));
+  cam.dist = Math.max(14, Math.min(1600, cam.dist));
+  const ce = Math.cos(cam.el);
+  camera.position.set(
+    cam.target.x + Math.cos(cam.az) * ce * cam.dist,
+    cam.target.y + Math.sin(cam.el) * cam.dist,
+    cam.target.z + Math.sin(cam.az) * ce * cam.dist);
+  camera.lookAt(cam.target);
+}
+applyCam();
+
+let drag = 0, lx = 0, ly = 0;
+const el = renderer.domElement;
+el.addEventListener('contextmenu', (e) => e.preventDefault());
+el.addEventListener('pointerdown', (e) => {
+  drag = (e.button === 0 && !e.shiftKey) ? 1 : 2;
+  lx = e.clientX; ly = e.clientY;
+  el.setPointerCapture(e.pointerId);
+});
+el.addEventListener('pointerup', (e) => { drag = 0; el.releasePointerCapture(e.pointerId); });
+el.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const dx = e.clientX - lx, dy = e.clientY - ly;
+  lx = e.clientX; ly = e.clientY;
+  if (drag === 1) { cam.az += dx * 0.005; cam.el -= dy * 0.005; }
+  else {
+    const s = cam.dist * 0.0016;
+    const right = new THREE.Vector3(-Math.sin(cam.az), 0, Math.cos(cam.az));
+    const fwd = new THREE.Vector3(Math.cos(cam.az), 0, Math.sin(cam.az));
+    cam.target.addScaledVector(right, dx * s).addScaledVector(fwd, dy * s);
+  }
+  applyCam();
+});
+el.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  cam.dist *= Math.exp(e.deltaY * 0.0011);
+  applyCam();
+}, { passive: false });
+
+let night = false;
+function setNight(on) {
+  night = on;
+  sun.intensity = on ? 0.16 : 2.6;
+  sun.color.setHex(on ? 0x9fb6e0 : 0xffd7a3);
+  hemi.intensity = on ? 0.14 : 0.55;
+  skyMat.uniforms.uNight.value = on ? 1 : 0;
+  scene.fog.color.copy(on ? FOG_NIGHT : FOG_DAY);
+  scene.fog.density = on ? 0.0009 : 0.00115;
+  lanternPts.visible = on;
+  renderer.toneMappingExposure = on ? 1.35 : 1.0;
+}
+addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  if (k === 'n') setNight(!night);
+  else if (k === 'l') labelBox.style.display = labelBox.style.display === 'none' ? '' : 'none';
+  else if (k === 'h') hud.style.display = hud.style.display === 'none' ? '' : 'none';
+  else if (k === 'r' || k === '0') {
+    cam.target.copy(HOME.t); cam.dist = HOME.d; cam.az = HOME.a; cam.el = HOME.e; applyCam();
+  } else if (k >= '1' && k <= '6') {
+    const i = +k - 1;
+    cam.target.set((i - 2.5) * COL, 8, 2 * ROW); cam.dist = 430; cam.el = 0.52; applyCam();
+  } else if (k === '7') { cam.target.set(0, 4, ROW_STATION); cam.dist = 300; cam.el = 0.4; applyCam(); }
+  else if (k === '8') { cam.target.set(0, 6, ROW_PORTAL); cam.dist = 280; cam.el = 0.32; applyCam(); }
+  else if (k === '9') { cam.target.set(0, 12, ROW_PIER); cam.dist = 300; cam.el = 0.28; applyCam(); }
+});
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// ---------------------------------------------------------------------------
+// loop
+// ---------------------------------------------------------------------------
+const env = { time: 0, windDir: [0.82, 0.57], windStrength: 1, sunDir, ashLevel: 0 };
+const v = new THREE.Vector3();
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  env.time += dt;
+  env.windStrength = 0.75 + 0.35 * Math.sin(env.time * 0.21);
+  for (const b of built) if (b.update) b.update(dt, env);
+  lanternPts.material.uniforms.uT.value = env.time;
+
+  // shadow camera follows the view so 2048 texels go where they are needed
+  sun.target.position.copy(cam.target);
+  sun.position.copy(cam.target).addScaledVector(sunDir, 760);
+  const span = Math.max(70, Math.min(520, cam.dist * 0.62));
+  const sc = sun.shadow.camera;
+  sc.left = -span; sc.right = span; sc.top = span; sc.bottom = -span;
+  sc.updateProjectionMatrix();
+
+  renderer.render(scene, camera);
+
+  // labels
+  if (labelBox.style.display !== 'none') {
+    for (const l of labels) {
+      v.copy(l.p).project(camera);
+      if (v.z > 1 || v.x < -1.3 || v.x > 1.3 || v.y < -1.25 || v.y > 1.2) { l.el.style.display = 'none'; continue; }
+      const d = camera.position.distanceTo(l.p);
+      l.el.style.display = '';
+      l.el.style.left = ((v.x * 0.5 + 0.5) * innerWidth).toFixed(1) + 'px';
+      l.el.style.top = ((-v.y * 0.5 + 0.5) * innerHeight).toFixed(1) + 'px';
+      l.el.style.opacity = Math.max(0.12, Math.min(1, 900 / d - 0.15)).toFixed(2);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// a handle for poking at it from the console
+window.PROPS = { scene, camera, renderer, built, stats, setNight, buildSettlement, buildStation, buildTunnelPortal, buildBridgePier, THREE };
+</script>
+</body>
+</html>

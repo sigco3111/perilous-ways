@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Perilous Ways — mass transit for an age of doom</title>
+<meta name="description" content="You are Director of the Realm Transit Authority. Lay track across a continent of halflings, dwarves, elves and orcs, and discover what a railway is actually for.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🚂</text></svg>">
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/webgpu": "./vendor/three/three.module.min.js",
+    "three/tsl": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/addons/"
+  }
+}
+</script>
+</head>
+<body>
+
+<canvas id="view"></canvas>
+
+<!-- ══ loading ══ -->
+<div id="boot">
+  <div class="boot-inner">
+    <h1>PERILOUS WAYS</h1>
+    <p class="sub">Mass transit for an age of doom</p>
+    <div class="boot-bar"><i></i></div>
+    <p class="boot-status">surveying the realm…</p>
+  </div>
+</div>
+
+<!-- ══ title ══ -->
+<div id="title" hidden>
+  <div class="title-card">
+    <h1>PERILOUS WAYS</h1>
+    <p class="sub">Being an account of the Realm Transit Authority,<br>its triumphs and its incidents</p>
+    <div class="brief">
+      <p>You are Director of the Authority. You do not fight, rule, or quest. You
+      lay track, buy engines, and answer correspondence.</p>
+      <p>A Delve produces iron and cannot grow food. A Shire grows food and has no
+      tools. Neither can do anything about this without you.</p>
+      <p class="dim">Everything that happens to the realm afterwards is, technically, your fault.</p>
+    </div>
+    <div class="seedrow">
+      <label>Realm <input id="seedInput" type="text" maxlength="18" spellcheck="false"></label>
+      <button id="reroll" class="ghost" title="Generate a different realm">↻</button>
+    </div>
+    <button id="begin" class="big">Take up the post</button>
+    <p class="creds">drag to look · scroll to zoom · click a settlement, then another, to survey a line<br>then set what it carries, what it charges, and where it calls</p>
+  </div>
+</div>
+
+<!-- ══ hud ══ -->
+<div id="hud" hidden>
+
+  <!-- top bar -->
+  <header id="topbar">
+    <div class="brand">PERILOUS&nbsp;WAYS</div>
+    <div class="stat" id="stWeek"><b>—</b><span>week</span></div>
+    <div class="stat money" id="stMoney"><b>—</b><span>crowns</span></div>
+    <div class="stat" id="stFlow"><b>—</b><span>per week</span></div>
+    <div class="stat" id="stPros"><b>—</b><span>prosperity</span></div>
+    <div class="stat" id="stConcord"><b>—</b><span>concord</span></div>
+    <div class="stat shadow" id="stShadow"><b>—</b><span>the east</span></div>
+    <div class="spacer"></div>
+    <button id="charterBtn" hidden title="The Council is waiting on you">A charter awaits</button>
+    <button id="ledgerBtn" title="Receipts, flows and bottlenecks">Ledger</button>
+    <button id="commBtn" title="What the realm is asking you to move">Commissions</button>
+    <div class="speeds">
+      <button data-speed="0" title="Pause (space)">❙❙</button>
+      <button data-speed="1" class="on">1×</button>
+      <button data-speed="2">2×</button>
+      <button data-speed="4">4×</button>
+    </div>
+    <button id="muteBtn" class="ghost" title="Mute">♪</button>
+  </header>
+
+  <!-- left: peoples + fleet -->
+  <aside id="leftpanel">
+    <!-- the standing orders: a light guided opening -->
+    <section class="card" id="guide" hidden>
+      <h3>Standing Orders <button id="guideSkip" class="ghost sm" title="Dismiss">✕</button></h3>
+      <div id="guideBody"></div>
+    </section>
+
+    <section class="card" id="fleetCard">
+      <h3>The Fleet</h3>
+      <div class="fleetline"><span>Engines</span><b id="fEngines">—</b></div>
+      <div class="fleetline"><span>Wagons each</span><b id="fCars">—</b></div>
+      <div class="fleetline"><span>Charters</span><b id="fCharters">—</b></div>
+      <div id="lineList"></div>
+    </section>
+    <section class="card" id="concordCard">
+      <h3>Concord</h3>
+      <div id="regardList"></div>
+    </section>
+  </aside>
+
+  <!-- left, lower: the open service -->
+  <div id="linePanel" hidden></div>
+
+  <!-- right: the register -->
+  <aside id="register">
+    <h3>The Register <button id="regToggle" class="ghost sm" title="Collapse">▾</button></h3>
+    <div id="logList"></div>
+  </aside>
+
+  <!-- right, over the register: what the realm is asking for -->
+  <aside id="commissions" hidden></aside>
+
+  <!-- right, over the register: the ledger -->
+  <aside id="ledger" hidden></aside>
+
+  <!-- bottom: survey / selection -->
+  <div id="inspector" hidden></div>
+
+  <!-- the land the camera is over, named as on a map -->
+  <div id="cartouche"><b></b><i></i></div>
+
+  <!-- hint -->
+  <div id="hint"></div>
+
+  <!-- modals -->
+  <div id="modal" hidden>
+    <div class="modal-card" id="modalCard"></div>
+  </div>
+</div>
+
+<noscript><p style="color:#eee;font:16px serif;padding:2rem">Perilous Ways needs JavaScript and WebGL.</p></noscript>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perilous Ways — Audio Bench</title>
+<style>
+  :root {
+    --iron: #1b1c20;
+    --panel: #24262b;
+    --panel2: #2c2f35;
+    --line: #3c4048;
+    --ink: #d9d3c4;
+    --dim: #8d8b83;
+    --brass: #b08d57;
+    --brass-hi: #d8b781;
+    --sand: #c9b393;
+    --good: #7fae9d;
+    --warn: #d8a24a;
+    --bad: #c1543f;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--iron); color: var(--ink); }
+  body {
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 18px 20px 60px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 15px; letter-spacing: .22em; text-transform: uppercase;
+    margin: 0 0 2px; color: var(--brass-hi); font-weight: 600;
+  }
+  .sub { color: var(--dim); font-size: 12px; margin-bottom: 16px; }
+  .sub code { color: var(--sand); }
+  fieldset {
+    border: 1px solid var(--line); border-radius: 3px; background: var(--panel);
+    margin: 0 0 14px; padding: 12px 14px 14px;
+  }
+  legend {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--brass); padding: 0 6px;
+  }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+
+  label.row {
+    display: grid; grid-template-columns: 74px 1fr 76px;
+    align-items: center; gap: 10px; margin: 9px 0;
+  }
+  label.row > span:first-child {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--dim);
+  }
+  label.row > .val { font-family: var(--mono); font-size: 12px; color: var(--sand); text-align: right; }
+  input[type=range] { width: 100%; accent-color: var(--brass); }
+  select, button {
+    font: inherit; color: var(--ink); background: var(--panel2);
+    border: 1px solid var(--line); border-radius: 3px; padding: 6px 9px;
+  }
+  select { width: 100%; }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--brass); color: var(--brass-hi); }
+  button:active { background: #35383f; transform: translateY(1px); }
+  button.on { border-color: var(--brass); background: #3a3325; color: var(--brass-hi); }
+  button.wide { width: 100%; text-align: left; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 7px; }
+  .grid button { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; padding: 7px 9px; }
+  .grid button b { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+  .grid button i { font-style: normal; font-size: 10.5px; color: var(--dim); line-height: 1.3; }
+  .grid button:hover i { color: var(--sand); }
+  .group-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--brass); margin: 14px 0 6px; border-bottom: 1px solid var(--line); padding-bottom: 3px;
+  }
+  .group-title:first-child { margin-top: 0; }
+
+  table.stats { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+  table.stats td { padding: 2px 0; }
+  table.stats td:first-child { color: var(--dim); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; }
+  table.stats td:last-child { text-align: right; color: var(--sand); }
+  .verdict {
+    font-family: var(--mono); font-size: 12px; margin-top: 10px; padding: 7px 9px;
+    border: 1px solid var(--line); border-radius: 3px; background: #1f2125;
+  }
+  .verdict.ok { color: var(--good); border-color: #3c554d; }
+  .verdict.warn { color: var(--warn); border-color: #5a4a2a; }
+  .verdict.bad { color: var(--bad); border-color: #5c3229; }
+  canvas { width: 100%; height: 132px; display: block; background: #1a1b1f; border: 1px solid var(--line); border-radius: 3px; }
+  .canvas-legend { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 4px; }
+  .tools { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 7px; }
+  #log {
+    font-family: var(--mono); font-size: 11.5px; color: var(--dim);
+    background: #1a1b1f; border: 1px solid var(--line); border-radius: 3px;
+    height: 116px; overflow-y: auto; padding: 7px 9px; margin-top: 10px; white-space: pre-wrap;
+  }
+  #log b { color: var(--sand); font-weight: 400; }
+  #gate {
+    position: fixed; inset: 0; background: rgba(15,16,18,.94); z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  }
+  #gate p { color: var(--dim); font-size: 12.5px; max-width: 460px; text-align: center; margin: 0; }
+  #gate button {
+    font-family: var(--mono); font-size: 13px; letter-spacing: .2em; text-transform: uppercase;
+    padding: 15px 30px; border-color: var(--brass); color: var(--brass-hi); background: #26231c;
+  }
+  .hint { color: var(--dim); font-size: 11.5px; margin-top: 9px; }
+  .speedmarks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--dim); }
+</style>
+</head>
+<body>
+
+<h1>Perilous Ways — Audio Bench</h1>
+<div class="sub">
+  Office of Acoustic Compliance. Every sound below is synthesised at runtime; nothing is fetched.
+  Serve this over HTTP (e.g. <code>python -m http.server</code> from the project root) — ES modules
+  will not load from <code>file://</code>. Module under test: <code>src/audio/audio.js</code>.
+</div>
+
+<div class="cols">
+
+  <!-- ================= scene ================= -->
+  <div>
+    <fieldset>
+      <legend>Scene</legend>
+      <label class="row">
+        <span>Age</span>
+        <input id="age" type="range" min="1" max="3" step="1" value="1">
+        <span class="val" id="ageV">I</span>
+      </label>
+      <label class="row">
+        <span>Region</span>
+        <select id="region"></select>
+        <span class="val" id="regionV">—</span>
+      </label>
+      <label class="row">
+        <span>Unrest</span>
+        <input id="unrest" type="range" min="0" max="1" step="0.01" value="0">
+        <span class="val" id="unrestV">0.00</span>
+      </label>
+      <label class="row">
+        <span>Night</span>
+        <input id="night" type="range" min="0" max="1" step="0.01" value="0">
+        <span class="val" id="nightV">0.00</span>
+      </label>
+      <label class="row">
+        <span>Speed</span>
+        <input id="speed" type="range" min="0" max="3" step="1" value="1">
+        <span class="val" id="speedV">1×</span>
+      </label>
+      <div class="speedmarks" style="margin:-4px 0 8px; padding-left:84px; padding-right:86px;">
+        <span>paused</span><span>1×</span><span>2×</span><span>4×</span>
+      </div>
+      <label class="row">
+        <span>Volume</span>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.5">
+        <span class="val" id="volV">0.50</span>
+      </label>
+      <div style="display:flex; gap:7px; margin-top:10px;">
+        <button id="mute" style="flex:1">Mute</button>
+        <button id="reinit" style="flex:1" title="init() must be idempotent">Call init() again</button>
+      </div>
+      <table class="stats" style="margin-top:12px">
+        <tr><td>Key / mode</td><td id="sKey">—</td></tr>
+        <tr><td>Tempo</td><td id="sBpm">—</td></tr>
+        <tr><td>Context</td><td id="sState">—</td></tr>
+        <tr><td>Sample rate</td><td id="sSr">—</td></tr>
+      </table>
+    </fieldset>
+
+    <fieldset>
+      <legend>Stress &amp; soak</legend>
+      <div class="tools">
+        <button id="tStorm">Chuff storm — 20/s for 10 s</button>
+        <button id="tRhythm">Chuff in rhythm (host-style)</button>
+        <button id="tAll">Fire every one-shot in turn</button>
+        <button id="tRegions">Cycle all 11 regions</button>
+        <button id="tAges">Cycle ages I → II → III</button>
+        <button id="tFloor">Measure drained floor</button>
+        <button id="tSoak">Auto-soak (leave it running)</button>
+        <button id="tDispose">dispose()</button>
+      </div>
+      <div id="log"></div>
+      <div class="hint">
+        Leak test: press <b>Measure drained floor</b> now, soak for ten minutes, then press it again.
+        The two figures must be identical. <code>window.PWAudio</code> is exposed for the console.
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- ================= instruments ================= -->
+  <div>
+    <fieldset>
+      <legend>Node census</legend>
+      <canvas id="graph" width="640" height="132"></canvas>
+      <div class="canvas-legend">
+        <span id="gLeft">−5 min</span>
+        <span id="gMid">total AudioNodes held by the module</span>
+        <span id="gRight">now</span>
+      </div>
+      <table class="stats" style="margin-top:10px">
+        <tr><td>Nodes (total)</td><td id="nTotal">—</td></tr>
+        <tr><td>Persistent</td><td id="nPersist">—</td></tr>
+        <tr><td>Transient</td><td id="nLive">—</td></tr>
+        <tr><td>Voices / beds</td><td id="nVoices">—</td></tr>
+        <tr><td>Created / disposed</td><td id="nCd">—</td></tr>
+        <tr><td>Balance (must be 0)</td><td id="nBal">—</td></tr>
+        <tr><td>Voices stolen</td><td id="nStolen">—</td></tr>
+        <tr><td>Melody notes</td><td id="nNotes">—</td></tr>
+        <tr><td>Peak transient</td><td id="nPeak">—</td></tr>
+        <tr><td>Session</td><td id="nUp">—</td></tr>
+      </table>
+      <div class="verdict" id="verdict">Waiting for audio…</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>One-shots</legend>
+      <label class="row">
+        <span>Gain</span>
+        <input id="sfxGain" type="range" min="0" max="2" step="0.05" value="1">
+        <span class="val" id="sfxGainV">1.00</span>
+      </label>
+      <label class="row">
+        <span>Pan</span>
+        <input id="sfxPan" type="range" min="-1" max="1" step="0.05" value="0">
+        <span class="val" id="sfxPanV">0.00</span>
+      </label>
+      <div id="shots"></div>
+    </fieldset>
+  </div>
+</div>
+
+<div id="gate">
+  <button id="begin">Initialise audio</button>
+  <p>
+    A browser will not let a page make sound until you ask it to. This button calls
+    <code>Audio.init()</code>, which is the only entry point that needs a gesture.
+  </p>
+</div>
+
+<script type="module">
+import { Audio as PWAudio } from '../src/audio/audio.js';
+window.PWAudio = PWAudio;
+
+const $ = (id) => document.getElementById(id);
+const ROMAN = { 1: 'I', 2: 'II', 3: 'III' };
+const SPEEDS = [0, 1, 2, 4];
+
+// Descriptions double as an audition checklist.
+const SHOT_GROUPS = [
+  ['The signature', [
+    ['whistle', 'two-tone steam whistle, with chiff'],
+    ['bell', 'struck bell, inharmonic partials'],
+  ]],
+  ['Works', [
+    ['build_track', 'ratchet then rail clank'],
+    ['build_works', 'heavier: stone, grit, rumble'],
+  ]],
+  ['Motion', [
+    ['chuff', 'one exhaust beat, pitch-varied'],
+    ['brake', 'metal squeal on the wheel'],
+  ]],
+  ['Correspondence', [
+    ['coin', 'fare income'],
+    ['charter', 'page turned, then a chime'],
+    ['petition', 'a formal knock and a wax seal'],
+  ]],
+  ['Irregularities', [
+    ['incident', 'low ominous hit'],
+    ['collapse', 'rockslide with debris'],
+    ['dragon', 'distant roar, swept'],
+  ]],
+  ['Matters of record', [
+    ['depart', 'the Elves take ship (10 s)'],
+    ['doom', 'Age III arrives (13 s)'],
+    ['ent', 'a vast slow wooden groan'],
+  ]],
+  ['Interface', [
+    ['ui_click', 'tiny'],
+    ['ui_hover', 'tinier'],
+    ['error', 'a dull thunk, not a beep'],
+  ]],
+];
+
+// --- build the region selector and the one-shot grid -----------------------
+const regionSel = $('region');
+for (const r of PWAudio.regions) {
+  const o = document.createElement('option');
+  o.value = r; o.textContent = r;
+  regionSel.appendChild(o);
+}
+
+const shots = $('shots');
+const listed = new Set();
+for (const [title, items] of SHOT_GROUPS) {
+  const h = document.createElement('div');
+  h.className = 'group-title';
+  h.textContent = title;
+  shots.appendChild(h);
+  const g = document.createElement('div');
+  g.className = 'grid';
+  for (const [name, desc] of items) { g.appendChild(shotButton(name, desc)); listed.add(name); }
+  shots.appendChild(g);
+}
+// Anything the module exposes that this page does not know about still gets a button.
+const extra = PWAudio.oneShots.filter((n) => !listed.has(n));
+if (extra.length) {
+  const h = document.createElement('div');
+  h.className = 'group-title';
+  h.textContent = 'Also exported';
+  shots.appendChild(h);
+  const g = document.createElement('div');
+  g.className = 'grid';
+  for (const n of extra) g.appendChild(shotButton(n, 'undocumented on this page'));
+  shots.appendChild(g);
+}
+
+function shotButton(name, desc) {
+  const b = document.createElement('button');
+  b.innerHTML = '<b></b><i></i>';
+  b.querySelector('b').textContent = name;
+  b.querySelector('i').textContent = desc;
+  b.addEventListener('click', () => fire(name));
+  return b;
+}
+
+function fire(name, extraOpts) {
+  const opts = {
+    gain: parseFloat($('sfxGain').value),
+    pan: parseFloat($('sfxPan').value),
+  };
+  if (extraOpts) Object.assign(opts, extraOpts);
+  PWAudio.play(name, opts);
+}
+
+// --- scene wiring ----------------------------------------------------------
+function pushScene() {
+  PWAudio.setScene({
+    age: parseInt($('age').value, 10),
+    region: regionSel.value,
+    unrest: parseFloat($('unrest').value),
+    night: parseFloat($('night').value),
+    speed: SPEEDS[parseInt($('speed').value, 10)],
+  });
+  paintScene();
+}
+
+function paintScene() {
+  $('ageV').textContent = ROMAN[$('age').value] || $('age').value;
+  $('unrestV').textContent = parseFloat($('unrest').value).toFixed(2);
+  $('nightV').textContent = parseFloat($('night').value).toFixed(2);
+  const sp = SPEEDS[parseInt($('speed').value, 10)];
+  $('speedV').textContent = sp === 0 ? 'paused' : sp + '×';
+  $('regionV').textContent = regionSel.value.slice(0, 8).toLowerCase();
+  $('volV').textContent = parseFloat($('vol').value).toFixed(2);
+}
+
+for (const id of ['age', 'unrest', 'night', 'speed']) {
+  $(id).addEventListener('input', pushScene);
+}
+regionSel.addEventListener('change', pushScene);
+$('vol').addEventListener('input', () => {
+  PWAudio.setVolume(parseFloat($('vol').value));
+  paintScene();
+});
+$('sfxGain').addEventListener('input', () => { $('sfxGainV').textContent = parseFloat($('sfxGain').value).toFixed(2); });
+$('sfxPan').addEventListener('input', () => { $('sfxPanV').textContent = parseFloat($('sfxPan').value).toFixed(2); });
+
+$('mute').addEventListener('click', () => {
+  PWAudio.setMuted(!PWAudio.muted);
+  $('mute').classList.toggle('on', PWAudio.muted);
+  $('mute').textContent = PWAudio.muted ? 'Muted' : 'Mute';
+  log(PWAudio.muted ? 'muted' : 'unmuted');
+});
+$('reinit').addEventListener('click', () => {
+  const before = PWAudio.stats().nodes;
+  PWAudio.init();
+  const after = PWAudio.stats().nodes;
+  log(`init() again: ${before} → ${after} nodes ${after === before ? '(idempotent)' : '(GREW — bug)'}`);
+});
+
+// --- log -------------------------------------------------------------------
+const logEl = $('log');
+function log(msg) {
+  const t = new Date().toLocaleTimeString([], { hour12: false });
+  logEl.insertAdjacentHTML('afterbegin', `<b>${t}</b>  ${msg}\n`);
+  while (logEl.childNodes.length > 200) logEl.removeChild(logEl.lastChild);
+}
+
+// --- node graph ------------------------------------------------------------
+const cv = $('graph');
+const g2 = cv.getContext('2d');
+const HIST = 1500;                       // 5 minutes at 5 Hz
+const hist = [];
+let floorFirst = null;
+let startedAt = 0;
+
+function drawGraph() {
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  g2.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g2.clearRect(0, 0, w, h);
+
+  if (!hist.length) return;
+  let max = 10, min = Infinity;
+  for (const v of hist) { if (v > max) max = v; if (v < min) min = v; }
+  const top = Math.ceil((max * 1.25) / 20) * 20;
+  const y = (v) => h - 6 - (v / top) * (h - 14);
+
+  // grid
+  g2.strokeStyle = '#2b2e34'; g2.lineWidth = 1; g2.font = '9px ui-monospace, monospace';
+  g2.fillStyle = '#6a6c72';
+  for (let i = 0; i <= 4; i++) {
+    const v = (top / 4) * i;
+    const yy = Math.round(y(v)) + 0.5;
+    g2.beginPath(); g2.moveTo(0, yy); g2.lineTo(w, yy); g2.stroke();
+    g2.fillText(String(Math.round(v)), 3, yy - 3);
+  }
+
+  // the floor we are meant to return to
+  if (floorFirst !== null) {
+    g2.strokeStyle = '#7fae9d'; g2.setLineDash([3, 4]);
+    const yy = Math.round(y(floorFirst)) + 0.5;
+    g2.beginPath(); g2.moveTo(0, yy); g2.lineTo(w, yy); g2.stroke();
+    g2.setLineDash([]);
+  }
+
+  // the line
+  const step = w / (HIST - 1);
+  const x0 = w - (hist.length - 1) * step;
+  g2.beginPath();
+  for (let i = 0; i < hist.length; i++) {
+    const x = x0 + i * step;
+    const yy = y(hist[i]);
+    if (i === 0) g2.moveTo(x, yy); else g2.lineTo(x, yy);
+  }
+  g2.strokeStyle = '#d8b781'; g2.lineWidth = 1.4; g2.stroke();
+  g2.lineTo(w, h); g2.lineTo(x0, h); g2.closePath();
+  g2.fillStyle = 'rgba(176,141,87,.13)'; g2.fill();
+
+  $('gLeft').textContent = `−${(hist.length / 5 / 60).toFixed(1)} min`;
+  $('gMid').textContent = `min ${min} · max ${max} · scale ${top}`;
+}
+
+// --- polling ---------------------------------------------------------------
+function poll() {
+  const s = PWAudio.stats();
+  const sc = PWAudio.scene();
+  hist.push(s.nodes);
+  while (hist.length > HIST) hist.shift();
+
+  $('nTotal').textContent = s.nodes;
+  $('nPersist').textContent = s.persistent;
+  $('nLive').textContent = s.live;
+  $('nVoices').textContent = `${s.voices} / ${s.beds}`;
+  $('nCd').textContent = `${s.created} / ${s.disposed}`;
+  $('nBal').textContent = s.balance;
+  $('nStolen').textContent = s.stolen;
+  $('nNotes').textContent = s.notes;
+  $('nPeak').textContent = s.peakLive;
+  const up = startedAt ? (performance.now() - startedAt) / 1000 : 0;
+  $('nUp').textContent = `${Math.floor(up / 60)}m ${String(Math.floor(up % 60)).padStart(2, '0')}s`;
+  $('sKey').textContent = sc.key;
+  $('sBpm').textContent = `${sc.bpm} bpm`;
+  $('sState').textContent = `${s.state} · t=${s.time.toFixed(1)}s`;
+  $('sSr').textContent = s.sampleRate ? `${(s.sampleRate / 1000).toFixed(1)} kHz` : '—';
+
+  const v = $('verdict');
+  const drift = floorFirst === null ? null : s.nodes - floorFirst;
+  if (s.balance !== 0) {
+    v.className = 'verdict bad';
+    v.textContent = `ACCOUNTING BROKEN: balance ${s.balance}. A node was created and never disconnected.`;
+  } else if (drift !== null && drift > 120) {
+    v.className = 'verdict bad';
+    v.textContent = `Node count is ${drift} above the measured floor of ${floorFirst}. Suspect a leak.`;
+  } else if (s.live > 160) {
+    v.className = 'verdict warn';
+    v.textContent = `${s.live} transient nodes in flight — high, but bounded. Watch that it comes back down.`;
+  } else {
+    v.className = 'verdict ok';
+    v.textContent = `Balanced. ${s.persistent} persistent + ${s.live} transient in ${s.voices} voices`
+      + (floorFirst === null ? '. Measure the drained floor to arm the leak check.' : `; floor ${floorFirst}.`);
+  }
+  drawGraph();
+}
+
+// --- stress tools ----------------------------------------------------------
+let rhythmTimer = null, soakTimer = null, busy = false;
+
+$('tStorm').addEventListener('click', () => {
+  if (busy) return;
+  busy = true;
+  log('chuff storm: 20/s for 10 s');
+  let n = 0;
+  const id = setInterval(() => {
+    fire('chuff', { gain: 0.8, pan: (Math.random() * 2 - 1) * 0.6, rate: 0.85 + Math.random() * 0.3 });
+    if (++n >= 200) {
+      clearInterval(id); busy = false;
+      log(`storm done: ${PWAudio.stats().stolen} voices stolen in total`);
+    }
+  }, 50);
+});
+
+$('tRhythm').addEventListener('click', () => {
+  const b = $('tRhythm');
+  if (rhythmTimer) {
+    clearInterval(rhythmTimer); rhythmTimer = null;
+    b.classList.remove('on'); log('rhythm chuff off');
+    return;
+  }
+  let beat = 0;
+  rhythmTimer = setInterval(() => {
+    // Four beats per revolution, the last one slightly late, as engines do.
+    const swing = (beat % 4 === 3) ? 30 : 0;
+    setTimeout(() => fire('chuff', { gain: 0.75, rate: 0.95 + (beat % 4) * 0.02 }), swing);
+    beat++;
+  }, 260);
+  b.classList.add('on');
+  log('rhythm chuff on (≈4.6 beats/s across two cylinders)');
+});
+
+$('tAll').addEventListener('click', async () => {
+  if (busy) return;
+  busy = true;
+  log('firing every one-shot in turn');
+  for (const n of PWAudio.oneShots) {
+    log('  ▸ ' + n);
+    fire(n);
+    await wait(n === 'doom' ? 14000 : n === 'depart' ? 11500 : n === 'ent' ? 5500 : 1500);
+  }
+  busy = false;
+  log('all one-shots fired');
+});
+
+$('tRegions').addEventListener('click', async () => {
+  if (busy) return;
+  busy = true;
+  for (const r of PWAudio.regions) {
+    regionSel.value = r; pushScene();
+    log('region → ' + r);
+    await wait(5000);
+  }
+  busy = false;
+  log(`region cycle done; beds alive: ${PWAudio.stats().beds}`);
+});
+
+$('tAges').addEventListener('click', async () => {
+  if (busy) return;
+  busy = true;
+  for (const a of [1, 2, 3]) {
+    $('age').value = a; pushScene();
+    log(`age → ${ROMAN[a]} (${PWAudio.scene().key})`);
+    await wait(14000);
+  }
+  busy = false;
+});
+
+$('tFloor').addEventListener('click', async () => {
+  if (busy) return;
+  busy = true;
+  const restore = $('speed').value;
+  log('measuring drained floor: pausing for 16 s…');
+  $('speed').value = '0'; pushScene();
+  await wait(16000);
+  const n = PWAudio.stats().nodes;
+  if (floorFirst === null) {
+    floorFirst = n;
+    log(`floor = <b>${n}</b> nodes (armed; the dashed line on the graph)`);
+  } else {
+    const d = n - floorFirst;
+    log(`floor = <b>${n}</b> nodes; first reading was ${floorFirst} → drift ${d >= 0 ? '+' : ''}${d} ` +
+      (d === 0 ? '— clean' : d <= 4 ? '— within a bed crossfade' : '— LEAK'));
+  }
+  $('speed').value = restore; pushScene();
+  busy = false;
+});
+
+$('tSoak').addEventListener('click', () => {
+  const b = $('tSoak');
+  if (soakTimer) {
+    clearInterval(soakTimer); soakTimer = null;
+    b.classList.remove('on'); log('soak off');
+    return;
+  }
+  let t = 0;
+  soakTimer = setInterval(() => {
+    t += 0.5;
+    // A plausible session: constant engine noise, occasional everything else.
+    fire('chuff', { gain: 0.6, pan: (Math.random() * 2 - 1) * 0.5, rate: 0.85 + Math.random() * 0.3 });
+    if (Math.random() < 0.25) fire('ui_hover');
+    if (Math.random() < 0.12) fire('coin');
+    if (Math.random() < 0.08) fire('build_track');
+    if (Math.random() < 0.05) fire('ui_click');
+    if (Math.random() < 0.03) fire('whistle');
+    if (Math.random() < 0.02) fire(['brake', 'petition', 'charter', 'bell', 'error', 'build_works'][Math.floor(Math.random() * 6)]);
+    if (Math.random() < 0.006) fire(['incident', 'collapse', 'dragon', 'ent'][Math.floor(Math.random() * 4)]);
+    if (t % 20 === 0) {
+      regionSel.selectedIndex = Math.floor(Math.random() * PWAudio.regions.length);
+      $('night').value = String(Math.random().toFixed(2));
+      $('unrest').value = String(Math.min(1, t / 900).toFixed(2));
+      $('speed').value = String([1, 1, 2, 3, 0][Math.floor(Math.random() * 5)]);
+      pushScene();
+    }
+    if (t % 120 === 0) {
+      $('age').value = String(1 + Math.floor((t / 120) % 3));
+      pushScene();
+      log(`soak: ${Math.round(t)}s elapsed, ${PWAudio.stats().nodes} nodes, age ${ROMAN[$('age').value]}`);
+    }
+  }, 500);
+  b.classList.add('on');
+  log('soak on — leave it for ten minutes and watch the graph stay flat');
+});
+
+$('tDispose').addEventListener('click', () => {
+  PWAudio.dispose();
+  log(`dispose(): ${PWAudio.stats().nodes} nodes remain (want 0). Press "Call init() again" to restart.`);
+});
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// --- gate ------------------------------------------------------------------
+$('begin').addEventListener('click', () => {
+  PWAudio.init();
+  PWAudio.init();                        // prove idempotence on the way in
+  const s = PWAudio.stats();
+  if (!s.available) {
+    $('gate').innerHTML = '<p>This browser exposes no AudioContext. Every Audio method is a silent ' +
+      'no-op, which is the specified behaviour — there is nothing to hear here.</p>';
+    return;
+  }
+  $('gate').remove();
+  startedAt = performance.now();
+  PWAudio.setVolume(parseFloat($('vol').value));
+  pushScene();
+  log(`initialised: ${s.nodes} nodes, ${(s.sampleRate / 1000).toFixed(1)} kHz`);
+  log('tip: measure the drained floor first, then soak');
+  setInterval(poll, 200);
+  poll();
+});
+
+paintScene();
+</script>
+</body>
+</html>

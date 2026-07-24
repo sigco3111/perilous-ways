@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Perilous Ways — rolling stock test</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1a1e; }
+  canvas { display: block; }
+  body { font: 13px/1.45 "Iowan Old Style", Palatino, Georgia, serif; color: #f2e6d2; }
+
+  #hud {
+    position: fixed; top: 12px; left: 12px; z-index: 10; width: 268px;
+    padding: 12px 14px 13px; border: 1px solid rgba(240,220,190,.28);
+    background: rgba(24,22,26,.72); backdrop-filter: blur(6px);
+  }
+  #hud h1 { margin: 0 0 2px; font-size: 14px; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; }
+  #hud .sub { margin: 0 0 10px; font-size: 11px; opacity: .6; letter-spacing: .04em; }
+  #hud label { display: block; margin: 9px 0 2px; font-size: 11px; letter-spacing: .05em; opacity: .8; }
+  #hud input[type=range] { width: 100%; margin: 0; accent-color: #b08d57; }
+  #hud .row { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
+  #stats { margin-top: 11px; padding-top: 9px; border-top: 1px solid rgba(240,220,190,.18);
+           font-size: 11.5px; font-family: ui-monospace, Consolas, monospace; }
+  #stats b { font-weight: 600; color: #ffd7a3; }
+  #hud .hint { margin-top: 10px; font-size: 10.5px; opacity: .5; line-height: 1.5; }
+  #hud .chk { display: flex; align-items: center; gap: 6px; font-size: 11px; opacity: .85; margin-top: 8px; }
+  #hud .chk label { display: inline; margin: 0; }
+
+  #labels { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+  .lab {
+    position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    color: #fff3e0; text-shadow: 0 1px 3px #000, 0 0 12px rgba(0,0,0,.8);
+  }
+  .lab.small { font-size: 10.5px; letter-spacing: .09em; opacity: .82; text-transform: none; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <h1>Rolling stock</h1>
+  <p class="sub">src/gfx/trains.js — proof sheet</p>
+
+  <label>Day → night <span id="nightv" style="float:right;opacity:.6"></span></label>
+  <input id="night" type="range" min="0" max="1" step="0.01" value="0">
+
+  <label>Line speed <span id="speedv" style="float:right;opacity:.6"></span></label>
+  <input id="speed" type="range" min="0" max="55" step="0.5" value="14">
+  <div class="chk"><input id="auto" type="checkbox" checked><label for="auto" style="margin:0">cycle speed (watch the steam thin out)</label></div>
+
+  <div id="stats"></div>
+  <p class="hint">drag to orbit · wheel to zoom · right-drag or shift-drag to pan · <b>1</b> engines · <b>2</b> wagons · <b>3</b> follow the train</p>
+</div>
+<div id="labels"></div>
+
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/three.module.min.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { buildEngine, buildWagon, buildTrain, createSteam, createSparks,
+         ENGINE_STYLES, CARGO_KINDS, TRAIN_GAUGE } from '../src/gfx/trains.js';
+
+// ---------------------------------------------------------------- renderer
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.4, 900);
+
+// ART.md: sun #ffd7a3 at ~24 degrees, hemisphere sky #9fbde0 / ground #6b5a44,
+// fog #e6c8a2 exponential.
+const SUN_DAY = new THREE.Color(0xffd7a3), SUN_NIGHT = new THREE.Color(0x5f6f9e);
+const SKY_DAY = new THREE.Color(0x3f74c4), SKY_NIGHT = new THREE.Color(0x141a2c);
+const HOR_DAY = new THREE.Color(0xf2c98a), HOR_NIGHT = new THREE.Color(0x2a2740);
+const FOG_DAY = new THREE.Color(0xe6c8a2), FOG_NIGHT = new THREE.Color(0x1d2135);
+
+scene.fog = new THREE.FogExp2(FOG_DAY.getHex(), 0.0034);
+scene.background = new THREE.Color(0x9fc0dd);
+
+const sun = new THREE.DirectionalLight(SUN_DAY, 2.6);
+const sunEl = 24 * Math.PI / 180, sunAz = -0.85;
+sun.position.set(Math.cos(sunEl) * Math.sin(sunAz) * 180, Math.sin(sunEl) * 180, Math.cos(sunEl) * Math.cos(sunAz) * 180);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -105; sun.shadow.camera.right = 105;
+sun.shadow.camera.top = 105; sun.shadow.camera.bottom = -105;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 460;
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.025;
+scene.add(sun, sun.target);
+
+const hemi = new THREE.HemisphereLight(0x9fbde0, 0x6b5a44, 0.55);
+scene.add(hemi);
+
+// sky dome so the horizon is not flat grey (vertex colours, no textures)
+const skyGeo = new THREE.SphereGeometry(600, 24, 14);
+const skyCol = new Float32Array(skyGeo.attributes.position.count * 3);
+const skyMesh = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({
+  vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false,
+}));
+skyMesh.name = 'sky';
+skyGeo.setAttribute('color', new THREE.BufferAttribute(skyCol, 3));
+function paintSky(night) {
+  const zen = SKY_DAY.clone().lerp(SKY_NIGHT, night), hor = HOR_DAY.clone().lerp(HOR_NIGHT, night);
+  const p = skyGeo.attributes.position, c = skyGeo.attributes.color, t = new THREE.Color();
+  for (let i = 0; i < p.count; i++) {
+    const h = Math.max(0, p.getY(i) / 600);
+    t.copy(hor).lerp(zen, Math.pow(h, 0.55));
+    c.setXYZ(i, t.r, t.g, t.b);
+  }
+  c.needsUpdate = true;
+}
+scene.add(skyMesh);
+
+// ---------------------------------------------------------------- ground
+const hash = (x, z) => { const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453; return s - Math.floor(s); };
+const gGeo = new THREE.PlaneGeometry(560, 560, 72, 72).rotateX(-Math.PI / 2);
+{
+  const p = gGeo.attributes.position, n = p.count;
+  const cA = new THREE.Color(0x7d9a4e), cB = new THREE.Color(0xa9ba69), cC = new THREE.Color(0xb2a35e);
+  const arr = new Float32Array(n * 3), t = new THREE.Color();
+  for (let i = 0; i < n; i++) {
+    const x = p.getX(i), z = p.getZ(i);
+    const h = hash(Math.round(x * 0.25), Math.round(z * 0.25));
+    const h2 = hash(Math.round(x * 0.06) + 11, Math.round(z * 0.06) - 7);
+    t.copy(cA).lerp(cB, h * 0.65).lerp(cC, h2 * 0.4);
+    arr[i * 3] = t.r; arr[i * 3 + 1] = t.g; arr[i * 3 + 2] = t.b;
+    p.setY(i, (h2 - 0.5) * 0.5);            // very gentle undulation
+  }
+  gGeo.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+  gGeo.computeVertexNormals();
+}
+const ground = new THREE.Mesh(gGeo, new THREE.MeshStandardMaterial({
+  vertexColors: true, roughness: 0.95, metalness: 0,
+}));
+ground.receiveShadow = true;
+ground.position.y = -0.02;
+scene.add(ground);
+
+// ---------------------------------------------------------------- the loop
+// trains.js puts y = 0 at the railhead, so every curve point below IS the
+// railhead and the track structure hangs underneath it.
+const RAILTOP = 0.66;          // railhead height above the grass
+const RAIL_R = 0.085;
+
+// closed Catmull-Rom, with one side lifted so the train climbs a shoulder
+const CTRL = [];
+for (let i = 0; i < 12; i++) {
+  const a = (i / 12) * Math.PI * 2;
+  const rx = 80 + Math.sin(a * 2) * 7, rz = 58 + Math.cos(a * 3) * 6;
+  const y = RAILTOP + 4.0 * Math.max(0, Math.sin(a - 0.6));
+  CTRL.push(new THREE.Vector3(Math.sin(a) * rx, y, Math.cos(a) * rz));
+}
+const curve = new THREE.CatmullRomCurve3(CTRL, true, 'catmullrom', 0.5);
+const LEN = curve.getLength();
+
+// rails: offset curves extruded as tube
+class RailCurve extends THREE.Curve {
+  constructor(base, off, lift) { super(); this.base = base; this.off = off; this.lift = lift; }
+  getPoint(t, target = new THREE.Vector3()) {
+    const p = this.base.getPointAt(t), tan = this.base.getTangentAt(t);
+    const side = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), tan).normalize();
+    return target.copy(p).addScaledVector(side, this.off).setY(p.y + this.lift);
+  }
+}
+const railMat = new THREE.MeshStandardMaterial({ color: 0xa89e90, roughness: 0.42, metalness: 0.75 });
+const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x4a3626, roughness: 0.92, metalness: 0.02 });
+const ballastMat = new THREE.MeshStandardMaterial({ color: 0x948a7c, roughness: 0.95, metalness: 0 });
+for (const s of [-1, 1]) {
+  const rail = new THREE.Mesh(new THREE.TubeGeometry(new RailCurve(curve, s * TRAIN_GAUGE / 2, -RAIL_R), 420, RAIL_R, 4, true), railMat);
+  rail.castShadow = true; rail.receiveShadow = true;
+  scene.add(rail);
+}
+{
+  const N = 340;
+  const sleepers = new THREE.InstancedMesh(new THREE.BoxGeometry(3.2, 0.17, 0.5), sleeperMat, N);
+  const bal = new THREE.InstancedMesh(new THREE.BoxGeometry(4.4, 0.28, LEN / N + 0.4), ballastMat, N);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1);
+  const fwd = new THREE.Vector3(0, 0, 1);
+  const piers = [];
+  for (let i = 0; i < N; i++) {
+    const t = i / N, p = curve.getPointAt(t), tan = curve.getTangentAt(t);
+    q.setFromUnitVectors(fwd, tan.clone().normalize());
+    sleepers.setMatrixAt(i, m.compose(p.clone().setY(p.y - RAIL_R * 2 - 0.085), q, one));
+    bal.setMatrixAt(i, m.compose(p.clone().setY(p.y - RAIL_R * 2 - 0.31), q, one));
+    if (p.y > RAILTOP + 0.5 && i % 5 === 0) piers.push(p.clone());
+  }
+  sleepers.castShadow = bal.castShadow = true;
+  sleepers.receiveShadow = bal.receiveShadow = true;
+  scene.add(sleepers, bal);
+  if (piers.length) {                      // stone piers under the raised shoulder
+    const pm = new THREE.InstancedMesh(new THREE.BoxGeometry(2.4, 1, 2.4),
+      new THREE.MeshStandardMaterial({ color: 0x7d7468, roughness: 0.9 }), piers.length);
+    piers.forEach((p, i) => {
+      const top = p.y - 0.5, h = top + 0.02;
+      pm.setMatrixAt(i, m.compose(new THREE.Vector3(p.x, top - h / 2, p.z), new THREE.Quaternion(), new THREE.Vector3(1, h, 1)));
+    });
+    pm.castShadow = true; pm.receiveShadow = true;
+    scene.add(pm);
+  }
+}
+
+// short lengths of siding under the display stock, same datum
+const yardSleepers = [], yardRails = [];
+function laySiding(cx, cz, len) {
+  const n = Math.max(2, Math.round(len / 1.0));
+  for (let i = 0; i < n; i++) yardSleepers.push([cx, cz - len / 2 + (i + 0.5) * (len / n)]);
+  for (const s of [-1, 1]) yardRails.push([cx + s * TRAIN_GAUGE / 2, cz, len]);
+}
+
+// ---------------------------------------------------------------- stock
+const labels = document.getElementById('labels');
+const tags = [];
+function tag(text, x, y, z, small) {
+  const el = document.createElement('div');
+  el.className = 'lab' + (small ? ' small' : '');
+  el.textContent = text;
+  labels.appendChild(el);
+  tags.push({ el, p: new THREE.Vector3(x, y, z) });
+}
+
+const nightables = [];   // everything with setNight
+const spinners = [];     // { wheels, r } for the static display stock
+
+// four engines, side by side, facing +Z
+const ENGINE_NOTE = {
+  dwarf: 'brass over iron · the standard',
+  men: 'painted, plainer, cheaper',
+  elf: 'verdigris · almost no steam',
+  orc: 'armour · ember chimney',
+};
+const engines = [];
+ENGINE_STYLES.forEach((style, i) => {
+  const e = buildEngine({ style, seed: 'sheet-' + style }, THREE);
+  e.group.position.set(-22 + i * 14.7, RAILTOP, -31);
+  scene.add(e.group);
+  engines.push(e);
+  nightables.push(e);
+  spinners.push(e);
+  laySiding(e.group.position.x, -31, e.length + 3.6);
+  tag(style, e.group.position.x, RAILTOP + 7.0, -31 + 0.2);
+  tag(ENGINE_NOTE[style], e.group.position.x, RAILTOP + 6.2, -31 + 0.2, true);
+});
+
+// one of every wagon, side by side
+CARGO_KINDS.forEach((cargo, i) => {
+  const w = buildWagon({ cargo, seed: 'sheet-' + cargo }, THREE);
+  w.group.position.set(-27 + i * 9, RAILTOP, 24);
+  scene.add(w.group);
+  nightables.push(w);
+  spinners.push(w);
+  laySiding(w.group.position.x, 24, w.length + 2.8);
+  tag(cargo, w.group.position.x, RAILTOP + 5.3, 24);
+});
+
+// build the yard track now that both rows have been laid out
+{
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1);
+  const sl = new THREE.InstancedMesh(new THREE.BoxGeometry(3.2, 0.17, 0.5), sleeperMat, yardSleepers.length);
+  yardSleepers.forEach(([x, z], i) => sl.setMatrixAt(i, m.compose(new THREE.Vector3(x, RAILTOP - RAIL_R * 2 - 0.085, z), q, one)));
+  const rl = new THREE.InstancedMesh(new THREE.BoxGeometry(0.17, 0.17, 1), railMat, yardRails.length);
+  yardRails.forEach(([x, z, len], i) => rl.setMatrixAt(i, m.compose(new THREE.Vector3(x, RAILTOP - 0.085, z), q, new THREE.Vector3(1, 1, len))));
+  sl.castShadow = rl.castShadow = true;
+  sl.receiveShadow = rl.receiveShadow = true;
+  scene.add(sl, rl);
+}
+
+// the working train
+const train = buildTrain({ style: 'dwarf', cars: ['ore', 'timber', 'passenger', 'brake'], seed: 'viaduct' }, THREE);
+scene.add(train.group);
+nightables.push(train);
+
+// steam + sparks: ONE system each for the whole scene
+const steam = createSteam(THREE, 900, { fov: 34 });
+const sparks = createSparks(THREE, 200);
+scene.add(steam.points, sparks.points);
+
+// ---------------------------------------------------------------- camera rig
+const target = new THREE.Vector3(0, 3, -4);
+let dist = 74, yaw = 0.62, pitch = 0.46, follow = false;
+function placeCamera() {
+  const cp = Math.cos(pitch);
+  camera.position.set(
+    target.x + Math.sin(yaw) * cp * dist,
+    target.y + Math.sin(pitch) * dist,
+    target.z + Math.cos(yaw) * cp * dist,
+  );
+  camera.lookAt(target);
+}
+placeCamera();
+
+let drag = null;
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  drag = { x: e.clientX, y: e.clientY, pan: e.button === 2 || e.shiftKey };
+  renderer.domElement.setPointerCapture(e.pointerId);
+});
+renderer.domElement.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  drag.x = e.clientX; drag.y = e.clientY;
+  if (drag.pan) {
+    const k = dist * 0.0016;
+    const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+    const fwd = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw));
+    target.addScaledVector(right, -dx * k).addScaledVector(fwd, -dy * k);
+    follow = false;
+  } else {
+    yaw -= dx * 0.005;
+    pitch = Math.max(0.05, Math.min(1.45, pitch + dy * 0.004));
+  }
+  placeCamera();
+});
+addEventListener('pointerup', () => { drag = null; });
+renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+renderer.domElement.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  dist = Math.max(6, Math.min(340, dist * (1 + Math.sign(e.deltaY) * 0.09)));
+  placeCamera();
+}, { passive: false });
+addEventListener('keydown', (e) => {
+  if (e.key === '1') { follow = false; target.set(0, 3.4, -31); dist = 44; placeCamera(); }
+  if (e.key === '2') { follow = false; target.set(0, 2.6, 24); dist = 50; placeCamera(); }
+  if (e.key === '3') { follow = true; dist = 34; }
+});
+
+// ---------------------------------------------------------------- HUD
+const elNight = document.getElementById('night'), elNightV = document.getElementById('nightv');
+const elSpeed = document.getElementById('speed'), elSpeedV = document.getElementById('speedv');
+const elAuto = document.getElementById('auto'), elStats = document.getElementById('stats');
+let night = 0;
+function applyNight(n) {
+  night = n;
+  elNightV.textContent = n < 0.02 ? 'noon' : n > 0.98 ? 'midnight' : (n * 100).toFixed(0) + '%';
+  for (const s of nightables) s.setNight(n);
+  sun.intensity = 2.6 * (1 - n) + 0.06;
+  sun.color.copy(SUN_DAY).lerp(SUN_NIGHT, n);
+  hemi.intensity = 0.55 * (1 - 0.82 * n);
+  hemi.color.set(0x9fbde0); hemi.color.lerp(new THREE.Color(0x2a3550), n);
+  scene.fog.color.copy(FOG_DAY).lerp(FOG_NIGHT, n);
+  scene.background.copy(new THREE.Color(0x9fc0dd)).lerp(new THREE.Color(0x141a2c), n);
+  paintSky(n);
+}
+elNight.addEventListener('input', () => applyNight(+elNight.value));
+applyNight(0);
+
+// ---------------------------------------------------------------- loop
+let prev = performance.now() / 1000, elapsed = 0;
+let s = 0, speed = +elSpeed.value, phase = 0, fps = 60, sparkT = 0;
+const stackW = new THREE.Vector3(), velW = new THREE.Vector3(), pF = new THREE.Vector3(), pR = new THREE.Vector3();
+const stackE = new THREE.Vector3();
+const ndc = new THREE.Vector3();
+let statT = 0;
+
+function frame() {
+  const now = performance.now() / 1000;
+  const dt = Math.min(0.05, Math.max(0, now - prev));
+  prev = now;
+  elapsed += dt;
+
+  // speed: cycled so the plume visibly thins as the train accelerates
+  if (elAuto.checked) {
+    phase += dt * 0.14;
+    speed = 3.5 + 25 * (1 - Math.cos(phase * Math.PI * 2)) / 2 + 9 * Math.max(0, Math.sin(phase * Math.PI * 4));
+    elSpeed.value = Math.min(55, speed).toFixed(1);
+  } else speed = +elSpeed.value;
+  elSpeedV.textContent = speed.toFixed(1) + ' u/s';
+
+  // run the train along the loop, placed on the chord between its ends so it
+  // does not visibly cut the corners
+  s = (s + speed * dt) % LEN;
+  const half = Math.min(0.36 * train.length, LEN * 0.2) / LEN;
+  const t0 = s / LEN;
+  pF.copy(curve.getPointAt((t0 + half) % 1));
+  pR.copy(curve.getPointAt((t0 - half + 1) % 1));
+  train.group.position.copy(pF).add(pR).multiplyScalar(0.5);
+  train.group.position.y += 0.0;
+  train.group.lookAt(pF.x, pF.y, pF.z);
+  train.group.updateMatrixWorld(true);
+
+  // wheels: exactly what the host is expected to do
+  const dTheta = (speed * dt) / train.wheelRadius;
+  for (const w of train.wheels) w.rotation.x += dTheta;
+
+  // steam from the stack; strength falls away as speed rises
+  const strength = Math.max(0.16, 1.15 - speed / 34);
+  stackW.copy(train.stackTop);
+  train.group.localToWorld(stackW);
+  velW.copy(curve.getTangentAt(t0)).multiplyScalar(speed);
+  steam.emit(stackW, velW, strength, train.style, 'train');
+
+  // the display engines idle, so all four steam styles are visible at once
+  for (const e of engines) {
+    stackE.copy(e.stackTop);
+    e.group.localToWorld(stackE);
+    steam.emit(stackE, null, 0.55, e.style, 'idle-' + e.style);
+  }
+
+  // static stock turns its wheels slowly for inspection
+  for (const sp of spinners) {
+    const d = (dt * 2.4) / sp.wheelRadius;
+    for (const w of sp.wheels) w.rotation.x += d;
+  }
+
+  // brake sparks whenever the cycle is slowing hard
+  sparkT -= dt;
+  if (speed > 9 && elAuto.checked && Math.cos(phase * Math.PI * 4) < -0.9 && sparkT <= 0) {
+    sparkT = 0.05;
+    const w = train.wheels[(Math.random() * train.wheels.length) | 0];
+    sparks.burst(w.getWorldPosition(new THREE.Vector3()), 5, 0xffa23a);
+  }
+
+  steam.update(dt, { time: elapsed, windDir: [0.75, 0.35], windStrength: 1.9, fov: 34 });
+  sparks.update(dt);
+
+  if (follow) {
+    target.lerp(train.group.position.clone().setY(train.group.position.y + 2), 0.12);
+    placeCamera();
+  }
+
+  // keep the shadow camera on the interesting part of the scene
+  sun.target.position.copy(train.group.position);
+  sun.position.copy(train.group.position).add(new THREE.Vector3(
+    Math.cos(sunEl) * Math.sin(sunAz) * 180, Math.sin(sunEl) * 180, Math.cos(sunEl) * Math.cos(sunAz) * 180));
+
+  renderer.render(scene, camera);
+
+  // labels
+  for (const t of tags) {
+    ndc.copy(t.p).project(camera);
+    const vis = ndc.z < 1 && Math.abs(ndc.x) < 1.3 && Math.abs(ndc.y) < 1.3;
+    t.el.style.display = vis ? 'block' : 'none';
+    if (vis) {
+      t.el.style.left = ((ndc.x * 0.5 + 0.5) * innerWidth) + 'px';
+      t.el.style.top = ((-ndc.y * 0.5 + 0.5) * innerHeight) + 'px';
+    }
+  }
+
+  fps += (1 / Math.max(dt, 1e-4) - fps) * 0.08;
+  statT -= dt;
+  if (statT <= 0) {
+    statT = 0.25;
+    const r = renderer.info.render;
+    elStats.innerHTML =
+      `<div class="row"><span>fps</span><b>${fps.toFixed(0)}</b></div>` +
+      `<div class="row"><span>draw calls (scene)</span><b>${r.calls}</b></div>` +
+      `<div class="row"><span>triangles</span><b>${r.triangles.toLocaleString()}</b></div>` +
+      `<div class="row"><span>train: calls / tris</span><b>${trainCalls} / ${trainTris.toLocaleString()}</b></div>` +
+      `<div class="row"><span>steam puffs</span><b>${steam.count} / ${steam.capacity}</b></div>` +
+      `<div class="row"><span>sparks</span><b>${sparks.count}</b></div>`;
+  }
+  requestAnimationFrame(frame);
+}
+
+// one-off measurement of the working train
+let trainTris = 0, trainCalls = 0;
+train.group.traverse((o) => {
+  if (!o.isMesh) return;
+  trainCalls++;
+  trainTris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3;
+});
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// small console dump so the numbers are checkable without reading the HUD
+console.log('train:', train.style, train.cars.join(','), 'length', train.length.toFixed(2),
+  '| draw calls', trainCalls, '| triangles', trainTris, '| wheels', train.wheels.length);
+for (const e of engines) {
+  let t = 0, c = 0;
+  e.group.traverse((o) => { if (o.isMesh) { c++; t += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; } });
+  console.log('engine', e.style.padEnd(6), 'calls', c, 'tris', t, 'len', e.length, 'stackTop', e.stackTop.toArray().join(','));
+}
+window.PWTEST = { THREE, scene, camera, renderer, train, engines, steam, sparks, curve };
+
+scene.updateMatrixWorld(true);   // so the first frame's steam spawns in the right place
+prev = performance.now() / 1000;
+frame();
+</script>
+</body>
+</html>

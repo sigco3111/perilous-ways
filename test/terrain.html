@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Perilous Ways — terrain harness</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%237d9a4e'/%3E%3C/svg%3E">
+<style>
+  html, body { margin: 0; height: 100%; background: #12161c; overflow: hidden;
+    font: 12px/1.45 ui-monospace, "Cascadia Mono", Consolas, monospace; color: #e8e2d4; }
+  #cv { display: block; width: 100vw; height: 100vh; }
+  .panel { position: fixed; background: rgba(14,18,24,.74); border: 1px solid rgba(232,226,212,.18);
+    border-radius: 4px; padding: 8px 10px; backdrop-filter: blur(3px); pointer-events: none;
+    white-space: pre; letter-spacing: .2px; }
+  #hud { top: 10px; left: 10px; min-width: 260px; }
+  #keys { bottom: 10px; left: 10px; color: #bfc7cf; }
+  #err { top: 10px; right: 10px; max-width: 44vw; color: #ffb3a0; display: none;
+    white-space: pre-wrap; pointer-events: auto; }
+  b { color: #ffd7a3; font-weight: 600; }
+  .g { color: #a9ba69; } .r { color: #ff8a6a; } .d { color: #8b93a0; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div class="panel" id="hud">booting…</div>
+<div class="panel" id="keys"></div>
+<div class="panel" id="err"></div>
+
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/three.module.min.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { makeStubWorld } from './stubWorld.js';
+import { createTerrain } from '../src/gfx/terrain.js';
+
+const hud = document.getElementById('hud');
+const keysEl = document.getElementById('keys');
+const errEl = document.getElementById('err');
+
+function fail(e) {
+  errEl.style.display = 'block';
+  errEl.textContent = 'ERROR\n' + (e && (e.stack || e.message) || e);
+  console.error(e);
+}
+window.addEventListener('error', (ev) => fail(ev.error || ev.message));
+window.addEventListener('unhandledrejection', (ev) => fail(ev.reason));
+
+// ---------------------------------------------------------------------------
+// renderer / scene
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById('cv');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.shadowMap.enabled = true;
+// NOTE r185: THREE.PCFSoftShadowMap is deprecated and silently downgraded to
+// PCFShadowMap (it warns once and rewrites shadowMap.type). ART.md's
+// "PCFSoftShadowMap" is stale for this version — use PCFShadowMap.
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.06;
+
+const scene = new THREE.Scene();
+const FOG_COLOR = 0xe6c8a2, FOG_DENSITY = 0.0012;
+scene.fog = new THREE.FogExp2(FOG_COLOR, FOG_DENSITY);
+
+const camera = new THREE.PerspectiveCamera(34, 16 / 9, 2, 6000);
+
+// --- sun: ART.md elevation ~24 degrees, colour #ffd7a3
+const SUN_EL = 24 * Math.PI / 180, SUN_AZ = 213 * Math.PI / 180;
+const sunDir = new THREE.Vector3(
+  Math.cos(SUN_EL) * Math.cos(SUN_AZ), Math.sin(SUN_EL), Math.cos(SUN_EL) * Math.sin(SUN_AZ)).normalize();
+
+const sun = new THREE.DirectionalLight(0xffd7a3, 2.6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 2400;
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.9;         // large-scale heightfield: kill the acne
+scene.add(sun);
+scene.add(sun.target);
+
+const hemi = new THREE.HemisphereLight(0x9fbde0, 0x6b5a44, 0.55);
+scene.add(hemi);
+
+// --- sky dome (gradient + a soft sun bloom), no textures
+const skyGeo = new THREE.SphereGeometry(4200, 32, 16);
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, depthTest: false, fog: false,
+  uniforms: {
+    uZenith: { value: new THREE.Color(0x3f74c4) },
+    uHorizon: { value: new THREE.Color(0xf2c98a) },
+    uSunCol: { value: new THREE.Color(0xffd7a3) },
+    uSun: { value: sunDir.clone() },
+  },
+  vertexShader: `
+varying vec3 vDir;
+void main() {
+  vDir = normalize(position);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`,
+  fragmentShader: `
+uniform vec3 uZenith, uHorizon, uSunCol, uSun;
+varying vec3 vDir;
+void main() {
+  vec3 d = normalize(vDir);
+  float up = clamp(d.y * 1.06 + 0.02, 0.0, 1.0);
+  vec3 col = mix(uHorizon, uZenith, pow(up, 0.62));
+  float sd = max(dot(d, normalize(uSun)), 0.0);
+  col += uSunCol * (pow(sd, 220.0) * 1.4 + pow(sd, 12.0) * 0.28 + pow(sd, 3.0) * 0.07);
+  col = mix(col, uHorizon, pow(1.0 - up, 5.0) * 0.7);
+  gl_FragColor = vec4(col, 1.0);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}`,
+});
+const sky = new THREE.Mesh(skyGeo, skyMat);
+sky.frustumCulled = false;
+sky.renderOrder = -10;
+scene.add(sky);
+
+// ---------------------------------------------------------------------------
+// world + terrain
+// ---------------------------------------------------------------------------
+const SEED = new URLSearchParams(location.search).get('seed') || 'eardon-1';
+let t0 = performance.now();
+const world = makeStubWorld(SEED);
+const tWorld = performance.now() - t0;
+
+t0 = performance.now();
+const terrain = createTerrain(world, THREE, {});
+const tTerrain = performance.now() - t0;
+scene.add(terrain.group);
+terrain.shared.uSun.value.copy(sunDir);
+terrain.shared.uFog.value.w = FOG_DENSITY;
+
+// ---------------------------------------------------------------------------
+// hand-written orbit camera (deliberately not OrbitControls)
+// ---------------------------------------------------------------------------
+const cam = {
+  target: new THREE.Vector3(-40, 6, 20),
+  dist: 520, yaw: 0.62, pitch: 0.70, // pitch = radians above the horizon
+};
+const clampf = (v, a, b) => v < a ? a : v > b ? b : v;
+
+function applyCam() {
+  cam.pitch = clampf(cam.pitch, 0.10, 1.50);
+  cam.dist = clampf(cam.dist, 24, 2400);
+  cam.target.x = clampf(cam.target.x, -700, 700);
+  cam.target.z = clampf(cam.target.z, -520, 520);
+  const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+  camera.position.set(
+    cam.target.x + Math.sin(cam.yaw) * cp * cam.dist,
+    cam.target.y + sp * cam.dist,
+    cam.target.z + Math.cos(cam.yaw) * cp * cam.dist);
+  camera.lookAt(cam.target);
+}
+
+let drag = 0, lx = 0, ly = 0;
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('pointerdown', (e) => {
+  drag = (e.button === 2 || e.shiftKey) ? 2 : 1;
+  lx = e.clientX; ly = e.clientY;
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointerup', (e) => {
+  drag = 0;
+  try { canvas.releasePointerCapture(e.pointerId); } catch (_) { /* ignore */ }
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!drag) return;
+  const dx = e.clientX - lx, dy = e.clientY - ly;
+  lx = e.clientX; ly = e.clientY;
+  if (drag === 1) {
+    cam.yaw -= dx * 0.0045;
+    cam.pitch += dy * 0.0035;
+  } else {
+    const s = cam.dist * 0.0016;
+    const c = Math.cos(cam.yaw), si = Math.sin(cam.yaw);
+    cam.target.x -= (dx * c - dy * si) * s;
+    cam.target.z += (dx * si + dy * c) * s;
+  }
+  applyCam();
+}, { passive: true });
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  cam.dist *= Math.exp(clampf(e.deltaY, -220, 220) * 0.0011);
+  applyCam();
+}, { passive: false });
+applyCam();
+
+// ---------------------------------------------------------------------------
+// controls
+// ---------------------------------------------------------------------------
+const state = {
+  wind: 1, windStrength: 1.0, cloud: 1, ash: 0, paused: false,
+  ffwd: 1, felled: 0,
+};
+const cloudStrength = terrain.shared.uCloudXf.value.w;
+
+addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  if (k === 'w') state.wind = state.wind ? 0 : 1;
+  else if (k === 'c') {
+    state.cloud = state.cloud ? 0 : 1;
+    terrain.shared.uCloudXf.value.w = state.cloud ? cloudStrength : 0;
+  } else if (k === 'a') state.ash = state.ash > 0.5 ? 0 : (state.ash > 0 ? 1 : 0.45);
+  else if (k === 'g') state.windStrength = state.windStrength > 1.6 ? 1.0 : 2.2;
+  else if (k === 'p') state.paused = !state.paused;
+  else if (k === 'f') fellAtTarget();
+  else if (k === 'r') { cam.target.set(-40, 6, 20); cam.dist = 520; cam.yaw = 0.62; cam.pitch = 0.70; applyCam(); }
+  else if (k === '1') { cam.target.set(-260, 6, 40); cam.dist = 260; applyCam(); }   // Greenhollow coast
+  else if (k === '2') { cam.target.set(110, 30, -20); cam.dist = 300; applyCam(); }  // the Peaks
+  else if (k === '3') { cam.target.set(-40, 3, 215); cam.dist = 300; applyCam(); }   // Weeping Marsh
+  else if (k === '4') { cam.target.set(400, 10, 60); cam.dist = 340; state.ash = 0.8; applyCam(); } // Ashenreach
+  updateKeys();
+});
+
+function fellAtTarget() {
+  const c = world.toCell(cam.target.x, cam.target.z);
+  const n = terrain.setForestDamage(c.cx, c.cy, 46);
+  state.felled += n || 0;
+}
+
+function updateKeys() {
+  keysEl.textContent =
+    'drag rotate  ·  right/shift-drag pan  ·  wheel zoom\n' +
+    `[W] wind ${state.wind ? 'on ' : 'off'}   [G] gust ${state.windStrength.toFixed(1)}   ` +
+    `[C] cloud ${state.cloud ? 'on ' : 'off'}   [A] ash ${state.ash.toFixed(2)}\n` +
+    '[F] fell trees at target   [P] pause   [R] reset view   [1-4] Greenhollow / Peaks / Marsh / Ashenreach';
+}
+updateKeys();
+
+// ---------------------------------------------------------------------------
+// resize
+// ---------------------------------------------------------------------------
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+// ---------------------------------------------------------------------------
+// shadow camera refit — the host does this; mimic it here
+// ---------------------------------------------------------------------------
+function fitShadow() {
+  const r = clampf(cam.dist * 0.85, 90, 900);
+  const c = sun.shadow.camera;
+  c.left = -r; c.right = r; c.top = r; c.bottom = -r;
+  c.near = 1; c.far = 2400;
+  c.updateProjectionMatrix();
+  sun.target.position.copy(cam.target);
+  sun.position.copy(cam.target).addScaledVector(sunDir, 1100);
+}
+
+// ---------------------------------------------------------------------------
+// loop
+// ---------------------------------------------------------------------------
+const env = {
+  time: 0, windDir: [0.82, 0.57], windStrength: 1.0,
+  sunDir: sunDir.clone(), ashLevel: 0,
+};
+let last = performance.now(), acc = 0, frames = 0, fps = 0, worst = 0, msAcc = 0;
+
+function frame(now) {
+  requestAnimationFrame(frame);
+  let dt = (now - last) / 1000;
+  last = now;
+  if (!(dt > 0)) dt = 0;
+  if (dt > 0.2) dt = 0.2;
+
+  if (!state.paused) {
+    env.time += dt;
+    env.windStrength = state.wind ? state.windStrength : 0;
+    env.ashLevel = state.ash;
+    terrain.update(dt, env);
+  }
+
+  sky.position.copy(camera.position);
+  fitShadow();
+
+  const tA = performance.now();
+  renderer.render(scene, camera);
+  const cpuMs = performance.now() - tA;
+
+  // --- readout
+  frames++; acc += dt; msAcc += cpuMs;
+  worst = Math.max(worst, dt * 1000);
+  if (acc >= 0.5) {
+    fps = frames / acc;
+    const info = renderer.info.render;
+    hud.innerHTML =
+      `<b>PERILOUS WAYS · terrain</b>   seed ${SEED}\n` +
+      `fps <b>${fps.toFixed(1)}</b>   frame ${(1000 / fps).toFixed(1)} ms   worst ${worst.toFixed(1)} ms\n` +
+      `render cpu ${(msAcc / frames).toFixed(2)} ms   ${renderer.domElement.width}x${renderer.domElement.height}\n` +
+      `<span class="d">──────── gpu submission ────────</span>\n` +
+      `draw calls <b>${info.calls}</b>   triangles <b>${(info.triangles / 1000).toFixed(0)}k</b>\n` +
+      `<span class="d">(includes the shadow pass and the sky)</span>\n` +
+      `<span class="d">──────── terrain owns ────────</span>\n` +
+      `meshes ${terrain.stats.drawCalls}   tris ${(terrain.stats.triangles / 1000).toFixed(0)}k   ` +
+      `instances ${terrain.stats.instances}\n` +
+      `trees standing ${terrain.forestCount()}   felled ${state.felled}\n` +
+      `programs ${renderer.info.programs.length}   geometries ${renderer.info.memory.geometries}\n` +
+      `<span class="d">build: world ${tWorld.toFixed(0)} ms · terrain ${tTerrain.toFixed(0)} ms</span>`;
+    frames = 0; acc = 0; msAcc = 0; worst = 0;
+  }
+}
+requestAnimationFrame(frame);
+
+// debug surface, same shape as the host's
+window.PW = {
+  world, gfx: { terrain }, scene, camera, renderer, cam, state, THREE,
+  fell: (cx, cy, r) => terrain.setForestDamage(cx, cy, r || 40),
+  snapshot: () => ({
+    fps, calls: renderer.info.render.calls, tris: renderer.info.render.triangles,
+    stats: terrain.stats, standing: terrain.forestCount(),
+  }),
+};
+console.log('[terrain harness] ready. window.PW is live. stats:', terrain.stats);
+</script>
+</body>
+</html>

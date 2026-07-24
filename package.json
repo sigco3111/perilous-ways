@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "puppeteer": "^25.3.0"
+  },
+  "devDependencies": {
+    "three": "^0.185.1"
+  },
+  "type": "module"
+}
