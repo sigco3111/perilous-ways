@@ -179,3 +179,8 @@ src/audio/audio.js      entirely procedural score and sound
 are the specs the code was built against. `VOICE.md` in particular is the record
 of how the register's prose was made to stop sounding like a machine, and what it
 cost to learn that.
+
+## License
+
+[MIT](LICENSE). The vendored copy of [three.js](https://github.com/mrdoob/three.js)
+in `vendor/three/` is © its authors, also under the MIT license.
