@@ -20,9 +20,9 @@ export const REGION = {
 };
 
 export const REGION_NAME = {
-  0: 'the Greenhollow', 1: 'the Frostmarch', 2: 'Mirkholt', 3: 'the Sundering Peaks',
-  4: 'the Weeping Marsh', 5: 'the Ashenreach', 6: 'the Marchlands', 7: 'Elderwood',
-  8: 'the Grey Quays', 9: 'the Barrowdowns', 10: 'Wodenholt',
+  0: '그린할로우', 1: '프로스트마치', 2: '머크홀트', 3: '선더링 산맥',
+  4: '우는 습지', 5: '잿빛벌판', 6: '변경 지대', 7: '엘더우드',
+  8: '회색 부두', 9: '배로우 언덕', 10: '워든홀트',
 };
 
 /**
@@ -31,39 +31,39 @@ export const REGION_NAME = {
  * why the continent read as one place with different textures.
  */
 export const REGION_LORE = {
-  0: { name: 'the Greenhollow', people: 'Halflings',
-       gist: 'Six kinds of hill and a great deal of correspondence.',
-       rule: 'Nothing dangerous has happened here in living memory, which the Authority finds unnerving.' },
-  1: { name: 'the Frostmarch', people: 'nobody, gladly',
-       gist: 'Snow highland. The line drifts over between the turn of the year and the thaw.',
-       rule: 'Track here closes for part of every winter.' },
-  2: { name: 'Mirkholt', people: 'spiders, reportedly',
-       gist: 'Old wood. The trees are close and the light is wrong.',
-       rule: 'Track laid through Mirkholt decays faster than track anywhere else.' },
-  3: { name: 'the Sundering Peaks', people: 'Dwarves',
-       gist: 'The wall down the middle of the world. Two passes, both bad.',
-       rule: 'Tunnels bored deep beneath the Peaks find things that were there first.' },
-  4: { name: 'the Weeping Marsh', people: 'frogs',
-       gist: 'A fen that swallows what is put on it, patiently.',
-       rule: 'Causeways across the Marsh sink, and want rebuilding.' },
-  5: { name: 'the Ashenreach', people: 'the Eastern Party',
-       gist: 'Ash plain, slag, and Mount Wrack at the middle of it.',
-       rule: 'Everything here is dangerous and everything here pays four times.' },
-  6: { name: 'the Marchlands', people: 'Men',
-       gist: 'River plain and market towns. The easy country, and the Council knows it.',
-       rule: 'Cheap to build across. The Council will ask why you have not.' },
-  7: { name: 'Elderwood', people: 'Elves',
-       gist: 'The Elves’ wood, and Lorindel within it.',
-       rule: 'Every mile of track laid here is remembered, at length, in verse.' },
-  8: { name: 'the Grey Quays', people: 'Elves',
-       gist: 'The western shore. Ships leave from here and do not come back.',
-       rule: 'Safe. Also the last place you want the Elves to have a reason to visit.' },
-  9: { name: 'the Barrowdowns', people: 'the buried',
-       gist: 'Chalk ridges full of tombs. Bare, bright, and quiet by day.',
-       rule: 'Incidents here happen only after dark, and they happen more.' },
-  10: { name: 'Wodenholt', people: 'the Onodrim',
-        gist: 'A small wood exactly where you would like to build.',
-        rule: 'The wood is not available. It will explain why, slowly.' },
+  0: { name: '그린할로우', people: '하플링',
+       gist: '여섯 종류의 언덕과 엄청난 양의 서신 왕래.',
+       rule: '살아 있는 이들의 기억에 위험한 일이라곤 없는데, 교통청은 그 점이 오히려 불안하다.' },
+  1: { name: '프로스트마치', people: '아무도, 다행히도',
+       gist: '눈 덮인 고지대. 연말부터 해빙기까지 선로가 눈에 파묻힌다.',
+       rule: '이곳의 선로는 매년 겨울의 일부 기간 폐쇄된다.' },
+  2: { name: '머크홀트', people: '전언에 의하면 거미',
+       gist: '오래된 숲. 나무들은 빽빽하고 빛이 이상하다.',
+       rule: '머크홀트를 지나는 선로는 다른 어디보다 빨리 낡는다.' },
+  3: { name: '선더링 산맥', people: '드워프',
+       gist: '세계 한가운데를 가르는 벽. 고갯길은 두 개, 둘 다 험하다.',
+       rule: '산맥 깊은 곳을 뚫는 터널은 먼저 와 있던 것들을 만난다.' },
+  4: { name: '우는 습지', people: '개구리',
+       gist: '위에 놓인 것을 삼키는 늪. 참을성 있게.',
+       rule: '습지를 가로지르는 둑길은 가라앉으며, 다시 쌓아야 한다.' },
+  5: { name: '잿빛벌판', people: '동쪽 세력',
+       gist: '재의 평원과 슬래그, 그 중앙에 랙 산.',
+       rule: '이곳의 모든 것은 위험하고, 모든 것이 네 배의 값을 한다.' },
+  6: { name: '변경 지대', people: '인간',
+       gist: '강 범람원과 장터 마을들. 쉬운 땅이고, 평의회도 그걸 안다.',
+       rule: '건설비가 싸다. 평의회는 왜 아직 안 놓았냐고 물을 것이다.' },
+  7: { name: '엘더우드', people: '엘프',
+       gist: '엘프의 숲, 그 안에 로린델.',
+       rule: '여기에 놓인 선로 1마일마다, 길이를 헤아려 시로 기억된다.' },
+  8: { name: '회색 부두', people: '엘프',
+       gist: '서쪽 해안. 배는 여기서 떠나고 돌아오지 않는다.',
+       rule: '안전하다. 그리고 엘프에게 이곳을 찾을 이유를 주고 싶지 않은 곳이기도 하다.' },
+  9: { name: '배로우 언덕', people: '묻힌 자들',
+       gist: '고분으로 가득한 분암 능선. 헐벗고, 밝고, 낮에는 고요하다.',
+       rule: '이곳의 사건은 해가 진 뒤에만 일어나며, 더 자주 일어난다.' },
+  10: { name: '워든홀트', people: '오노드림',
+        gist: '당신이 딱 짓고 싶은 자리에 있는 작은 숲.',
+        rule: '이 숲은 내어 줄 수 없다. 그 이유를, 천천히, 설명해 줄 것이다.' },
 };
 
 /** Ambient danger by region. Consulted when a segment is surveyed. */
@@ -78,32 +78,32 @@ export const REGION_PERIL = {
  * is not merely decorative, and each gives the register something to talk about.
  */
 export const TRAITS = {
-  famous_ale:   { label: 'famous for its ale', kinds: ['shire', 'burg'], produce: { ale: 1.4 } },
-  great_market: { label: 'a great market', kinds: ['burg', 'shire'], pax: 1.3, luxury: 1.4 },
-  deep_shaft:   { label: 'a very deep shaft', kinds: ['delve'], produce: { ore: 1.6 }, perilNear: 0.10 },
-  smithy:       { label: 'a smithy of repute', kinds: ['delve', 'burg'], produce: { steel: 0.8 } },
-  on_a_barrow:  { label: 'built on a barrow', kinds: ['shire', 'burg', 'watch'], regions: [9], perilNear: 0.14 },
-  sacred_grove: { label: 'a grove nobody cuts', kinds: ['haven', 'shire'], elfCare: 1 },
-  old_road:     { label: 'on the old road', kinds: null, buildFrom: 0.85 },
+  famous_ale:   { label: '맥주로 유명함', kinds: ['shire', 'burg'], produce: { ale: 1.4 } },
+  great_market: { label: '큰 장터', kinds: ['burg', 'shire'], pax: 1.3, luxury: 1.4 },
+  deep_shaft:   { label: '아주 깊은 수직갱', kinds: ['delve'], produce: { ore: 1.6 }, perilNear: 0.10 },
+  smithy:       { label: '명성 있는 대장간', kinds: ['delve', 'burg'], produce: { steel: 0.8 } },
+  on_a_barrow:  { label: '고분 위에 세워짐', kinds: ['shire', 'burg', 'watch'], regions: [9], perilNear: 0.14 },
+  sacred_grove: { label: '아무도 베지 않는 숲', kinds: ['haven', 'shire'], elfCare: 1 },
+  old_road:     { label: '옛길 위에 있음', kinds: null, buildFrom: 0.85 },
   // Eight of these carried a label and NOTHING ELSE — they were pure decoration, and
   // that is a large part of why settlements never felt like particular places. Every
   // trait now does something the player can notice.
-  silent_bell:  { label: 'a bell that never rings', kinds: ['shire', 'burg', 'watch'],
+  silent_bell:  { label: '울리지 않는 종', kinds: ['shire', 'burg', 'watch'],
                   pax: 0.82, omen: 0.05 },
-  long_memory:  { label: 'a long memory', kinds: ['delve', 'haven'], regardWeight: 2.0 },
-  gate_of_kings:{ label: 'a gate cut for kings', kinds: ['delve'], pax: 1.5, luxury: 1.25 },
-  hedge_maze:   { label: 'a hedge nobody has mapped', kinds: ['shire'], buildFrom: 1.22 },
-  drowned_wing: { label: 'a drowned lower hall', kinds: ['delve'], regions: [4],
+  long_memory:  { label: '긴 기억', kinds: ['delve', 'haven'], regardWeight: 2.0 },
+  gate_of_kings:{ label: '왕을 위해 파낸 문', kinds: ['delve'], pax: 1.5, luxury: 1.25 },
+  hedge_maze:   { label: '아무도 측량하지 못한 생울타리', kinds: ['shire'], buildFrom: 1.22 },
+  drowned_wing: { label: '물에 잠긴 아래 전당', kinds: ['delve'], regions: [4],
                   produce: { ore: 0.7 }, plagueProne: 1.4 },
-  watchfire:    { label: 'a watchfire kept lit', kinds: ['watch'], wardsNear: 0.35 },
-  slave_pens:   { label: 'pens the Authority does not inspect', kinds: ['hold'],
+  watchfire:    { label: '꺼뜨리지 않는 봉화', kinds: ['watch'], wardsNear: 0.35 },
+  slave_pens:   { label: '교통청이 검사하지 않는 가축 우리', kinds: ['hold'],
                   produce: { coal: 1.5, ore: 1.4 }, shameful: 1 },
-  bad_water:    { label: 'bad water', kinds: ['shire', 'burg', 'watch', 'hold'], plagueProne: 1.8 },
-  fine_masons:  { label: 'fine masons', kinds: ['delve', 'burg'], produce: { stone: 1.4 } },
-  hard_winter:  { label: 'a hard winter every year', kinds: null, regions: [1, 3], freezes: true },
-  ferry_rights: { label: 'ancient ferry rights', kinds: ['shire', 'burg', 'haven'], nearWater: true, toll: 3.5 },
-  smoke_works:  { label: 'works that smoke', kinds: ['burg', 'hold'], smoke: 1.5 },
-  ill_omened:   { label: 'ill-omened', kinds: null, regions: [2, 4, 5, 9], perilNear: 0.08 },
+  bad_water:    { label: '나쁜 물', kinds: ['shire', 'burg', 'watch', 'hold'], plagueProne: 1.8 },
+  fine_masons:  { label: '훌륭한 석공들', kinds: ['delve', 'burg'], produce: { stone: 1.4 } },
+  hard_winter:  { label: '매년 혹독한 겨울', kinds: null, regions: [1, 3], freezes: true },
+  ferry_rights: { label: '오래된 나룻배 권리', kinds: ['shire', 'burg', 'haven'], nearWater: true, toll: 3.5 },
+  smoke_works:  { label: '연기 나는 공장', kinds: ['burg', 'hold'], smoke: 1.5 },
+  ill_omened:   { label: '흉조가 서림', kinds: null, regions: [2, 4, 5, 9], perilNear: 0.08 },
 };
 export const TRAIT_KEYS = Object.keys(TRAITS);
 
@@ -119,46 +119,46 @@ export const CULTURE_OF_KIND = {
 
 export const NAMES = {
   shire: [
-    'Nether Wembly', 'Great Nubbin', 'Puddifoot', 'Combe-under-Hill',
-    'Sixpenny Handley', 'Marrowmead', 'Nobbottle', "Hobb's Bottom",
-    'Mossy Bottom', 'Widdershin', 'Tuckham', 'Pipwick', 'Little Snoring',
-    'Buckleberry Ford', 'Cheddington Parva', 'Nether Slumbering', 'Wistleton',
-    'Old Croaking', 'Bagbottom', 'Sowerby Grange', 'Muckle Diddling',
+    '네더 웸블리', '그레이트 너빈', '퍼디풋', '언덕 아래 쿰',
+    '식스페니 핸들리', '매로미드', '노보틀', '홉스 바텀',
+    '모시 바텀', '위더신', '터컴', '핍윅', '리틀 스노링',
+    '버클베리 여울', '체딩턴 파르바', '네더 슬럼버링', '위슬턴',
+    '올드 크로킹', '배그바텀', '소워비 그레인지', '머클 디들링',
   ],
   delve: [
-    'Anvilgate', 'Thrumhold', 'Baraz Deep', 'Kalgarûn', 'the Ironmoot',
-    "Grimbeard's Delve", 'Zhaddun', 'Karag-Vor', 'the Underforge', 'Dolvenhal',
-    'Hammerreach', 'Khaz Vindral', 'Stonemoot', 'the Long Adit',
+    '앤빌게이트', '스럼홀드', '바라즈 깊은곳', '칼가룬', '아이언무트',
+    '그림비어드의 델브', '자둔', '카라그보르', '언더포지', '돌벤할',
+    '해머리치', '카즈 빈드랄', '스톤무트', '긴 갱도',
   ],
   haven: [
-    'Nimrothel', 'Aelinquë', 'Celedhil', 'Mithravel', 'Silverhithe',
-    'the Last Quay', 'Elenmar', 'Thalanor', 'Lathrieth', 'Vaenwood',
-    'Eryn Sûl', 'Miriel', 'the Willowlands',
+    '님로델', '아엘린퀘', '켈레딜', '미스라벨', '실버하이드',
+    '마지막 부두', '엘렌마르', '탈라노르', '라스리에스', '벤우드',
+    '에린 술', '미리엘', '버드나무 들판',
   ],
   burg: [
-    'Stonemarch', 'Highholt', 'Westermark', 'Dunhollow', 'Kingsbridge',
-    'Eryndale', 'Rillbridge', 'Amonwell', 'Harrowgate', 'Farthingale',
-    'Coldharbour', 'Saltbridge', 'Ostenmoor', 'Wainford', 'Threpwell',
+    '스톤마치', '하이홀트', '웨스터마크', '던할로우', '킹스브리지',
+    '에린데일', '릴브리지', '아몬웰', '해로우게이트', '파싱게일',
+    '콜드하버', '솔트브리지', '오스턴무어', '웨인포드', '스렙웰',
   ],
   watch: [
-    'Windwatch', 'the Grey Tower', 'Thornwatch', 'Beacon Hardy', 'Northkeep',
-    'Stormcrown', 'the Sentinel', 'Ravensperch', 'Coldfell Watch',
+    '윈드워치', '회색 탑', '손워치', '하디 봉화대', '노스킵',
+    '스톰크라운', '파수꾼', '레이븐스퍼치', '콜드펠 초소',
   ],
   hold: [
-    'Gorgobal', 'Uzgrath', 'Nardûk', 'Cinderhold', 'the Slagworks',
-    'Grimtooth', 'Ushnak', 'Bolg-Durr', 'the Cauldron', 'Vharn',
+    '고르고발', '우즈그라스', '나르두크', '신더홀드', '슬래그 공장',
+    '그림투스', '우쉬낙', '볼그두르', '가마솥', '바른',
   ],
 };
 
 /** Places that are always present, always here, always called this. */
 const ANCHORS = [
-  { u: 0.335, v: 0.505, kind: 'burg',  name: 'Brackenford', tier: 2, anchor: 'brackenford' },
-  { u: 0.455, v: 0.585, kind: 'burg',  name: 'Amonhal',     tier: 3, anchor: 'capital' },
-  { u: 0.185, v: 0.415, kind: 'shire', name: 'Bywater Byrill', tier: 1, anchor: 'shire' },
-  { u: 0.315, v: 0.300, kind: 'haven', name: 'Lorindel',    tier: 2, anchor: 'elfhome' },
-  { u: 0.085, v: 0.735, kind: 'haven', name: 'the Grey Quays', tier: 1, anchor: 'quays' },
-  { u: 0.645, v: 0.365, kind: 'delve', name: 'Dhurunzol',   tier: 2, anchor: 'greatdelve' },
-  { u: 0.880, v: 0.520, kind: 'hold',  name: 'Mount Wrack', tier: 3, anchor: 'wrack' },
+  { u: 0.335, v: 0.505, kind: 'burg',  name: '브래큰포드', tier: 2, anchor: 'brackenford' },
+  { u: 0.455, v: 0.585, kind: 'burg',  name: '아몬할',     tier: 3, anchor: 'capital' },
+  { u: 0.185, v: 0.415, kind: 'shire', name: '바이워터 비릴', tier: 1, anchor: 'shire' },
+  { u: 0.315, v: 0.300, kind: 'haven', name: '로린델',    tier: 2, anchor: 'elfhome' },
+  { u: 0.085, v: 0.735, kind: 'haven', name: '회색 부두', tier: 1, anchor: 'quays' },
+  { u: 0.645, v: 0.365, kind: 'delve', name: '두룬졸',   tier: 2, anchor: 'greatdelve' },
+  { u: 0.880, v: 0.520, kind: 'hold',  name: '랙 산', tier: 3, anchor: 'wrack' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -400,7 +400,7 @@ export function generateWorld(seedStr = 'eardon') {
   const jr = () => rng.range(-0.012, 0.012);
   const rivers = [
     { // the Silverflood — the great river, and the first real bridging problem
-      name: 'the Silverflood',
+      name: '실버플러드',
       w0: 0.9, w1: 3.4, depth: 7,
       pts: catmull([
         { x: 0.345 + jr(), y: 0.115 }, { x: 0.360 + jr(), y: 0.215 },
@@ -411,7 +411,7 @@ export function generateWorld(seedStr = 'eardon') {
       ], 14),
     },
     { // the Winterbourne — comes down out of the northern pass
-      name: 'the Winterbourne',
+      name: '윈터본',
       w0: 0.7, w1: 1.7, depth: 5,
       pts: catmull([
         { x: 0.600 + jr(), y: 0.395 }, { x: 0.540 + jr(), y: 0.430 },
@@ -420,7 +420,7 @@ export function generateWorld(seedStr = 'eardon') {
       ], 12),
     },
     { // the Mirefall — feeds the Weeping Marsh, which is why it is weeping
-      name: 'the Mirefall',
+      name: '미어폴',
       w0: 0.6, w1: 1.5, depth: 4,
       pts: catmull([
         { x: 0.620 + jr(), y: 0.700 }, { x: 0.585 + jr(), y: 0.750 },
@@ -592,7 +592,7 @@ export function generateWorld(seedStr = 'eardon') {
   world.biomeAt = (x, z) => nearest(biome, x, z);
   world.waterAt = (x, z) => nearest(water, x, z);
   world.regionAt = (x, z) => nearest(region, x, z);
-  world.regionName = (r) => REGION_NAME[r] ?? 'the wilds';
+  world.regionName = (r) => REGION_NAME[r] ?? '황야';
 
   // -- settlement sites ----------------------------------------------------
   world.sites = placeSites(world, rng);
