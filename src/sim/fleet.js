@@ -17,26 +17,26 @@ import { makeRng } from '../rng.js';
  */
 const NAMES = {
   dwarf: [
-    'Grimhammer', 'Anvilheart', 'Deepdelver', 'Stonewright', 'Emberforge',
-    'Ironoath', 'Khazad-Vor', 'Mattock', 'Rockbiter', 'Coalbrand',
-    'Thrain’s Word', 'Undergate', 'Hammerfall', 'Sparkmaiden', 'Bellowsbreath',
-    'Adamant', 'Dwarrowdelf', 'Firebeard', 'Stoneheart', 'Anvilgate',
+    '그림해머', '앤빌하트', '딥델버', '스톤라이트', '엠버포지',
+    '아이언오스', '카자드보르', '매턱', '락바이터', '콜브랜드',
+    '트라인의 말씀', '언더게이트', '해머폴', '스파크메이든', '벨로스브레스',
+    '아다만트', '드워로델프', '파이어비어드', '스톤하트', '앤빌게이트',
   ],
   men: [
-    'Perseverance', 'Marchwarden', 'Amonhal', 'Endeavour', 'Steadfast',
-    'The King’s Errand', 'Rillbridge', 'Vigilant', 'Diligence', 'Westermark',
-    'Recompense', 'Providence', 'Thornwatch', 'Stout Fellow', 'Reliance',
-    'Enterprise', 'Fortitude', 'Kingsbridge', 'Sundry', 'Punctual',
+    '인내', '변경지기', '아몬할', '노력', '불굴',
+    '왕의 심부름', '릴브리지', '경계', '근면', '웨스터마크',
+    '보답', '섭리', '손워치', '씩씩한 친구', '신뢰',
+    '진취', '용기', '킹스브리지', '선드리', '시간엄수',
   ],
   elf: [
-    'Nimrothel', 'Last Light', 'Silverleaf', 'Windward', 'Elenmar',
-    'Quiet Water', 'Mithravel', 'Evenstar', 'Longmemory', 'Farewell',
-    'Thalanor', 'The Sea, Later', 'Lorien’s Grief', 'Starflung', 'Willow',
+    '님로델', '마지막 빛', '은빛잎', '바람맞이', '엘렌마르',
+    '고요한 물', '미스라벨', '저녁별', '긴기억', '작별',
+    '탈라노르', '바다는, 나중에', '로리엔의 슬픔', '별에 닿은', '버드나무',
   ],
   orc: [
-    'Gnasher', 'Slagmouth', 'Number Four', 'Bolg-Durr', 'Rendfang',
-    'Cinderwake', 'Uzgrath', 'Iron Tooth', 'Grimtooth', 'Number Eleven',
-    'Spoilheap', 'Cauldron', 'Ashmaw', 'Vharn', 'Number Two',
+    '나셔', '슬래그마우스', '4번', '볼그두르', '렌드팽',
+    '신더웨이크', '우즈그라스', '쇠이빨', '그림투스', '11번',
+    '스포일힙', '가마솥', '애시모', '바른', '2번',
   ],
 };
 
@@ -64,37 +64,37 @@ const NAMES = {
  */
 export const ENGINE_CLASSES = {
   pony: {
-    id: 'pony', style: 'men', name: 'Pony', builder: 'The Amonhal Works',
+    id: 'pony', style: 'men', name: '포니', builder: '아몬할 공작소',
     power: 0.75, speed: 1.10, grace: 0.95, stamina: 1.0, upkeep: 1.7, price: 210, wear: 1.0,
-    blurb: 'Small, willing, and made in numbers. Nothing about it is remarkable and nothing about it fails.',
+    blurb: '작고 순하며 많이 찍어 냈다. 특별할 것도, 고장 날 것도 없다.',
   },
   drover: {
-    id: 'drover', style: 'men', name: 'Drover', builder: 'The Amonhal Works',
+    id: 'drover', style: 'men', name: '드로버', builder: '아몬할 공작소',
     power: 1.15, speed: 0.95, grace: 0.90, stamina: 0.9, upkeep: 2.6, price: 340, wear: 1.15,
-    blurb: 'The general-purpose engine of the realm. Hauls anything, adequately, and is always slightly late.',
+    blurb: '왕국의 표준 범용 기관차. 무엇이든 그럭저럭 끌고, 언제나 조금씩 늦는다.',
   },
   delver: {
-    id: 'delver', style: 'dwarf', name: 'Delver', builder: 'Ironmoot & Sons',
+    id: 'delver', style: 'dwarf', name: '델버', builder: '아이언무트 & 선스',
     power: 1.55, speed: 0.78, grace: 0.70, stamina: 1.9, upkeep: 3.4, price: 520, wear: 0.45,
-    blurb: 'Slow, immensely strong, and built to a standard rather than a price. Signed for.',
+    blurb: '느리고, 엄청나게 강하며, 가격이 아니라 기준에 맞춰 만들었다. 검수 서명 완료.',
   },
   hammerhead: {
-    id: 'hammerhead', style: 'dwarf', name: 'Hammerhead', builder: 'Ironmoot & Sons',
+    id: 'hammerhead', style: 'dwarf', name: '해머헤드', builder: '아이언무트 & 선스',
     power: 1.95, speed: 0.66, grace: 0.55, stamina: 2.2, upkeep: 5.2, price: 880, wear: 0.35,
-    blurb: 'Mountain freight. It will take a train over the Peaks and it does not care how long that takes.',
+    blurb: '산악 화물용. 산맥 너머로 열차를 끌고 넘어가며, 시간이 얼마나 걸리든 개의치 않는다.',
   },
   windward: {
-    id: 'windward', style: 'elf', name: 'Windward', builder: 'The Grey Havens',
+    id: 'windward', style: 'elf', name: '윈드워드', builder: '회색 항구',
     power: 0.60, speed: 1.65, grace: 1.85, stamina: 1.6, upkeep: 4.1, price: 760, wear: 0.20,
     // the refusal is the point: it is not a freight engine and will not pretend to be
     refuses: ['coal', 'ore', 'stone'],
-    blurb: 'Very fast, very quiet, and will not be put to coal. People will change trains to ride behind it.',
+    blurb: '매우 빠르고, 매우 조용하며, 석탄 운반에는 쓸 수 없다. 사람들은 이 기관차 뒤에 타려고 열차를 갈아탄다.',
   },
   slagmaw: {
-    id: 'slagmaw', style: 'orc', name: 'Slagmaw', builder: 'the Slagworks',
+    id: 'slagmaw', style: 'orc', name: '슬래그모', builder: '슬래그 공장',
     power: 2.20, speed: 0.90, grace: 0.15, stamina: 0.55, upkeep: 2.2, price: 300, wear: 2.4,
     shadow: 0.06,
-    blurb: 'It hauls more than anything else on the continent. Nobody will ride behind it and it breaks constantly.',
+    blurb: '대륙에서 가장 많이 끌어 낸다. 아무도 그 뒤에 타려 하지 않고, 끊임없이 고장 난다.',
   },
 };
 export const CLASS_KEYS = Object.keys(ENGINE_CLASSES);
@@ -131,7 +131,7 @@ export function createFleet(seed) {
       const n = `${pool[rng.int(0, pool.length - 1)]} II`.replace(' II', ` ${romans(k)}`);
       if (!used.has(n)) { used.add(n); return n; }
       k++;
-      if (k > 40) return `No. ${nextId}`;
+      if (k > 40) return `${nextId}호`;
     }
   }
 
@@ -171,10 +171,10 @@ export function createFleet(seed) {
 /** A short, dry service record, for the engine card. */
 export function engineRecord(e, week) {
   const bits = [];
-  bits.push(`${Math.round(e.dist).toLocaleString('en-GB')} units run`);
-  if (e.loads > 0) bits.push(`${Math.round(e.loads).toLocaleString('en-GB')} loads`);
-  bits.push(`in service since week ${e.since}`);
-  if (e.incidents === 1) bits.push('one incident');
-  else if (e.incidents > 1) bits.push(`${e.incidents} incidents`);
+  bits.push(`주행 ${Math.round(e.dist).toLocaleString('en-GB')}`);
+  if (e.loads > 0) bits.push(`적재 ${Math.round(e.loads).toLocaleString('en-GB')}`);
+  bits.push(`${e.since}주차부터 운용`);
+  if (e.incidents === 1) bits.push('사고 1회');
+  else if (e.incidents > 1) bits.push(`사고 ${e.incidents}회`);
   return bits.join(' · ');
 }
