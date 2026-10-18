@@ -54,11 +54,11 @@ let G = null;   // the live game
 
 async function startGame(seed) {
   const canvas = $('view');
-  boot.set(8, 'surveying the realm…');
+  boot.set(8, '왕국을 측량하는 중…');
   await frame();
 
   const world = generateWorld(seed);
-  boot.set(28, 'raising the Sundering Peaks…');
+  boot.set(28, '선더링 산맥을 일으키는 중…');
   await frame();
 
   const sim = createSim(world);
@@ -71,11 +71,11 @@ async function startGame(seed) {
     fatal('shader would not compile', `${log(vs)}
 ${log(fs)}`.trim().slice(0, 1400));
   };
-  boot.set(46, 'planting Mirkholt…');
+  boot.set(46, '머크홀트를 조림하는 중…');
   await frame();
 
   const w3 = createWorld3D(world, sim, sceneApi.scene, sceneApi);
-  boot.set(84, 'printing the timetable…');
+  boot.set(84, '시각표를 인쇄하는 중…');
   await frame();
 
   // ── interaction state
@@ -115,12 +115,12 @@ ${log(fs)}`.trim().slice(0, 1400));
       if (hud.openLine !== null && !selected) {
         const r = sim.addStop(hud.openLine, site.id);
         if (r.ok) {
-          hud.hint(`${site.name} added to the service.`);
+          hud.hint(`${site.name}이(가) 해당 노선에 추가되었습니다.`);
           w3.showOverlay(sim.lines.find((l) => l.id === hud.openLine) || null);
           hud.refresh();
           return;
         }
-        hud.hint(r.reason || 'that cannot be a call on this service');
+        hud.hint(r.reason || '이 노선의 정차역이 될 수 없습니다');
       }
       if (!selected) {
         selected = site;
@@ -201,7 +201,7 @@ ${log(fs)}`.trim().slice(0, 1400));
     addStopToLine(lineId) {
       if (!selected) return;
       const r = sim.addStop(lineId, selected.id);
-      if (!r.ok) { hud.hint(r.reason || 'cannot add that call'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '해당 정차역을 추가할 수 없습니다'); Audio.play('error'); return; }
       Audio.play('ui_click');
       selectedLine = lineId;
       hud.setSelectedLine(lineId);
@@ -217,7 +217,7 @@ ${log(fs)}`.trim().slice(0, 1400));
       const line = sim.lines.find((l) => l.id === lineId);
       if (!line) return;
       const r = sim.setLineTrains(lineId, line.trains + delta);
-      if (!r.ok) { hud.hint(r.reason || 'no engines to spare'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '여유 기관차가 없습니다'); Audio.play('error'); return; }
       Audio.play('ui_click');
       hud.refreshFleet();
       if (selectedEngine !== null) {
@@ -281,17 +281,17 @@ ${log(fs)}`.trim().slice(0, 1400));
     },
     buyEngine(clsKey) {
       const r = sim.buyEngine(clsKey);
-      if (!r.ok) { hud.hint(r.reason || 'they will not build it'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '제작해 주지 않습니다'); Audio.play('error'); return; }
       Audio.play('build_works');
       const c = sim.engineClass(r.engine);
-      hud.hint(`${r.engine.name}, a ${c.name}, has been delivered to the shed.`, 5000);
+      hud.hint(`${c.name}급 ${r.engine.name}이(가) 차고에 납입되었습니다.`, 5000);
       hud.refresh();
     },
     overhaul(engineId) {
       const r = sim.overhaul(engineId);
-      if (!r.ok) { hud.hint(r.reason || 'nothing to put right'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '수리할 것이 없습니다'); Audio.play('error'); return; }
       Audio.play('build_track');
-      hud.hint(`Overhauled for ${r.paid} crowns. She is as she was.`, 4000);
+      hud.hint(`${r.paid}크라운으로 전면 정비했습니다. 새것처럼 돌아왔습니다.`, 4000);
       const e = sim.engineById(engineId);
       if (e) hud.showEngine(e);
       hud.refresh();
@@ -299,19 +299,19 @@ ${log(fs)}`.trim().slice(0, 1400));
     borrow(lender) {
       const cap = sim.borrowingPower(lender);
       const r = sim.borrow(lender, cap);
-      if (!r.ok) { hud.hint(r.reason || 'they will not lend'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '빌려 주지 않습니다'); Audio.play('error'); return; }
       Audio.play('build_works');
-      hud.hint(`${sim.debts.length === 1 ? 'A debt' : 'Another debt'}: `
-        + `${r.debt.principal} crowns from ${LENDERS[lender].name}.`, 5000);
+      hud.hint(`${sim.debts.length === 1 ? '새로운 부채' : '또 하나의 부채'}: `
+        + `${LENDERS[lender].name}로부터 ${r.debt.principal}크라운.`, 5000);
       hud.refresh();
     },
     repay(debtId) {
       // pay down as much as can be spared without going under
       const spare = Math.max(0, sim.treasury - 40);
       const r = sim.repay(debtId, spare);
-      if (!r.ok) { hud.hint(r.reason || 'nothing to pay it with'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '갚을 돈이 없습니다'); Audio.play('error'); return; }
       Audio.play('build_track');
-      hud.hint(`${r.paid} crowns paid off the debt.`, 4000);
+      hud.hint(`부채에서 ${r.paid}크라운을 갚았습니다.`, 4000);
       hud.refresh();
     },
     toggleRide() {
@@ -341,13 +341,13 @@ ${log(fs)}`.trim().slice(0, 1400));
     },
     doubleTrack(linkId) {
       const r = sim.doubleTrack(linkId);
-      if (!r.ok) { hud.hint(r.reason || 'cannot double that section'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '해당 구간을 복선화할 수 없습니다'); Audio.play('error'); return; }
       Audio.play('build_works');
       hud.refresh();
     },
     stationWorks(siteId) {
       const r = sim.stationWorks(siteId);
-      if (!r.ok) { hud.hint(r.reason || 'cannot enlarge that station'); Audio.play('error'); return; }
+      if (!r.ok) { hud.hint(r.reason || '해당 역을 증축할 수 없습니다'); Audio.play('error'); return; }
       Audio.play('build_works');
       const st = sim.byId.get(siteId);
       if (st) hud.showSite(st);
@@ -359,7 +359,7 @@ ${log(fs)}`.trim().slice(0, 1400));
       const ids = [...new Set(sim.lineLinks(line) || [])];
       let any = false, last = null;
       for (const id of ids) { const r = sim.regrade(id); if (r.ok) any = true; else last = r; }
-      if (!any) { hud.hint(last?.reason || 'nothing left to ease'); Audio.play('error'); return; }
+      if (!any) { hud.hint(last?.reason || '더 완화할 경사가 없습니다'); Audio.play('error'); return; }
       Audio.play('build_track');
       hud.refresh();
     },
@@ -369,7 +369,7 @@ ${log(fs)}`.trim().slice(0, 1400));
       const ids = [...new Set(sim.lineLinks(line) || [])];
       let any = false, last = null;
       for (const id of ids) { const r = sim.fortify(id); if (r.ok) any = true; else last = r; }
-      if (!any) { hud.hint(last?.reason || 'already fortified'); Audio.play('error'); return; }
+      if (!any) { hud.hint(last?.reason || '이미 보강되었습니다'); Audio.play('error'); return; }
       Audio.play('build_works');
       hud.refresh();
     },
@@ -478,10 +478,10 @@ ${log(fs)}`.trim().slice(0, 1400));
   }
 
   const REGION_KEY = {
-    'the Greenhollow': 'GREENHOLLOW', 'the Frostmarch': 'FROSTMARCH', 'Mirkholt': 'MIRKHOLT',
-    'the Sundering Peaks': 'PEAKS', 'the Weeping Marsh': 'WEEPING', 'the Ashenreach': 'ASHENREACH',
-    'the Marchlands': 'MARCHLANDS', 'Elderwood': 'ELDERWOOD', 'the Grey Quays': 'QUAYS',
-    'the Barrowdowns': 'BARROWDOWNS', 'Wodenholt': 'WODENHOLT',
+    '그린할로우': 'GREENHOLLOW', '프로스트마치': 'FROSTMARCH', '머크홀트': 'MIRKHOLT',
+    '선더링 산맥': 'PEAKS', '우는 습지': 'WEEPING', '잿빛벌판': 'ASHENREACH',
+    '변경 지대': 'MARCHLANDS', '엘더우드': 'ELDERWOOD', '회색 부두': 'QUAYS',
+    '배로우 언덕': 'BARROWDOWNS', '워든홀트': 'WODENHOLT',
   };
   const regionKey = (n) => REGION_KEY[n] || 'MARCHLANDS';
 
@@ -521,14 +521,14 @@ ${log(fs)}`.trim().slice(0, 1400));
 
   G = { world, sim, sceneApi, w3, hud, controls };
 
-  boot.set(100, 'ready');
+  boot.set(100, '준비 완료');
   await frame();
   $('boot').hidden = true;
   hud.refresh();
   hud.setSpeedButtons(1);
   requestAnimationFrame(tick);
 
-  hud.hint('Click a settlement, then another, to survey a line between them.', 7000);
+  hud.hint('정착지를 클릭하고 이어서 다른 정착지를 클릭하면 두 곳 사이의 노선을 측량합니다.', 7000);
   return G;
 }
 
