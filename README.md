@@ -1,186 +1,91 @@
-# PERILOUS WAYS
+# 페릴러스 웨이즈 (Perilous Ways) — 한국어판
 
-**Live: https://perilous-ways.netlify.app**
+**플레이: https://sigco3111.github.io/perilous-ways/**
 
-A 3D world simulator. You are Director of the Realm Transit Authority on a
-continent of halflings, dwarves, elves, men and orcs. You do not fight, rule, or
-quest. You lay track, buy engines, and answer correspondence.
+하플링, 드워프, 엘프, 인간, 오크가 사는 대륙을 무대로 한 3D 세계 시뮬레이션입니다.
+당신은 왕국 교통청(Realm Transit Authority)의 청장입니다. 싸우지도, 다스리지도,
+모험을 떠나지도 않습니다. 선로를 놓고, 기관차를 사고, 서신에 답할 뿐입니다.
 
-Then you find out what a railway is actually for.
+그리고 나서, 철도가 실제로 무엇을 위한 것인지 알게 됩니다.
 
-![The Marchlands, week one](docs/opening.jpg)
-![Brackenford, up close](docs/settlement.jpg)
+> 원작: [emollick/perilous-ways](https://github.com/emollick/perilous-ways) (MIT 라이선스)
+> 원작 데모: https://perilous-ways.netlify.app
+> 이 저장소는 원작의 모든 문서·인터페이스·서사 텍스트를 한국어로 옮긴 포크입니다.
+> 원문 README는 [README.en.md](README.en.md)에 그대로 보존되어 있습니다.
 
 ---
 
-## Playing
+## 게임 방법
 
-Click a settlement, then another, to survey a line between them. The surveyors
-route it themselves across the real heightmap — following contours, bridging
-rivers, boring tunnels — and hand you a bill. Authorise it or don't, and say
-whether it is a new service or an extension of an existing one.
+정착지를 클릭하고 다른 정착지를 클릭하면 두 곳 사이의 선로를 측량합니다.
+측량사들은 실제 지형 위에서 스스로 노선을 잡습니다. 등고선을 따라가고, 강에는
+다리를 놓고, 산에는 터널을 뚫습니다. 그리고 청구서를 내밉니다. 결재하거나
+결재하지 않으면 되고, 새 노선인지 기존 노선의 연장인지도 정하면 됩니다.
 
-Then run it. Click a service in *The Fleet* to open its dossier and set:
+그다음 운행합니다. **차량 기지(The Fleet)** 패널에서 노선을 클릭해 상세 정보를
+열고 다음을 설정하세요.
 
-| Lever | What it does |
+| 조절 항목 | 효과 |
 |---|---|
-| **Carries** | Freight pays better by the ton; Passengers carries several times the people. Neither moves more tonnage — for that, join up more of the places that make things |
-| **Fares** | Dear extracts money now and costs prosperity, concord and, eventually, population. Cheap earns less and the realm grows around it |
-| **Engines** | Which locomotives work the service — a Hammerhead hauls 56% more than a Pony; a Windward carries 3.4× the passengers and refuses coal |
-| **Rolling stock** | Wagons per train, up to what the Authority's stock allows. The consist is drawn, and the wagons show what the line actually carries |
-| **Wardens** | 8 crowns a week to halve incidents on that line |
-| **Calls at** | Add, drop, reorder, or split the service in two |
+| **운송 품목** | 화물은 톤당 수익이 좋고, 여객은 몇 배의 사람을 실어 나릅니다. 더 많은 톤수를 원하면 물건을 만드는 곳들을 더 많이 연결하세요 |
+| **운임** | 비싸게 받으면 지금 돈이 되지만 번영과 화합, 그리고 결국 인구를 갉아먹습니다. 싸게 받으면 적게 벌지만 왕국이 그 주변으로 자랍니다 |
+| **기관차** | 어떤 기관차가 그 노선을 달릴지 — 해머헤드는 포니보다 56% 더 끌고, 윈드워드는 3.4배의 승객을 태우며 석탄을 거부합니다 |
+| **차량 편성** | 열차당 차량 수. 교통청의 보유량 한도까지. 편성은 그림으로 그려지고, 차량에는 그 선로가 실제로 싣는 것이 표시됩니다 |
+| **파수꾼** | 주당 8크라운으로 그 선로의 사고를 절반으로 줄입니다 |
+| **정차역** | 정차를 추가·삭제·순서 변경하거나 노선을 둘로 나눕니다 |
 
-### Commissions
+### 의뢰 (Commissions)
 
-The **Commissions** panel (top bar, or `C`) is where the realm asks you for things
-by name. Each is a sentence you can act on: *this cargo, to this place, by this
-week, for this fee, or else.*
+**의뢰** 패널(상단 바, 또는 `C` 키)은 왕국이 당신에게 이름을 걸고 무언가를
+청하는 곳입니다. 각 의뢰는 행동 가능한 한 문장입니다. *이 화물을, 이곳에,
+이번 주까지, 이 사례로, 그렇지 않으면.*
 
-- **Freight** — grain to a delve that cannot feed itself, wine for a wedding that
-  cannot move its date, two loads of mithril for the Council, which has not said
-  what for. Discharged by ordinary working: run a service that carries the cargo to
-  the place named and deliveries count automatically.
-- **Passage** — pilgrims to the Grey Quays, excursion traffic to a fair, a Dwarf
-  delegation travelling in state. Satisfied by the route *having* passenger service,
-  which is what makes a Passenger line worth running.
-- **Sieges** — in Age III, a watch is invested and wants arms in four weeks. You can
-  decline. If you accept and fail, it is taken, and the Crown remembers.
-- **Physic** — a plague wants athelas, which grows in one place on the continent and
-  is picked by people who do not hurry.
+- **화물** — 스스로 먹여 살리지 못하는 광산에 곡물을, 술이 모자란 혼례에 와인을
+- **여객** — 회색 부두로 떠나는 순례자들, 장에 가는 변경의 백성, 위풍당당한 드워프 대표단
+- **비상** — 포위된 초소에 무기를, 역병이 도는 역에 아셀라스를. 기한이 있습니다
 
-The **Ledger** (top bar, or `L`) is the answer to "why is this happening": receipts
-and upkeep per service, what physically moved yesterday and by what route, which
-sections are at capacity, and which settlements are going without *and why* — no
-connected source, capacity short at a named place, too many changes.
+### 칙허 (Charters)
 
-### The fleet
+왕실, 평의회, 대상인들이 특허장을 내걸니다. 조건을 채우면 새로운 지역과
+기관차 설계가 열립니다. 열여섯 장의 칙허가 있고, 각각이 다른 방향으로
+왕국을 넓힙니다.
 
-Every engine is an individual of a **class** — Pony, Drover, Delver, Hammerhead,
-Windward, Slagmaw — each an engraved side elevation in the engine works, each a real
-tradeoff of haul, speed, passenger appeal, endurance and upkeep, and each sold only
-by a people still on speaking terms with the Authority. Engines wear with the work
-they do; a worn one hauls less until it is overhauled.
+### 세 개의 시대
 
-![The six classes](docs/locomotives.png)
+- **제1시대 — 개척.** 그린할로우의 곡창 지대에 첫 선을 놓습니다.
+- **제2시대 — 확장.** 산맥을 뚫고, 습지를 건너고, 부두에 닿습니다. 동쪽에서
+  아주 좋은 조건의 제안이 옵니다. 모든 조건이 좋습니다.
+- **제3시대 — 머스터.** 동쪽에서 대군이 옵니다. 당신이 놓은 길 위로.
+  가장 잘 지은 것이 가장 위험한 것이 되는 순간, 교통청은 답을 정해야 합니다.
 
-Every engine is an individual with a name, a builder, a shed and a service record.
-**Click a train** to open its card: *Anvilheart, Dwarf-built, engine no. 1, working
-the Vermilion Way — 4,212 units run, 180 loads, in service since week 3, two
-incidents.* From there you can **ride with it** (the camera follows until you take
-the wheel back), **sound the whistle**, or jump to the service it works.
+### 엔딩
 
-Trains whistle on the approach, brake into their calls with a squeal and a shower
-of sparks, wait, and pull out chuffing. Idle engines sit in the shed at the foot of
-*The Fleet*, and clicking one tells you what it has done.
+아홉 가지가 있습니다. 하물이 도착하는 결말, 도착하지 않는 결말, 선로가
+버텨내는 결말, 스스로 걷어 내는 결말, 그리고 시간표만이 남는 결말들.
+어느 쪽이든 교통청의 장부는 마지막 페이지까지 정확하게 기록됩니다.
 
-- **drag** to look, **right-drag** or **shift-drag** to pan, **scroll** to zoom
-- **WASD** / arrows to pan, **Q**/**E** to rotate
-- **space** to pause, **1**/**2**/**3** for speed, **L** ledger, **C** commissions
-- **click a train** to select it, **F** to ride along
-- with a service open, clicking a settlement adds it as a further call
+### 조작
 
-## What is actually being simulated
+- 마우스 드래그: 지도 회전 / 휠: 확대·축소
+- 정착지 클릭 → 다른 정착지 클릭: 측량
+- `C`: 의뢰 패널 / `F`: 차량 기지 / `Space`: 일시 정지
 
-A Delve produces iron and cannot grow food. A Shire grows food and has no tools.
-Neither can do anything about it without you. Every other system hangs off that.
+---
 
-- **Trade** — fourteen goods flow over the rail graph each simulated day, limited by
-  capacity and travel time, with real manufacturing chains (ore + coal → steel →
-  arms).
-- **Growth** — prosperity follows met needs, population follows prosperity, and
-  settlements visibly build outward through five tiers in their own culture's
-  architecture. Unserved places decline and are eventually struck from the register.
-- **Concord** — five peoples with opinions. Serve the Elves and they stay; ignore
-  them and they take ship from the Grey Quays and do not come back, taking Lore
-  out of the economy for good. (Measured: serving them roughly doubles both
-  tonnage and income.)
-- **Peril** — terrain carries risk. Tunnels, Mirkholt and the Ashenreach produce
-  incidents, some of which unmake your track.
-- **The Shadow** — fed by what the Authority does: how far east the rails reach,
-  what is carried for the orcs, the smoke of the works, how deep the bores go. Held
-  back by a realm in concord. Time presses, but it is the smallest term.
-- **Money** — a Council grant that pays for settlements *served* and dries up if the
-  network stops growing; three lenders who charge in three currencies (the Crown in
-  obligation, Ironmoot & Sons in plain interest, the Grey Havens in restraint);
-  fares that trade income against goodwill.
-- **Age III** — raids on the most exposed sections, a refugee wave moving west along
-  your own line, then a host marching on your track at the speed you built it to
-  carry. You choose: fortify the road, requisition it for the evacuation, or tear up
-  the greatest thing you ever built. Each answer ends the game differently.
-- **The Errand** — one item, small, carried by hand, booked to the one place no
-  sensible railway goes. It travels as far as your metals reach and waits.
+## 이 한국어판에 대하여
 
-Once a year the Authority files an **annual report** — miles open, places served,
-what was struck from the timetable — every figure from your own run, set against
-last year's. The numbers are the narrative.
+- 원저작자: Ethan Mollick ([@emollick](https://github.com/emollick))
+- 라이선스: MIT (원문 [LICENSE](LICENSE) 그대로)
+- 번역 범위: 인터페이스 전체, 시뮬레이션 문자열, 의뢰·칙허·청원·사건·
+  연대기 서사(문서 형식의 보고서 200여 편 포함), 도판 캡션, 엔딩 텍스트
+- 지명·인명은 의미와 운율을 살려 음역·의역했고, 세계관 고유 명사는 게임 전체에서
+  일관되게 통일했습니다 (예: the Authority → 교통청, Master of Works → 공사감독,
+  charter → 칙허, 전보 문구 STOP → 스톱)
+- 게임 로직, 밸런스, 세계 생성 알고리즘은 원작과 동일합니다
 
-Three ages, several endings, and a Chronicle at the end that is the actual score.
+## 기술
 
-## Running it locally
-
-```
-python -m http.server 8577 -d .      # then open http://localhost:8577
-```
-
-No build step. Plain ES modules, an import map, and a vendored three.js r185.
-`window.PW` is the debug surface (`PW.snapshot()`, `PW.fastForward(weeks)`).
-
-## Tests
-
-Everything here runs without a browser except the last two, which drive the
-Chrome already on the machine.
-
-```
-node tools/imports.mjs        # every named import resolves to a real export
-node tools/smoke.mjs          # real three.js in Node: 37 construction checks
-node tools/balance.mjs eardon 30          # an AI plays 30 weeks, reports the loop
-node tools/balance.mjs eardon 30 --elfcare  # ...playing well by the Elves
-node tools/mapcheck.mjs eardon            # ASCII map + height bands
-node tools/routecheck.mjs eardon          # surveyor behaviour and pricing
-node tools/visual.mjs eardon              # headless Chrome, screenshots to shots/
-node tools/agencycheck.mjs                # drives every operational control, asserts it moved the sim
-node tools/traincheck.mjs                 # clicks a train, rides it, whistles, checks it stops and remembers
-node tools/commcheck.mjs                  # offers, accepts and discharges commissions; sieges, athelas, mithril
-node tools/stockcheck.mjs                 # buys engines, changes rakes, checks the drawings render
-node tools/age3check.mjs                  # plays the whole Age III arc once per answer; all must terminate
-node tools/freevars.mjs                   # names used but never imported (the class of bug imports.mjs cannot see)
-node tools/register.mjs eardon 40         # the register in play order — read it; if you can hear machinery, file a bug
-node tools/balance.mjs eardon 40 --story  # the chronicle as one story
-node tools/prodcheck.mjs                  # boots the deployed site, plays a few moves
-node tools/build.mjs                      # assemble dist/ for deploy
-```
-
-## Layout
-
-```
-src/world/worldgen.js   authored macro-geography + procedural detail
-src/sim/route.js        the surveyor: A* + deck-profile fitting
-src/sim/model.js        the economy as tables
-src/sim/sim.js          the tick: flow, growth, money, concord, the Shadow
-src/sim/events.js       outcomes, petitions, endings — and the writing
-src/gfx/terrain.js      ground, sea, 13.5k instanced trees, cloud shadows
-src/gfx/props.js        settlement architecture for six cultures, five tiers
-src/gfx/trains.js       four engine styles, seven wagon types, steam
-src/gfx/rails.js        rails, sleepers, ballast, piers, portals
-src/gfx/scene.js        camera, sun, sky, fitted shadows, bloom
-src/sim/fleet.js        locomotive classes, names by builder, the roster
-src/sim/commissions.js  named clients wanting cargo by a deadline
-src/sim/registry.js     draws the written corpus without repeating itself
-src/text/reports.js     the corpus: 209 register entries in five peoples' voices
-src/gfx/world3d.js      binds sim to scene: stations, consists, growth, labels
-src/ui/hud.js           the paperwork: panels, dossiers, ledger, modals
-src/ui/plates.js        sixteen engraved SVG plates, tone by hairline
-src/ui/locos.js         locomotive side elevations and consist strips
-src/audio/audio.js      entirely procedural score and sound
-```
-
-`DESIGN.md`, `WORLD.md`, `ART.md`, `VOICE.md`, `UI-SPEC.md` and `INTERFACES.md`
-are the specs the code was built against. `VOICE.md` in particular is the record
-of how the register's prose was made to stop sounding like a machine, and what it
-cost to learn that.
-
-## License
-
-[MIT](LICENSE). The vendored copy of [three.js](https://github.com/mrdoob/three.js)
-in `vendor/three/` is © its authors, also under the MIT license.
+- 빌드 없는 정적 사이트. `index.html` 하나로 바로 실행됩니다
+- [three.js](https://threejs.org) (벤더 포함) 기반 3D 지형·세계 렌더링
+- 시드 기반 절차 생성: 지형, 정착지, 이름, 사건이 시드에서 결정론적으로 생성됩니다
+- GitHub Pages에서 그대로 서빙됩니다
