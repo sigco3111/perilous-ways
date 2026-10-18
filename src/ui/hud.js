@@ -55,7 +55,7 @@ export function createHud(sim, hooks) {
   function refreshTop() {
     const s = sim;
     $('stWeek').firstChild.textContent = `${s.week}`;
-    $('stWeek').lastChild.textContent = `week · age ${['', 'I', 'II', 'III'][s.age]}`;
+    $('stWeek').lastChild.textContent = `${s.week}주차 · 제${['', '1', '2', '3'][s.age]}시대`;
 
     const m = $('stMoney');
     m.firstChild.textContent = crowns(s.treasury);
@@ -78,9 +78,9 @@ export function createHud(sim, hooks) {
       // decision with a cost for dithering.
       const left = s.charterOffer ? Math.max(0, (s.charterLapses ?? 0) - s.week) : 0;
       if (s.charterOffer) {
-        cb.textContent = left <= 1 ? 'The Council rises this week'
-          : left <= 2 ? `The Council rises in ${left} weeks`
-          : 'A charter awaits';
+        cb.textContent = left <= 1 ? '평의회가 이번 주에 폐회한다'
+          : left <= 2 ? `평의회 폐회까지 ${left}주`
+          : '칙허가 기다린다';
       }
       // only urgent when it is actually urgent
       cb.classList.toggle('pulse', !!s.charterOffer && left <= 2);
@@ -94,9 +94,9 @@ export function createHud(sim, hooks) {
       const c = CULTURES[key];
       const v = sim.regard[key];
       const gone = key === 'elf' && sim.elvesGone;
-      const mood = gone ? 'departed'
-        : v > 80 ? 'devoted' : v > 62 ? 'warm' : v > 44 ? 'civil'
-        : v > 26 ? 'cool' : v > 10 ? 'aggrieved' : 'done with you';
+      const mood = gone ? '떠남'
+        : v > 80 ? '헌신적' : v > 62 ? '우호적' : v > 44 ? '예의 바름'
+        : v > 26 ? '냉담함' : v > 10 ? '앙심 품음' : '절교함';
       rows.push(
         `<div class="regard${gone ? ' gone' : ''}">
            <div class="rl">${sigil(key)}<span>${esc(c.name)}</span><i>${mood}</i></div>
@@ -116,10 +116,10 @@ export function createHud(sim, hooks) {
     // Read the player's actual choice from the DOM before wiping it.
     const worksEl = $('lineList').querySelector('details.engWorks');
     if (worksEl) fleetShopOpen = worksEl.open;
-    $('fEngines').textContent = `${sim.enginesInUse()} of ${sim.stock.engines}`;
+    $('fEngines').textContent = `${sim.enginesInUse()}/${sim.stock.engines} 운용 중`;
     $('fCars').textContent = sim.stock.cars;
-    const got = Object.entries(sim.can).filter(([, v]) => v).map(([k]) => k);
-    $('fCharters').textContent = got.length ? got.join(', ') : 'none';
+    const got = Object.entries(sim.can).filter(([, v]) => v).map(([k]) => ({ bridge: '교량', tunnel: '터널', causeway: '둑길', span: '대교' }[k] || k));
+    $('fCharters').textContent = got.length ? got.join(', ') : '없음';
 
     const rows = sim.lines.map((l) => {
       const st = l.stats || {};
@@ -127,9 +127,9 @@ export function createHud(sim, hooks) {
       return `<div class="svc${openLine === l.id ? ' sel' : ''}" data-line="${l.id}">
         <div class="svcHead">
           <s class="swatch" style="background:${l.colour}"></s>
-          <span class="nm" title="${esc(l.name)} · ${l.stops.length} calls">${esc(l.name)}</span>
+          <span class="nm" title="${esc(l.name)} · 정차역 ${l.stops.length}곳">${esc(l.name)}</span>
           <span class="svcBadge ${l.policy}">${POLICIES[l.policy]?.label ?? l.policy}</span>
-          <span class="tn" title="engines">${l.trains}</span>
+          <span class="tn" title="기관차">${l.trains}</span>
           <span class="svcNet ${net >= 0 ? 'good' : 'bad'}">${net >= 0 ? '+' : ''}${Math.round(net)}</span>
         </div>
       </div>`;
@@ -137,7 +137,7 @@ export function createHud(sim, hooks) {
     // the shed: engines with nothing to do are a resource the player forgets about
     const idle = sim.engines.filter((e) => e.lineId === null);
     if (idle.length) {
-      rows.push(`<div class="shed"><i>In the shed</i>${idle.slice(0, 6).map((e) => {
+      rows.push(`<div class="shed"><i>차고 대기 중</i>${idle.slice(0, 6).map((e) => {
         const cond = clamp(e.condition ?? 1, 0, 1);
         const wear = cond < 0.35 ? ' worn' : cond < 0.7 ? ' tired' : '';
         return `<button class="engChip${wear}" data-eng-id="${e.id}"
@@ -159,23 +159,23 @@ export function createHud(sim, hooks) {
         <span class="drawing">${drawLoco(k, { w: 168 })}</span>
         <span class="nm">${sigil(o.style)}${esc(o.name)}</span>
         <span class="stats">
-          ${stat('haul', o.power, 1.9)}${stat('speed', o.speed, 1.5)}${stat('appeal', o.grace, 1.5)}${stat('endurance', o.stamina, 1.8)}
+          ${stat('견인', o.power, 1.9)}${stat('속도', o.speed, 1.5)}${stat('인상', o.grace, 1.5)}${stat('내구', o.stamina, 1.8)}
         </span>
         <span class="bl">${esc(o.blurb)}</span>
         ${o.refuse
           ? `<span class="wr">${esc(o.refuse)}</span>`
           : `<button data-buy-eng="${k}" ${o.price > sim.treasury ? 'disabled' : ''}
-               title="${esc(o.builder)} · ${o.upkeep} cr/week upkeep">Buy · ${o.price} cr</button>`}
+               title="${esc(o.builder)} · 주 ${o.upkeep}크라운 유지비">구입 · ${o.price}크라운</button>`}
       </div>`;
     }).join('');
     rows.push(`<details class="engWorks"${fleetShopOpen ? ' open' : ''}>
-      <summary>The engine works</summary>${buyable}
-      <p class="ledNote">Haul · speed · appeal · endurance. An engine wears with the work
-      it does; a worn one hauls less and can be put right in the shed.</p>
+      <summary>기관차 공작소</summary>${buyable}
+      <p class="ledNote">견인 · 속도 · 인상 · 내구. 기관차는 하는 일만큼 닳으며,
+      닳은 기관차는 적게 끌고 차고에서 정비할 수 있다.</p>
     </details>`);
 
     if (!rows.length) {
-      rows.push('<div class="empty">No services yet. Build a line and one will be founded.</div>');
+      rows.push('<div class="empty">아직 노선이 없습니다. 선로를 건설하면 노선이 생깁니다.</div>');
     }
     $('lineList').innerHTML = rows.join('');
   }
@@ -202,12 +202,12 @@ export function createHud(sim, hooks) {
       const worst = sim.needsOf(site).find((n) => n.met < 0.6 && n.why);
       return `<li data-stop="${id}">
         ${sigil(site.culture)}<span class="nm">${esc(site.name)}</span>
-        ${worst ? `<span class="flag short" title="${esc(worst.why)}">short of ${esc(GOODS[worst.good].name.toLowerCase())}</span>` : ''}
+        ${worst ? `<span class="flag short" title="${esc(worst.why)}">${esc(GOODS[worst.good].name)} 부족</span>` : ''}
         <span class="ops">
-          <button data-act="up" ${i === 0 ? 'disabled' : ''} title="Earlier">↑</button>
-          <button data-act="down" ${i === line.stops.length - 1 ? 'disabled' : ''} title="Later">↓</button>
-          <button data-act="split" ${i === 0 || i === line.stops.length - 1 ? 'disabled' : ''} title="Split the service here">⋔</button>
-          <button data-act="drop" ${line.stops.length <= 2 ? 'disabled' : ''} title="Stop calling here">✕</button>
+          <button data-act="up" ${i === 0 ? 'disabled' : ''} title="앞으로">↑</button>
+          <button data-act="down" ${i === line.stops.length - 1 ? 'disabled' : ''} title="뒤로">↓</button>
+          <button data-act="split" ${i === 0 || i === line.stops.length - 1 ? 'disabled' : ''} title="여기서 노선 분할">⋔</button>
+          <button data-act="drop" ${line.stops.length <= 2 ? 'disabled' : ''} title="정차 중지">✕</button>
         </span>
       </li>`;
     }).join('');
@@ -219,52 +219,52 @@ export function createHud(sim, hooks) {
       <div class="lpHead">
         <s class="swatch" style="background:${line.colour}"></s>
         <input class="lpName" value="${esc(line.name)}" maxlength="34" spellcheck="false">
-        <button class="ghost sm" data-act="closeLine" title="Close">✕</button>
+        <button class="ghost sm" data-act="closeLine" title="닫기">✕</button>
       </div>
 
       <div class="lpRow">
-        <span class="lpLabel">Carries</span>
+        <span class="lpLabel">수송</span>
         ${seg('policy', POLICY_KEYS.map((k) => ({
           v: k, l: POLICIES[k].label,
-          t: `goods ×${POLICIES[k].goods.toFixed(2)}, passengers ×${POLICIES[k].pax.toFixed(2)}`,
+          t: `화물 ×${POLICIES[k].goods.toFixed(2)}, 여객 ×${POLICIES[k].pax.toFixed(2)}`,
         })), line.policy)}
       </div>
 
       <div class="lpRow">
-        <span class="lpLabel">Fares</span>
+        <span class="lpLabel">운임</span>
         ${seg('fare', FARES.map((f, i) => ({
           v: i, l: f.label,
-          t: `receipts ×${f.mul.toFixed(2)}, tonnage ×${f.demand.toFixed(2)}`,
+          t: `수입 ×${f.mul.toFixed(2)}, 수송량 ×${f.demand.toFixed(2)}`,
         })), line.fare)}
       </div>
 
       <div class="lpRow">
-        <span class="lpLabel">Engines</span>
+        <span class="lpLabel">기관차</span>
         <div class="stepper">
           <button data-tr="-1" ${line.trains <= 0 ? 'disabled' : ''}>−</button>
           <b>${line.trains}</b>
           <button data-tr="1" ${idle <= 0 ? 'disabled' : ''}>+</button>
-          <i>${idle} idle in shed</i>
+          <i>차고 대기 ${idle}대</i>
         </div>
       </div>
 
       <div class="lpRow">
-        <span class="lpLabel">Wardens</span>
+        <span class="lpLabel">감시병</span>
         <label class="chk"><input type="checkbox" data-act="warden" ${line.warden ? 'checked' : ''}>
-          patrol this line (${WARDEN_COST}/wk, halves incidents)</label>
+          이 노선 순찰 (주 ${WARDEN_COST}크라운, 사건 절반으로 감소)</label>
       </div>
 
       <div class="lpStops">
-        <span class="lpLabel">Calls at</span>
+        <span class="lpLabel">정차역</span>
         <ol>${stops}</ol>
-        <p class="lpAdd">Click a settlement on the map to add it to this service.</p>
+        <p class="lpAdd">지도에서 정착지를 클릭하면 이 노선에 추가됩니다.</p>
       </div>
 
       <div class="lpStats">
-        <div><i>carried</i><b>${Math.round(st.loads ?? 0)}</b><s>loads/wk</s></div>
-        <div><i>receipts</i><b>${Math.round(st.revenue ?? 0)}</b><s>cr/wk</s></div>
-        <div><i>upkeep</i><b>${Math.round(st.upkeep ?? 0)}</b><s>cr/wk</s></div>
-        <div><i>busiest</i><b>${Math.round((st.worstLoad ?? 0) * 100)}%</b>
+        <div><i>수송</i><b>${Math.round(st.loads ?? 0)}</b><s>적재/주</s></div>
+        <div><i>수입</i><b>${Math.round(st.revenue ?? 0)}</b><s>크/주</s></div>
+        <div><i>유지비</i><b>${Math.round(st.upkeep ?? 0)}</b><s>크/주</s></div>
+        <div><i>최다 혼잡</i><b>${Math.round((st.worstLoad ?? 0) * 100)}%</b>
           <s class="${(st.worstLoad ?? 0) > 0.9 ? 'warn' : ''}">${esc(st.worstLink || '—')}</s></div>
       </div>
 
@@ -276,14 +276,14 @@ export function createHud(sim, hooks) {
         const cars = sim.lineCars(line);
         const shown = hooks.consistFor ? hooks.consistFor(line.id) : null;
         return `<div class="stockRow">
-          <span class="lpLabel">Rolling stock</span>
+          <span class="lpLabel">차량 편성</span>
           <span class="rake">
             <button data-cars="${Math.max(1, cars - 1)}" ${cars <= 1 ? 'disabled' : ''}
-              title="One wagon fewer: lighter train, round the line more often">−</button>
-            <b>${cars}</b><i>of ${sim.stock.cars}</i>
+              title="차량 1량 감소: 가벼운 열차, 더 잦은 순회">−</button>
+            <b>${cars}</b><i>/ ${sim.stock.cars}</i>
             <button data-cars="${Math.min(sim.stock.cars, cars + 1)}"
               ${cars >= sim.stock.cars ? 'disabled' : ''}
-              title="One wagon more: heavier train, more tonnage per trip">+</button>
+              title="차량 1량 증가: 무거운 열차, 운행당 수송량 증가">+</button>
           </span>
           ${shown && shown.length ? `<span class="rakeArt">${drawConsist(shown, { w: 210 })}</span>` : ''}
         </div>`;
@@ -297,17 +297,17 @@ export function createHud(sim, hooks) {
         const easePrice = toEase.reduce((n, L) => n + sim.worksPrice.regrade(L), 0);
         const armPrice = toArm.reduce((n, L) => n + sim.worksPrice.fortify(L), 0);
         return `<div class="worksRow">
-          <span class="lpLabel">Works</span>
+          <span class="lpLabel">공사</span>
           ${toEase.length ? `<button data-regrade="${line.id}" ${easePrice > sim.treasury ? 'disabled' : ''}
-            title="Ease the gradients and curves on every section: everything runs faster"
-            >Regrade · ${easePrice} cr</button>` : '<i>eased</i>'}
+            title="모든 구간의 경사와 곡선을 완화한다: 모든 것이 더 빨리 달린다"
+            >경사 완화 · ${easePrice}크라운</button>` : '<i>완화됨</i>'}
           ${toArm.length ? `<button data-fortify="${line.id}" ${armPrice > sim.treasury ? 'disabled' : ''}
-            title="Blockhouses and walled cuttings: incidents on this line more than halve"
-            >Fortify · ${armPrice} cr</button>` : '<i>fortified</i>'}
+            title="병영과 성벽 절개지: 이 노선의 사건이 절반 이하로 줄어든다"
+            >보강 · ${armPrice}크라운</button>` : '<i>보강됨</i>'}
         </div>`;
       })()}
       <div class="lpActions">
-        <button class="alt" data-act="deleteLine">Withdraw the service</button>
+        <button class="alt" data-act="deleteLine">노선 폐지</button>
       </div>`;
   }
 
@@ -336,7 +336,7 @@ export function createHud(sim, hooks) {
         <span class="fq">${m.amount.toFixed(1)}</span>
         <span class="fg">${esc(GOODS[m.good].name)}</span>
         <span class="fp">${esc(a.name)} → ${esc(b.name)}</span>
-        <span class="fx">${m.hops > 1 ? `${m.hops - 1} change${m.hops > 2 ? 's' : ''}` : 'direct'}</span>
+        <span class="fx">${m.hops > 1 ? `${m.hops - 1}회 환승` : '직행'}</span>
       </div>`;
     }).join('');
 
@@ -350,8 +350,8 @@ export function createHud(sim, hooks) {
       <span class="pc">${Math.round(b.load * 100)}%</span>
       ${can ? `<button class="botFix" data-double="${b.id}"
           ${price > sim.treasury ? 'disabled' : ''}
-          title="Lay a second road: capacity up nine tenths, upkeep up three quarters"
-        >Double it · ${price} cr</button>` : '<span class="botDone">double track</span>'}
+          title="두 번째 선로를 놓는다: 수송력 90% 증가, 유지비 75% 증가"
+        >복선화 · ${price}크라운</button>` : '<span class="botDone">복선</span>'}
     </div>`;
     }).join('');
 
@@ -381,11 +381,11 @@ export function createHud(sim, hooks) {
       const L = LENDERS[d.lender];
       return `<div class="debtRow${d.missed ? ' late' : ''}">
         <span class="nm">${esc(L.name)}</span>
-        <span class="num">${Math.round(d.owed)} owed</span>
-        <span class="dr">${(d.rate * 100).toFixed(1)}%/wk</span>
-        ${d.missed ? `<span class="lateTag">${d.missed} missed</span>` : ''}
+        <span class="num">${Math.round(d.owed)} 미상환</span>
+        <span class="dr">주 ${(d.rate * 100).toFixed(1)}%</span>
+        ${d.missed ? `<span class="lateTag">${d.missed}회 누락</span>` : ''}
         <button data-repay="${d.id}" ${sim.treasury < 20 ? 'disabled' : ''}
-          title="Pay down what you can afford now">Repay</button>
+          title="지금 감당할 수 있는 만큼 상환">상환</button>
       </div>`;
     }).join('');
 
@@ -398,8 +398,8 @@ export function createHud(sim, hooks) {
         <span class="ln">${esc(o.note)}</span>
         ${o.refuse
           ? `<span class="wr">${esc(o.refuse)}</span>`
-          : `<button data-borrow="${k}" title="Take the largest advance they will make">
-               Borrow ${o.cap} cr</button>`}
+          : `<button data-borrow="${k}" title="그들이 내줄 수 있는 최대 선지급">
+               ${o.cap}크라운 차입</button>`}
       </div>`;
     }).join('');
 
@@ -408,44 +408,44 @@ export function createHud(sim, hooks) {
     // moves by whatever was spent on works, which is a decision, not an income.
     const ledgerNet = fares + (sim.lastGrant ?? 0) - (sim.lastUpkeep ?? 0);
     el.innerHTML = `
-      <h3>The Ledger <button id="ledgerClose" class="ghost sm">✕</button></h3>
+      <h3>장부 <button id="ledgerClose" class="ghost sm">✕</button></h3>
 
       <div class="ledSection">
-        <h4>Receipts, week ${Math.max(1, sim.week - 1)}</h4>
+        <h4>수지, ${Math.max(1, sim.week - 1)}주차</h4>
         <table class="ledTable">
-          ${lines || '<tr><td colspan="4" class="dim">No services running.</td></tr>'}
-          <tr class="ledTotal"><td>Fares and freight</td><td colspan="2"></td>
+          ${lines || '<tr><td colspan="4" class="dim">운행 중인 노선이 없습니다.</td></tr>'}
+          <tr class="ledTotal"><td>여객 및 화물 운임</td><td colspan="2"></td>
             <td class="num good">+${Math.round(fares)}</td></tr>
-          <tr><td>Council grant</td><td colspan="2"></td>
+          <tr><td>평의회 보조금</td><td colspan="2"></td>
             <td class="num good">+${Math.round(sim.lastGrant ?? 0)}</td></tr>
-          <tr><td>Maintenance and wages</td><td colspan="2"></td>
+          <tr><td>유지비 및 인건비</td><td colspan="2"></td>
             <td class="num bad">−${Math.round(sim.lastUpkeep ?? 0)}</td></tr>
-          <tr class="ledTotal"><td>Net, before works</td><td colspan="2"></td>
+          <tr class="ledTotal"><td>공사비 제외 순수지</td><td colspan="2"></td>
             <td class="num ${ledgerNet >= 0 ? 'good' : 'bad'}">${ledgerNet >= 0 ? '+' : ''}${Math.round(ledgerNet)}</td></tr>
         </table>
       </div>
 
       <div class="ledSection">
-        <h4>What moved yesterday</h4>
-        ${flows || '<p class="ledNote">Nothing moved. Check that a service runs where the goods are.</p>'}
+        <h4>어제 움직인 것</h4>
+        ${flows || '<p class="ledNote">아무것도 움직이지 않았습니다. 화물이 있는 곳에 노선이 닿는지 확인하세요.</p>'}
       </div>
 
-      ${bots ? `<div class="ledSection"><h4>Bottlenecks</h4>${bots}
-        <p class="ledNote">A line at capacity carries no more however much is waiting. Add engines, or split the service.</p></div>` : ''}
+      ${bots ? `<div class="ledSection"><h4>병목</h4>${bots}
+        <p class="ledNote">수송력에 달한 선로는 얼마나 대기하든 더 실을 수 없습니다. 기관차를 늘리거나 노선을 나누세요.</p></div>` : ''}
 
-      ${wants ? `<div class="ledSection"><h4>Wanting for something</h4>${wants}</div>` : ''}
+      ${wants ? `<div class="ledSection"><h4>부족한 것들</h4>${wants}</div>` : ''}
 
       <div class="ledSection">
-        <h4>Raising money</h4>
+        <h4>자금 조달</h4>
         ${debts ? `<div class="debts">${debts}</div>` : ''}
         ${lenders}
-        <p class="ledNote">Borrowed money spends exactly like earned money. The difference
-        is who is owed, and what they want instead of interest.</p>
+        <p class="ledNote">빌린 돈은 번 돈과 똑같이 쓰인다. 다른 것은 채권자가
+        누구이며, 그들이 이자 대신 무엇을 원하는가이다.</p>
       </div>
 
       <div class="ledSection">
-        <h4>The lands you have entered</h4>
-        ${lands || '<p class="ledNote">Only the home country, so far.</p>'}
+        <h4>들어간 땅들</h4>
+        ${lands || '<p class="ledNote">아직은 고국뿐입니다.</p>'}
       </div>`;
   }
 
@@ -463,7 +463,7 @@ export function createHud(sim, hooks) {
     const pending = sim.commissions.filter((c) => c.state === 'offered').length;
     if (btn) {
       btn.classList.toggle('pulse', pending > 0);
-      btn.textContent = pending ? `Commissions (${pending})` : 'Commissions';
+      btn.textContent = pending ? `의뢰 (${pending})` : '의뢰';
     }
     if (!commOpen) return;
 
@@ -473,26 +473,26 @@ export function createHud(sim, hooks) {
       const left = c.due - sim.week;
       const pc = Math.min(100, Math.round((c.done / Math.max(1, c.need)) * 100));
       const what = c.class === 'people'
-        ? `${c.label || 'passage'}${from ? ` from ${esc(from.name)}` : ''}${to ? ` to ${esc(to.name)}` : ''}`
-        : `${c.need} × ${esc(goodName(c.good))}${to ? ` to ${esc(to.name)}` : ''}`;
+        ? `${c.label || '여객'}${from ? ` · ${esc(from.name)}발` : ''}${to ? ` · ${esc(to.name)}행` : ''}`
+        : `${esc(goodName(c.good))} ${c.need}건${to ? ` · ${esc(to.name)}행` : ''}`;
       const taken = c.state === 'taken';
       return `<div class="comm ${c.state}${c.urgent ? ' urgent' : ''}">
         <div class="commHead">
           <b>${esc(c.title)}</b>
-          <span class="commFee">${Math.round(c.fee)} cr</span>
+          <span class="commFee">${Math.round(c.fee)}크라운</span>
         </div>
-        <p class="commClient">${esc(c.client)}${c.urgent ? ' · urgent' : ''}</p>
+        <p class="commClient">${esc(c.client)}${c.urgent ? ' · 긴급' : ''}</p>
         <p class="commWhat">${what}</p>
         ${c.state === 'offered' ? `<p class="commBody">${esc(c.body || '')}</p>` : ''}
         ${taken ? `<div class="commBar"><i style="width:${pc}%"></i></div>
-          <p class="commProg">${c.class === 'people' ? `${pc}% carried` : `${c.done.toFixed(1)} of ${c.need}`}
-            · ${left <= 0 ? 'due now' : `${left} week${left === 1 ? '' : 's'} left`}${c.stalled ? ' · no route' : ''}</p>` : ''}
+          <p class="commProg">${c.class === 'people' ? `${pc}% 수송 완료` : `${c.need} 중 ${c.done.toFixed(1)}`}
+            · ${left <= 0 ? '기한 도래' : `남은 기한 ${left}주`}${c.stalled ? ' · 경로 없음' : ''}</p>` : ''}
         ${c.state === 'offered' ? `<div class="commActs">
-            <button data-comm-take="${c.id}">Accept</button>
-            <button class="alt" data-comm-drop="${c.id}">Decline</button>
+            <button data-comm-take="${c.id}">수락</button>
+            <button class="alt" data-comm-drop="${c.id}">거절</button>
           </div>` : ''}
-        ${c.state === 'done' ? '<p class="commProg good">discharged</p>' : ''}
-        ${c.state === 'failed' ? '<p class="commProg bad">not discharged</p>' : ''}
+        ${c.state === 'done' ? '<p class="commProg good">이행 완료</p>' : ''}
+        ${c.state === 'failed' ? '<p class="commProg bad">이행 실패</p>' : ''}
       </div>`;
     };
 
@@ -501,15 +501,15 @@ export function createHud(sim, hooks) {
     const closed = sim.commissions.filter((c) => c.state === 'done' || c.state === 'failed');
 
     el.innerHTML = `
-      <h3>Commissions <button id="commClose" class="ghost sm">✕</button></h3>
-      ${offered.length ? `<div class="ledSection"><h4>Asked of the Authority</h4>${offered.map(card).join('')}</div>` : ''}
-      ${taken.length ? `<div class="ledSection"><h4>In hand</h4>${taken.map(card).join('')}</div>` : ''}
-      ${closed.length ? `<div class="ledSection"><h4>Closed</h4>${closed.map(card).join('')}</div>` : ''}
+      <h3>의뢰 <button id="commClose" class="ghost sm">✕</button></h3>
+      ${offered.length ? `<div class="ledSection"><h4>교통청에 청해 온 것</h4>${offered.map(card).join('')}</div>` : ''}
+      ${taken.length ? `<div class="ledSection"><h4>진행 중</h4>${taken.map(card).join('')}</div>` : ''}
+      ${closed.length ? `<div class="ledSection"><h4>종결</h4>${closed.map(card).join('')}</div>` : ''}
       ${!offered.length && !taken.length && !closed.length
-        ? '<p class="ledNote">Nothing is being asked of the Authority. This is not usual and will not last.</p>' : ''}
-      <p class="ledNote">A commission is discharged by ordinary working: run a service that carries the
-        cargo to the place named, and deliveries count automatically. Freight wants tonnage;
-        passage wants a route with passenger services on it.</p>`;
+        ? '<p class="ledNote">현재 교통청에 청해 온 것이 없습니다. 이는 흔치 않은 일이며 오래가지 않을 것입니다.</p>' : ''}
+      <p class="ledNote">의뢰는 통상 운행으로 이행됩니다. 해당 화물을 지정된 곳으로 나르는 노선을
+        운행하면 배송이 자동으로 집계됩니다. 화물 의뢰는 톤수를,
+        여객 의뢰는 여객 노선이 지나는 경로를 요구합니다.</p>`;
   }
 
   // ── the register ───────────────────────────────────────────────────────
@@ -525,7 +525,7 @@ export function createHud(sim, hooks) {
       const div = document.createElement('div');
       div.className = `logEntry ${e.tone || 'plain'}${e.big ? ' big' : ''}`;
       const body = e.big ? illuminate(e.text) : paras(e.text);
-      div.innerHTML = `<span class="wk">week ${e.week}</span>${plateFor(e.plate)}${body}`;
+      div.innerHTML = `<span class="wk">${e.week}주차</span>${plateFor(e.plate)}${body}`;
       list.prepend(div);
       while (list.children.length > 60) list.lastChild.remove();
     }
@@ -544,7 +544,7 @@ export function createHud(sim, hooks) {
       <div class="need ${n.met < 0.6 ? 'short' : ''}">
         <s style="background:${GOODS[n.good].colour}"></s>
         <span class="ng">${esc(GOODS[n.good].name)}</span>
-        <span class="nq">${n.got.toFixed(1)} of ${n.want.toFixed(1)}</span>
+        <span class="nq">${n.want.toFixed(1)} 중 ${n.got.toFixed(1)}</span>
         ${n.why ? `<span class="nwhy">${esc(n.why)}</span>` : ''}
       </div>`).join('');
 
@@ -554,20 +554,20 @@ export function createHud(sim, hooks) {
     const wait = sim.waitingAt ? sim.waitingAt(site) : null;
     const platform = (wait && (wait.goods.length || wait.people >= 0.5)) ? `
       <div class="platform">
-        <h5>On the platform</h5>
+        <h5>승강장 위에</h5>
         ${wait.goods.slice(0, 5).map((x) => `
           <div class="waitRow">
             <s style="background:${GOODS[x.good].colour}"></s>
             <span class="ng">${esc(GOODS[x.good].name)}</span>
-            <span class="nq">${x.amount.toFixed(1)} waiting</span>
+            <span class="nq">${x.amount.toFixed(1)} 대기 중</span>
           </div>`).join('')}
         ${wait.people >= 0.5 ? `
           <div class="waitRow people">
             <s style="background:#cbbb96"></s>
-            <span class="ng">Passengers</span>
-            <span class="nq">${Math.round(wait.people)} wanting to travel</span>
+            <span class="ng">여객</span>
+            <span class="nq">${Math.round(wait.people)}명이 여행을 원함</span>
           </div>` : ''}
-        ${!site.connected ? '<p class="ledNote">No rail reaches it. Nothing here can go anywhere.</p>' : ''}
+        ${!site.connected ? '<p class="ledNote">철도가 닿지 않습니다. 여기서 그 무엇도 어디로도 갈 수 없습니다.</p>' : ''}
       </div>` : '';
 
     const makes = [
@@ -578,21 +578,21 @@ export function createHud(sim, hooks) {
     const reach = sim.linesReaching(site.id);
     const addTo = reach.length && !openLine ? `
       <div class="svcChoice">
-        <span class="lpLabel">Add as a call on</span>
+        <span class="lpLabel">이 노선에 정차역 추가</span>
         <div class="seg">${reach.slice(0, 3).map((l) =>
           `<button data-addto="${l.id}"><s class="swatch" style="background:${l.colour}"></s>${esc(l.name)}</button>`).join('')}</div>
       </div>` : '';
 
     el.innerHTML = `
       <h4>${sigil(site.culture)}${esc(site.name)} <em>${k.label} · ${TIER_NAME[site.tier]}</em></h4>
-      <p class="sub2">${esc(REGION_NAME[site.region] || 'the wilds')}${site.abandoned ? ' · abandoned' : ''}${site.quarantined ? ' · closed' : ''}</p>
+      <p class="sub2">${esc(REGION_NAME[site.region] || '황야')}${site.abandoned ? ' · 버려짐' : ''}${site.quarantined ? ' · 폐쇄됨' : ''}</p>
       <div class="kv">
-        <div><i>people</i><b>${crowns(site.pop)}</b></div>
-        <div><i>prosperity</i><b>${Math.round(site.prosperity)}</b></div>
-        <div><i>needs met</i><b>${pct(site.satisfaction)}</b></div>
-        <div><i>rail</i><b>${site.connected ? 'served' : 'none'}</b></div>
-        ${site.plague > 0.05 ? `<div><i class="warn">sickness</i><b class="warn">${pct(site.plague)}</b></div>` : ''}
-        ${site.unrest > 0.2 ? `<div><i class="warn">unrest</i><b class="warn">${pct(site.unrest)}</b></div>` : ''}
+        <div><i>인구</i><b>${crowns(site.pop)}</b></div>
+        <div><i>번영</i><b>${Math.round(site.prosperity)}</b></div>
+        <div><i>충족된 수요</i><b>${pct(site.satisfaction)}</b></div>
+        <div><i>철도</i><b>${site.connected ? '연결됨' : '없음'}</b></div>
+        ${site.plague > 0.05 ? `<div><i class="warn">역병</i><b class="warn">${pct(site.plague)}</b></div>` : ''}
+        ${site.unrest > 0.2 ? `<div><i class="warn">불안</i><b class="warn">${pct(site.unrest)}</b></div>` : ''}
       </div>
       ${(site.traits || []).length ? `<p class="traits">${site.traits.map((t) =>
         `<span class="trait">${esc(TRAITS[t]?.label ?? t)}</span>`).join('')}</p>` : ''}
@@ -604,18 +604,18 @@ export function createHud(sim, hooks) {
         const price = sim.worksPrice.station(site);
         const lvl = site.works || 0;
         return lvl >= 3
-          ? '<p class="worksNote">Station works: as large as the place can bear.</p>'
+          ? '<p class="worksNote">역 공사: 그 고장이 감당할 수 있는 최대 규모입니다.</p>'
           : `<div class="worksRow">
               <span class="lpLabel">Station</span>
               <button data-station="${site.id}" ${price > sim.treasury ? 'disabled' : ''}
-                title="A second platform and a canopy: more passengers, and a taste for finer things"
-              >${lvl ? 'Enlarge again' : 'Enlarge the station'} · ${price} cr</button>
-              ${lvl ? `<i>works ${'I'.repeat(lvl)}</i>` : ''}
+                title="두 번째 승강장과 캐노피: 더 많은 여객, 그리고 더 좋은 것을 찾는 입맛"
+              >${lvl ? '재차 증축' : '역 증축'} · ${price}크라운</button>
+              ${lvl ? `<i>공사 ${'I'.repeat(lvl)}</i>` : ''}
             </div>`;
       })() : ''}
       <div class="actions">
-        <span class="note">${openLine ? 'Adding to the open service.' : 'Click another settlement to survey a line from here.'}</span>
-        <button class="alt" data-act="clear">Done</button>
+        <span class="note">${openLine ? '열려 있는 노선에 추가 중.' : '다른 정착지를 클릭하면 여기서부터 노선을 측량합니다.'}</span>
+        <button class="alt" data-act="clear">완료</button>
       </div>`;
   }
 
@@ -624,7 +624,7 @@ export function createHud(sim, hooks) {
   // An engine is the only thing in the game the player watches move, so it has a
   // name, a class, a shed, a record, and a button that makes it whistle.
   const CLASS_OF = {
-    dwarf: 'Dwarf-built', men: 'March-built', elf: 'Elven', orc: 'Ashen',
+    dwarf: '드워프제', men: '변경제', elf: '엘프제', orc: '잿빛제',
   };
 
   function showEngine(eng, ctx = {}) {
@@ -640,14 +640,14 @@ export function createHud(sim, hooks) {
     const heading = ctx.heading || null;
     el.innerHTML = `
       <h4><span class="rune">${esc((CULTURE_RUNE[eng.style === 'men' ? 'men' : eng.style] || 'ᛗ'))}</span>${esc(eng.name)}
-        <em>${esc(CLASS_OF[eng.style] || eng.style)} · engine no. ${eng.id}</em></h4>
-      <p class="sub2">${line ? `working ${esc(line.name)}` : 'in the shed'}${
-        at ? ` · standing at ${esc(at.name)}` : heading ? ` · next stop ${esc(heading)}` : ''}</p>
+        <em>${esc(CLASS_OF[eng.style] || eng.style)} · 기관차 번호 ${eng.id}</em></h4>
+      <p class="sub2">${line ? `${esc(line.name)} 운행 중` : '차고 대기 중'}${
+        at ? ` · ${esc(at.name)}에 정차 중` : heading ? ` · 다음 정차 ${esc(heading)}` : ''}</p>
       <div class="kv">
-        <div><i>run</i><b>${Math.round(eng.dist).toLocaleString('en-GB')}</b></div>
-        <div><i>carried</i><b>${Math.round(eng.loads).toLocaleString('en-GB')}</b></div>
-        <div><i>in service</i><b>wk ${eng.since}</b></div>
-        <div><i>incidents</i><b class="${eng.incidents ? 'warn' : ''}">${eng.incidents}</b></div>
+        <div><i>주행</i><b>${Math.round(eng.dist).toLocaleString('en-GB')}</b></div>
+        <div><i>수송</i><b>${Math.round(eng.loads).toLocaleString('en-GB')}</b></div>
+        <div><i>운용 개시</i><b>${eng.since}주차</b></div>
+        <div><i>사고</i><b class="${eng.incidents ? 'warn' : ''}">${eng.incidents}</b></div>
       </div>
       <p class="engRec">${esc(engineRecord(eng, sim.week))}</p>
       <div class="engPortrait">${drawLoco(eng.cls, { w: 232, condition: cond })}</div>
@@ -655,31 +655,32 @@ export function createHud(sim, hooks) {
         // The rolling stock, drawn: what this engine is actually pulling right now.
         const cars = hooks.consistOf ? hooks.consistOf(eng.id) : null;
         if (!cars || !cars.length) return '';
-        const named = cars.map((c) => c === 'brake' ? 'brake van'
-          : c === 'passenger' ? 'carriage' : c === 'barrel' ? 'casks' : c).join(' · ');
+        const named = cars.map((c) => c === 'brake' ? '제관차'
+          : c === 'passenger' ? '객차' : c === 'barrel' ? '술통차'
+          : ({ grain: '곡물차', timber: '목재차', ore: '광차', flat: '평판차', van: '유개차', arms: '무기차' }[c] || c)).join(' · ');
         return `<div class="stockStrip">${drawConsist(cars, { w: 240 })}
           <span class="stockList">${esc(named)}</span></div>`;
       })()}
       <div class="engClass">
         <span class="nm">${esc(cls.name)}</span>
         <span class="bl">${esc(cls.builder)}</span>
-        <span class="condLabel">${cond > 0.85 ? 'in good order'
-          : cond > 0.6 ? 'run in' : cond > 0.35 ? 'tired' : 'worn out'}</span>
+        <span class="condLabel">${cond > 0.85 ? '상태 양호'
+          : cond > 0.6 ? '길들여짐' : cond > 0.35 ? '피로함' : '마모됨'}</span>
         <span class="condBar"><i style="width:${Math.round(cond * 100)}%"></i></span>
-        <span class="engStats">haul ${cls.power.toFixed(2)} · speed ${cls.speed.toFixed(2)}
-          · appeal ${cls.grace.toFixed(2)} · endurance ${cls.stamina.toFixed(1)}
-          · ${cls.upkeep} cr/wk${eng.overhauls ? ` · ${eng.overhauls} overhauled` : ''}</span>
-        ${cls.refuses ? `<span class="refuses">Will not take ${cls.refuses.map((g) =>
-          esc(GOODS[g]?.name?.toLowerCase() ?? g)).join(', ')}.</span>` : ''}
+        <span class="engStats">견인 ${cls.power.toFixed(2)} · 속도 ${cls.speed.toFixed(2)}
+          · 인상 ${cls.grace.toFixed(2)} · 내구 ${cls.stamina.toFixed(1)}
+          · ${cls.upkeep}크/주${eng.overhauls ? ` · 전면 정비 ${eng.overhauls}회` : ''}</span>
+        ${cls.refuses ? `<span class="refuses">${cls.refuses.map((g) =>
+          esc(GOODS[g]?.name ?? g)).join(', ')}은(는) 싣지 않습니다.</span>` : ''}
       </div>
       <div class="actions">
-        <button data-eng="ride">${hooks.isFollowing() ? 'Stop riding' : 'Ride with it'}</button>
-        <button class="alt" data-eng="whistle">Sound the whistle</button>
+        <button data-eng="ride">${hooks.isFollowing() ? '내리기' : '함께 타기'}</button>
+        <button class="alt" data-eng="whistle">기적 울리기</button>
         ${cond <= 0.92 ? `<button class="alt" data-overhaul="${eng.id}"
           ${overhaulPrice > sim.treasury ? 'disabled' : ''}
-          title="Put her right: back to as-new condition">Overhaul · ${overhaulPrice} cr</button>` : ''}
-        ${line ? `<button class="alt" data-eng="line">Open ${esc(line.name)}</button>` : ''}
-        <button class="alt" data-act="clear">Done</button>
+          title="정비한다: 새것 같은 상태로">전면 정비 · ${overhaulPrice}크라운</button>` : ''}
+        ${line ? `<button class="alt" data-eng="line">${esc(line.name)} 열기</button>` : ''}
+        <button class="alt" data-act="clear">완료</button>
       </div>`;
   }
 
@@ -691,9 +692,9 @@ export function createHud(sim, hooks) {
     el.hidden = false;
     if (!survey.ok) {
       el.innerHTML = `
-        <h4>${esc(a.name)} → ${esc(b.name)} <em>survey refused</em></h4>
+        <h4>${esc(a.name)} → ${esc(b.name)} <em>측량 거부</em></h4>
         <p class="sub2 warn">${esc(survey.reason)}</p>
-        <div class="actions"><button class="alt" data-act="clear">Very well</button></div>`;
+        <div class="actions"><button class="alt" data-act="clear">알겠다</button></div>`;
       return;
     }
     const mix = {};
@@ -701,8 +702,8 @@ export function createHud(sim, hooks) {
     const works = Object.entries(mix).sort((x, y) => y[1] - x[1])
       .map(([kk, v]) => `<span class="works ${kk}">${WORKS_NAME[kk]} ${Math.round(v)}</span>`).join('');
     const afford = survey.price <= sim.treasury;
-    const perilWord = survey.peril < 0.12 ? 'quiet' : survey.peril < 0.3 ? 'watched'
-      : survey.peril < 0.5 ? 'dangerous' : 'no sane route';
+    const perilWord = survey.peril < 0.12 ? '평온' : survey.peril < 0.3 ? '감시됨'
+      : survey.peril < 0.5 ? '위험' : '제정신으로 갈 수 없는 길';
 
     // extending an existing service is a decision, not something done for you
     const cand = sim.lines.filter((l) => {
@@ -712,26 +713,26 @@ export function createHud(sim, hooks) {
     if (!cand.some((l) => String(l.id) === svcChoice)) svcChoice = 'new';
 
     el.innerHTML = `
-      <h4>${esc(a.name)} → ${esc(b.name)} <em>survey</em></h4>
-      <p class="sub2">${Math.round(survey.length)} units of line${survey.tunnels ? `, ${survey.tunnels} tunnel${survey.tunnels > 1 ? 's' : ''}` : ''}${survey.piers ? `, ${survey.piers} piers` : ''}</p>
+      <h4>${esc(a.name)} → ${esc(b.name)} <em>측량</em></h4>
+      <p class="sub2">선로 ${Math.round(survey.length)}${survey.tunnels ? `, 터널 ${survey.tunnels}개` : ''}${survey.piers ? `, 교각 ${survey.piers}개` : ''}</p>
       <div class="kv">
-        <div><i>to build</i><b class="${afford ? '' : 'warn'}">${crowns(survey.price)} cr</b></div>
-        <div><i>upkeep</i><b>${survey.upkeep.toFixed(1)}/wk</b></div>
-        <div><i>country</i><b>${perilWord}</b></div>
-        <div><i>treasury</i><b>${crowns(sim.treasury)} cr</b></div>
+        <div><i>건설비</i><b class="${afford ? '' : 'warn'}">${crowns(survey.price)} cr</b></div>
+        <div><i>유지비</i><b>주 ${survey.upkeep.toFixed(1)}</b></div>
+        <div><i>지세</i><b>${perilWord}</b></div>
+        <div><i>금고</i><b>${crowns(sim.treasury)} cr</b></div>
       </div>
       <div class="worksrow">${works}</div>
       <div class="svcChoice">
-        <span class="lpLabel">Run it as</span>
+        <span class="lpLabel">운행 방식</span>
         <div class="seg">
-          <button data-svc="new" class="${svcChoice === 'new' ? 'on' : ''}">A new service</button>
+          <button data-svc="new" class="${svcChoice === 'new' ? 'on' : ''}">새 노선</button>
           ${cand.map((l) => `<button data-svc="${l.id}" class="${svcChoice === String(l.id) ? 'on' : ''}">
-            <s class="swatch" style="background:${l.colour}"></s>Extend ${esc(l.name)}</button>`).join('')}
+            <s class="swatch" style="background:${l.colour}"></s>${esc(l.name)} 연장</button>`).join('')}
         </div>
       </div>
       <div class="actions">
-        <button data-act="build" ${afford ? '' : 'disabled'}>${afford ? 'Authorise the works' : 'Cannot pay for it'}</button>
-        <button class="alt" data-act="clear">Abandon the survey</button>
+        <button data-act="build" ${afford ? '' : 'disabled'}>${afford ? '공사를 승인한다' : '비용을 감당할 수 없다'}</button>
+        <button class="alt" data-act="clear">측량을 버린다</button>
       </div>`;
   }
 
@@ -775,11 +776,11 @@ export function createHud(sim, hooks) {
         ${c.note ? `<span class="nt">${esc(c.note)}</span>` : ''}
       </button>`).join('');
     openModal(`
-      <p class="eyebrow">Week ${sim.week} · in session</p>
-      <h2>The Council Will Grant One Charter</h2>
-      <p class="from">Minuted, and not open to further discussion this quarter.</p>
+      <p class="eyebrow">${sim.week}주차 · 개회 중</p>
+      <h2>평의회가 칙허 하나를 내린다</h2>
+      <p class="from">기록되었으며, 이번 분기에 더 이상의 논의는 없다.</p>
       <div class="charters">${cards}</div>
-      <div class="deferrow"><button class="ghost" data-act="defer">Leave it on the table for now</button></div>`, '', 'charter');
+      <div class="deferrow"><button class="ghost" data-act="defer">일단 테이블 위에 둔다</button></div>`, '', 'charter');
   }
 
   function showPetition(p) {
@@ -788,9 +789,9 @@ export function createHud(sim, hooks) {
         <b>${esc(o.label)}</b><span>${esc(o.note)}</span>
       </button>`).join('');
     openModal(`
-      <p class="eyebrow">Week ${sim.week} · correspondence</p>
+      <p class="eyebrow">${sim.week}주차 · 서신 왕래</p>
       <h2>${esc(p.title)}</h2>
-      <p class="from">from ${esc(p.from)}</p>
+      <p class="from">보낸 이: ${esc(p.from)}</p>
       <div class="body">${illuminate(p.body)}</div>
       <div class="choices">${opts}</div>`, '', 'petition');
   }
@@ -799,19 +800,19 @@ export function createHud(sim, hooks) {
     const e = ENDINGS[id] || ENDINGS.survived;
     const s = sim;
     openModal(`
-      <p class="eyebrow">The final entry · week ${s.week}</p>
+      <p class="eyebrow">마지막 기록 · ${s.week}주차</p>
       <h2>${esc(e.title)}</h2>
-      <p class="from">Realm Transit Authority, ${esc(s.seed)}</p>
+      <p class="from">왕국 교통청, ${esc(s.seed)}</p>
       <div class="body">${illuminate(e.body(s))}</div>
       <div class="tally">
-        <div><i>line built</i><b>${crowns(s.links.reduce((n, L) => n + L.length, 0))}</b></div>
-        <div><i>loads carried</i><b>${crowns(s.stats.loadsMoved)}</b></div>
-        <div><i>fares taken</i><b>${crowns(s.stats.fares)}</b></div>
-        <div><i>places joined</i><b>${s.connectedCount()}</b></div>
-        <div><i>incidents</i><b>${s.stats.incidents}</b></div>
-        <div><i>great cities</i><b>${s.sites.filter((x) => x.tier >= 4 && !x.abandoned).length}</b></div>
+        <div><i>건설한 선로</i><b>${crowns(s.links.reduce((n, L) => n + L.length, 0))}</b></div>
+        <div><i>수송한 적재</i><b>${crowns(s.stats.loadsMoved)}</b></div>
+        <div><i>거둔 운임</i><b>${crowns(s.stats.fares)}</b></div>
+        <div><i>연결한 곳</i><b>${s.connectedCount()}</b></div>
+        <div><i>사고</i><b>${s.stats.incidents}</b></div>
+        <div><i>대도시</i><b>${s.sites.filter((x) => x.tier >= 4 && !x.abandoned).length}</b></div>
       </div>
-      <div class="choices"><button class="choice" data-act="restart"><b>Take up the post again</b><span>A new realm, a new timetable.</span></button></div>`, 'ending');
+      <div class="choices"><button class="choice" data-act="restart"><b>다시 취임한다</b><span>새로운 왕국, 새로운 시각표.</span></button></div>`, 'ending');
   }
 
   // ── standing orders ────────────────────────────────────────────────────
@@ -821,7 +822,7 @@ export function createHud(sim, hooks) {
   const ORDERS = [
     {
       id: 'connect',
-      text: 'Connect two settlements. Click one, then another: the surveyors will find a route and price it. A Delve cannot grow food; a Shire has no iron. Join them.',
+      text: '두 정착지를 연결하라. 하나를 클릭하고, 다른 하나를 클릭하라. 측량사들이 경로를 찾아 비용을 산정할 것이다. 델브는 식량을 기르지 못하고, 샤이어에는 철이 없다. 둘을 이어라.',
       done: (s) => s.links.length >= 1,
     },
     {
@@ -831,17 +832,17 @@ export function createHud(sim, hooks) {
       // the people. Tonnage barely moves either way, because what limits tonnage is
       // how many producers you have joined up — not how you run the trains. Saying
       // "Freight shifts half again as much tonnage" was a promise the sim cannot keep.
-      text: 'Open the service in <b>The Fleet</b> below. Choose what it <b>carries</b> — Freight pays better by the ton, Passengers carry many times the people — and how much it <b>charges</b>. Neither moves more tonnage: for that, join up more of the places that make things.',
+      text: '아래 <b>차량대</b>에서 노선을 열어라. 무엇을 <b>싣는지</b> — 화물은 톤당 수입이 좋고, 여객은 몇 배의 사람을 나른다 — 그리고 얼마를 <b>받는지</b>를 골라라. 어느 쪽도 수송량을 늘려 주지는 않는다. 그러려면 물건을 만드는 곳들을 더 많이 이어야 한다.',
       done: (s) => s.lines.some((l) => l.policy !== 'mixed' || l.fare !== 1),
     },
     {
       id: 'extend',
-      text: 'With a service open, clicking a settlement adds it as a further call. Reorder the calls, or split a long service into a trunk and a branch.',
+      text: '노선을 연 상태에서 정착지를 클릭하면 정차역으로 추가된다. 정차 순서를 바꾸거나, 긴 노선을 간선과 지선으로 나누어라.',
       done: (s) => s.lines.some((l) => l.stops.length >= 3),
     },
     {
       id: 'ledger',
-      text: 'Open the <b>Ledger</b> in the top bar. It shows what each service earns, what moved yesterday, where the line is at capacity, and which settlements are going without — and why.',
+      text: '상단 바의 <b>장부</b>를 열어라. 각 노선의 수입, 어제 움직인 것, 수송력이 포화인 구간, 무엇이 부족한 정착지와 그 이유를 보여 준다.',
       done: () => ledgerSeen,
     },
   ];
@@ -862,13 +863,13 @@ export function createHud(sim, hooks) {
     if (!step) {
       ordersDone = true;
       el.hidden = true;
-      hint('Standing orders complete. The realm is yours to ruin.', 5000);
+      hint('상시 지령 완료. 왕국은 마음대로 망치셔도 됩니다.', 5000);
       return;
     }
     el.hidden = false;
     const n = ORDERS.indexOf(step) + 1;
     $('guideBody').innerHTML =
-      `<p class="guideStep">${n} of ${ORDERS.length}</p><p class="guideText">${step.text}</p>`;
+      `<p class="guideStep">${ORDERS.length} 중 ${n}</p><p class="guideText">${step.text}</p>`;
   }
 
   $('guideSkip').addEventListener('click', () => { ordersDone = true; $('guide').hidden = true; });
