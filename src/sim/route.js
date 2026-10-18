@@ -27,8 +27,8 @@ export const WORKS = {
 
 /** Human names, for the survey panel and the reports. */
 export const WORKS_NAME = {
-  grade: 'plain track', bridge: 'bridge', span: 'great span',
-  causeway: 'causeway', tunnel: 'tunnel', viaduct: 'viaduct',
+  grade: '평지 선로', bridge: '교량', span: '대교',
+  causeway: '둑길', tunnel: '터널', viaduct: '고가교',
 };
 
 export const MAX_GRADE = 0.085;      // 8.5%; generous for rail, tight for a mountain
@@ -480,7 +480,7 @@ export function surveyLink(world, siteA, siteB, can, opts = {}) {
   const ctrl = simplify(raw, CELL * 1.25);
   const STEP = 6;
   const pts = resample(ctrl, STEP);
-  if (pts.length < 2) return { ok: false, reason: 'The survey came back blank.' };
+  if (pts.length < 2) return { ok: false, reason: '측량 결과가 백지로 돌아왔다.' };
 
   // pin the ends exactly on the settlements
   pts[0] = { x: siteA.x, z: siteA.z };
@@ -495,10 +495,10 @@ export function surveyLink(world, siteA, siteB, can, opts = {}) {
   // charter check on the classified result, which catches cases the plan-view
   // gates cannot see (a long bridge that turned out to need a great span)
   const need = new Set(info.spans.map((s) => s.kind));
-  if (need.has(WORKS.TUNNEL) && !can.tunnel) return { ok: false, reason: 'requires the Delvers’ Charter' };
-  if (need.has(WORKS.SPAN) && !can.span) return { ok: false, reason: 'requires the Great Span Charter' };
-  if (need.has(WORKS.BRIDGE) && !can.bridge) return { ok: false, reason: 'requires the Bridgewrights’ Charter' };
-  if (need.has(WORKS.CAUSEWAY) && !can.causeway) return { ok: false, reason: 'requires the Fen Causeway Charter' };
+  if (need.has(WORKS.TUNNEL) && !can.tunnel) return { ok: false, reason: '굴착단 칙허가 필요하다' };
+  if (need.has(WORKS.SPAN) && !can.span) return { ok: false, reason: '대교 칙허가 필요하다' };
+  if (need.has(WORKS.BRIDGE) && !can.bridge) return { ok: false, reason: '교량공단 칙허가 필요하다' };
+  if (need.has(WORKS.CAUSEWAY) && !can.causeway) return { ok: false, reason: '늪지 둑길 칙허가 필요하다' };
 
   return {
     ok: true,
@@ -528,12 +528,12 @@ function whyNot(world, a, b, can) {
     maxH = Math.max(maxH, world.heightAt(x, z));
   }
   const climbBase = Math.max(world.heightAt(a.x, a.z), world.heightAt(b.x, b.z), 24);
-  if (!can.tunnel && maxH > climbBase + 28) return 'high ground bars the way — the Delvers have not been chartered';
-  if (sawSea && !can.span) return 'open water, and no charter for a great span';
-  if (sawWater && !can.bridge) return 'a river bars the way, and the Bridgewrights have not been chartered';
-  if (sawMarsh && !can.causeway) return 'the fen will not bear track without a causeway charter';
-  if (sawWoden) return 'the route lies through Wodenholt, and the trees have opinions';
-  return 'no route the surveyors are willing to sign';
+  if (!can.tunnel && maxH > climbBase + 28) return '고지대가 길을 막는다. 굴착단은 아직 칙허를 받지 못했다';
+  if (sawSea && !can.span) return '개방 수면이다. 대교 칙허가 없다';
+  if (sawWater && !can.bridge) return '강이 길을 막는다. 교량공단은 아직 칙허를 받지 못했다';
+  if (sawMarsh && !can.causeway) return '둑길 칙허 없이는 늪이 선로를 견디지 못한다';
+  if (sawWoden) return '노선이 워든홀트를 지나는데, 나무들에게도 의견이 있다';
+  return '측량사들이 서명할 만한 경로가 없다';
 }
 
 /** Sample the finished alignment for the renderer: world-space points on the deck. */
