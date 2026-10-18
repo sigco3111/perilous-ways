@@ -11,8 +11,8 @@
 import { GOODS, VALUE } from './model.js';
 
 export const CLASSES = {
-  freight: { label: 'Freight' },
-  people: { label: 'Passage' },
+  freight: { label: '화물' },
+  people: { label: '여객' },
 };
 
 /**
