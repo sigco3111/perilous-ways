@@ -33,72 +33,72 @@ const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
 
 const BUILT_LINES = [
   // authority, flat
-  (a, b) => `Opened for traffic: ${a} to ${b}. Two workings each way, three on market days.`,
+  (a, b) => `운행 개시: ${a}–${b}. 각 방향 두 편, 장날에는 세 편.`,
   // working man, plain
-  (a, b) => `First train ${a} to ${b} went down at walking pace with the ganger riding the front step. He said the road was good. He does not say that.`,
+  (a, b) => `${a}발 ${b}행 첫 열차가 반장을 앞 발판에 태우고 걷는 속도로 내려갔다. 그는 선로가 좋다고 말했다. 그는 그런 말을 하지 않는 사람이다.`,
   // halfling
-  (a, b) => `${b} is much obliged and has sent a cake to ${a}, a second cake to the Authority, and a note explaining which is which.`,
+  (a, b) => `${b}는 깊이 감사하며 ${a}에 케이크 하나를, 교통청에 두 번째 케이크를, 그리고 어느 것이 어느 것인지 설명하는 쪽지를 보냈다.`,
   // authority, dry, not reversed
-  (a, b) => `The ${a}–${b} works are complete. Final cost exceeded the estimate by a ninth, under the heading of weather.`,
+  (a, b) => `${a}–${b} 공사 준공. 최종 비용은 날씨 항목으로 견적의 9분의 1을 초과하였다.`,
   // dwarf
-  (a, b) => `${a} to ${b}. Gauge true. Ballast sound. Signed for.`,
+  (a, b) => `${a}–${b}. 궤간 정확. 자갈 양호. 인수 서명 완료.`,
   // authority, flat
-  (a, b) => `${a} and ${b} are joined. The signboards are painted and hung.`,
+  (a, b) => `${a}와 ${b}가 이어졌다. 역명판은 칠해져 걸렸다.`,
   // halfling, arrives at its grievance sideways
-  (a, b) => `Mistress Puddifoot writes that the ${a} line is a fine thing, that her mother’s people came from ${b} and were not much thought of, and that the 6:40 is too early.`,
+  (a, b) => `퍼디풋 부인이 서신을 보내 왔다. ${a} 선은 훌륭한 것이며, 자기 어머니 일가는 ${b} 출신으로 별로 대접받지 못했으며, 6시 40분 차는 너무 이르다고 한다.`,
 ];
 
 const TUNNEL_LINES = [
-  (n) => `Bore through beneath the ${n}. Both headings met true. — T. Ironmoot, Master of Works`,
-  (n) => `The ${n} tunnel is open to traffic. Length one mile and six chains, lined throughout.`,
-  (n) => `Tunnel complete in the ${n}. The Delvers have cut KHAZAD into the crown, nine feet high, where no passenger will ever see it.`,
-  (n) => `Bored under the ${n}. The stone came out dry. Thrain Ironmoot asks whether we want a second while the plant is on site.`,
+  (n) => `${n} 아래 관통. 양 굴진면 정확히 만남. — T. 아이언무트, 공사감독`,
+  (n) => `${n} 터널 개통. 길이 1마일 6체인, 전 구간 피복 완료.`,
+  (n) => `${n} 터널 준공. 굴착단이 정점에 아홉 자 높이로 카자드를 새겼다. 어느 여객도 결코 보지 못할 자리에.`,
+  (n) => `${n} 아래 관통. 돌은 마른 채 나왔다. 스란 아이언무트가 장비가 현장에 있는 동안 두 번째 것도 원하는지 묻는다.`,
 ];
 
 const GREW_LINES = [
-  (n, t) => `${n} is entered on the register as a ${t}.`,
-  (n, t) => `${n} has grown to a ${t}. The inn has been extended twice and the innkeeper has stopped pretending to be surprised.`,
-  (n, t) => `${n} is now a ${t} and has applied for a coat of arms. The application encloses a drawing.`,
-  (n, t) => `${n}, ${t}. Population returns to follow.`,
-  (n, t) => `Reclassified: ${n}, ${t}. The stationmaster has asked for a hat appropriate to the new standing and has been told to wait.`,
+  (n, t) => `${n}이(가) 등록부에 ${t}(으)로 등록되었다.`,
+  (n, t) => `${n}이(가) ${t}(으)로 성장하였다. 주막은 두 번 증축되었고 주인은 놀라는 척하기를 그만두었다.`,
+  (n, t) => `${n}이(가) 이제 ${t}이며 문장을 신청하였다. 신청서에 그림이 동봉되어 있다.`,
+  (n, t) => `${n}, ${t}. 인구 보고는 후일 송부.`,
+  (n, t) => `재분류: ${n}, ${t}. 역장이 새 지위에 걸맞은 모자를 요청하였으나 기다리라는 답을 들었다.`,
 ];
 
 // A place slipping. No jokes in this pool.
 const DECLINE_LINES = [
-  (n) => `Population at ${n} continues to fall. The halt is still staffed.`,
-  (n) => `${n} is entered a tier lower. The mill has stopped.`,
-  (n) => `Fewer at ${n} again this quarter. The stationmaster keeps the lamp lit and is not paid to.`,
+  (n) => `${n}의 인구가 계속 줄고 있다. 간이역에는 아직 직원이 있다.`,
+  (n) => `${n}이(가) 한 등급 아래로 등록되었다. 방앗간이 멈췄다.`,
+  (n) => `이번 분기에도 ${n}은 줄었다. 역장은 등불을 켜 두고 있으며, 그 일로 급여를 받지는 않는다.`,
 ];
 
 // A place ending. Grave register: concrete nouns, then stop.
 const ABANDON_LINES = [
-  (n) => `${n} is empty. The last family went on foot, along the line, in the direction of the railway they had been promised.`,
-  (n) => `${n} is struck from the register. Its bell has gone to a place that still has people in it.`,
-  (n) => `No one remains at ${n}. The signboard is down and stored. The name may be wanted again.`,
+  (n) => `${n}은(는) 비었다. 마지막 가구가 도보로, 선로를 따라, 그들이 약속받았던 철도의 방향으로 떠났다.`,
+  (n) => `${n}이(가) 등록부에서 삭제되었다. 그 종은 아직 사람이 사는 곳으로 옮겨졌다.`,
+  (n) => `${n}에는 아무도 남지 않았다. 역명판은 내려 보관되었다. 그 이름은 다시 필요해질지도 모른다.`,
 ];
 
 const INCIDENT_BLOCK = [
-  (r) => `Rockfall, ${r} section. Line closed to traffic while the gang clears it. Ref ${ref()}.`,
-  (r) => `A tree is across the road in the ${r}. It was not there yesterday and it has not been felled. Ref ${ref()}.`,
-  (r) => `Something is standing in the cutting in the ${r}. It has been there since Thursday. Passengers are asked to keep their seats.`,
-  (r) => `The ${r} section is obstructed. The Wardens describe the obstruction as livestock. Ref ${ref()}.`,
-  (r) => `Signal held against us at the ${r} box four hours. The signal was working. The signalman was not certain, and I do not hold it against him. — Driver Halloway`,
-  (r) => `${r} section: obstruction cleared, twelve tons, two wagon loads. No injuries.`,
+  (r) => `낙석, ${r} 구간. 작업반이 치우는 동안 선로 폐쇄. 참조 ${ref()}.`,
+  (r) => `${r}에 나무가 선로를 가로질러 있다. 어제는 없었고, 베어진 것도 아니다. 참조 ${ref()}.`,
+  (r) => `${r}의 절개지 안에 무언가가 서 있다. 목요일부터 거기 있다. 여객은 자리에 앉아 계시기 바란다.`,
+  (r) => `${r} 구간에 장애물이 있다. 파수꾼들은 그 장애물을 가축이라고 부른다. 참조 ${ref()}.`,
+  (r) => `${r} 신호탑에서 네 시간 신호에 걸렸다. 신호기는 정상이었다. 신호수가 확신하지 못했을 뿐이며, 나는 그를 탓하지 않는다. — 기관사 할로웨이`,
+  (r) => `${r} 구간: 장애물 제거됨, 12톤, 두 차량 분량. 부상자 없음.`,
 ];
 
 const INCIDENT_BEAST = [
-  (r) => `A train was set upon in the ${r}. The engine is sound. The brake van is a matter for the adjusters. Ref ${ref()}.`,
-  (r) => `Wargs on the up road at dusk in the ${r}. I ran through them. They did not scatter. They stepped aside and watched us by. — Driver Mullet`,
-  (r) => `The 4:15 came through the ${r} with the engine and nothing else. Ref ${ref()}.`,
-  (r) => `A wagon is gone off the ${r} viaduct. The couplings were undone, not broken.`,
-  (r) => `${r} section: night working suspended by the men’s own agreement. The Authority has not overruled them.`,
+  (r) => `${r}에서 열차가 습격당했다. 기관차는 무사하다. 제동차는 손해사정인들이 다룰 일이다. 참조 ${ref()}.`,
+  (r) => `${r} 상행선, 해거름에 와르그. 나는 그들을 뚫고 지나갔다. 그들은 흩어지지 않았다. 비켜서서 우리가 지나가는 것을 지켜보았다. — 기관사 멀릿`,
+  (r) => `4시 15분 차가 ${r}을(를) 통과해 왔다. 기관차뿐이었고 그 외에는 아무것도 없었다. 참조 ${ref()}.`,
+  (r) => `${r} 고가교에서 차량 한 대가 사라졌다. 연결기는 부러진 것이 아니라 풀려 있었다.`,
+  (r) => `${r} 구간: 직원들의 자체 합의로 야간 작업 중단. 교통청은 이를 번복하지 않았다.`,
 ];
 
 // The older powers. Grave register throughout.
 const INCIDENT_WRATH = [
-  (r) => `The ${r} section has been unmade. Not broken. The rails are lying in the grass in the order they were rolled. Ref ${ref()}.`,
-  (r) => `Track through the ${r} was taken up overnight, with the embankment, the fence, and a surveyor’s coat. The coat was returned.`,
-  (r) => `The works in the ${r} are gone. There is a hill where they were, and it is the right shape for the country.`,
+  (r) => `${r} 구간이 무효화되었다. 부서진 것이 아니다. 레일들이 압연된 순서 그대로 풀밭에 놓여 있다. 참조 ${ref()}.`,
+  (r) => `${r}을(를) 지나던 선로가 하룻밤 사이에 걷혔다. 성토와 울타리와 측량사의 외투와 함께. 외투는 돌려주었다.`,
+  (r) => `${r}의 공사 흔적이 사라졌다. 그 자리에 언덕이 있고, 그 지형에 어울리는 모습이다.`,
 ];
 
 // ---------------------------------------------------------------------------
@@ -110,72 +110,68 @@ const INCIDENT_WRATH = [
  */
 const CROSSING_FALLBACK = {
   first_bridge: () =>
-    'The river is bridged. It took eleven weeks, four revisions and a diver, and the Authority '
-    + 'would like it recorded that the diver was not in the original estimate.\n\n'
-    + 'The first train across went at walking pace with the Bridgewrights standing on the deck. '
-    + 'That is either confidence or hostage-taking and nobody has asked which.',
+    '강에 다리가 놓였다. 열한 주와 네 차례의 설계 변경과 잠수부 한 명이 들었고, '
+    + '잠수부는 원 견적에 없었다는 점을 기록해 두기를 교통청은 바란다.\n\n'
+    + '첫 통과 열차는 교량공들이 상판 위에 서 있는 가운데 걷는 속도로 건넜다. '
+    + '그것이 자신감인지 인질극인지 아무도 묻지 않았다.',
 
   first_bore: () =>
-    'The Sundering Peaks are bored through.\n\n'
-    + 'Twelve hundred feet of rock, driven from both ends, meeting within a hand-breadth. Thrain '
-    + 'Ironmoot walked the length of it before the rails were laid and said nothing at all for the '
-    + 'whole distance, which those who know him report is the highest praise available.\n\n'
-    + 'A journey that took nine days now takes an afternoon. Nobody has worked out what the realm '
-    + 'will do with the other eight.',
+    '선더링 산맥이 관통되었다.\n\n'
+    + '천이백 피트의 암반, 양쪽 끝에서 굴진하여 손바닥 너비 이내로 만났다. 스란 '
+    + '아이언무트는 레일이 깔리기 전 그 전 구간을 걸으며 내내 한마디도 하지 않았는데, '
+    + '그를 아는 이들의 말로는 그것이 얻을 수 있는 최고의 찬사라 한다.\n\n'
+    + '아흐레 걸리던 여정이 이제 오후 한나절이다. 나머지 여드레를 왕국이 무엇에 쓸지 '
+    + '아무도 아직 계산하지 못했다.',
 
   first_pass: () =>
-    'A line is over the pass without a tunnel, up one side and down the other on gradients the '
-    + 'Delvers have described in writing as brave.\n\n'
-    + 'It will drift shut every winter. It cost a tenth of a bore. Both of those are now permanent.',
+    '터널 없이 고개를 넘는 선로가 놓였다. 한쪽 사면을 오르고 다른 쪽을 내리는데, '
+    + '그 구배를 굴착단은 서면으로 용감하다고 평하였다.\n\n'
+    + '매년 겨울 눈에 묻힐 것이다. 비용은 터널의 10분의 1이었다. 이 두 가지 모두 이제 영구적이다.',
 
   first_marsh: () =>
-    'The causeway across the Weeping Marsh is open, and is already an inch lower than it was on '
-    + 'Tuesday.\n\nThe Marsh is not hostile. The Marsh is patient, which is far harder to budget for.',
+    '우는 습지를 가로지르는 제방도로가 개통되었고, 벌써 화요일보다 1인치 낮아졌다.'
+    + '\n\n습지는 적대적이지 않다. 습지는 참을성이 있다. 예산을 세우기에는 그쪽이 훨씬 어렵다.',
 
   first_wood: () =>
-    'Track through Mirkholt. The gangs worked in daylight only, by their own agreement, and nobody '
-    + 'argued with them.\n\n'
-    + 'The trees on either side of the cutting are nearer the line this week than the survey says '
-    + 'they were. The survey has been rechecked. The survey is correct.',
+    '머크홀트를 지나는 선로. 작업반들은 자체 합의로 주간에만 작업했고, 아무도 그들과 '
+    + '논쟁하지 않았다.\n\n'
+    + '절개지 양쪽의 나무들이 측량 기록보다 이번 주 선로에 더 가까워져 있다. 측량은 재확인되었다. '
+    + '측량은 정확하다.',
 
   first_east: () =>
-    'A line is through the Wracklands and into the Ashenreach.\n\n'
-    + 'The gap in the ridge was undefended. Nobody stopped the gangs, nobody watched them, and '
-    + 'nothing whatever was asked of them.\n\n'
-    + 'The Authority spent some weeks deciding whether that was luck. It has stopped deciding.',
+    '랙랜드를 지나 잿빛벌판으로 이어지는 선로가 뚫렸다.\n\n'
+    + '능선의 틈은 지켜지지 않고 있었다. 아무도 작업반을 막지 않았고, 지켜보지도 않았으며, '
+    + '무엇 하나 요구하지도 않았다.\n\n'
+    + '교통청은 그것이 행운인지를 몇 주간 논의했다. 논의를 그만두었다.',
 
   first_wrack: () =>
-    'The line has reached Mount Wrack.\n\n'
-    + 'There is a buffer stop, a water tower, and a signboard with the name on it in the standard '
-    + 'lettering. The signwriter took four days over it and has asked not to be thanked publicly.\n\n'
-    + 'The tariffs are extraordinary. The first consignment east was arms, and the paperwork for it '
-    + 'is correct in every particular.',
+    '선로가 랙 산에 닿았다.\n\n'
+    + '차막이와 급수탑과 표준 서체로 이름을 쓴 역명판이 있다. 간판 장인은 나흘을 들였고 '
+    + '공개적으로 감사받지 않기를 요청했다.\n\n'
+    + '운임은 파격적이다. 첫 동행 화물은 무기였고, 그 서류는 모든 항목에서 정확했다.',
 
   first_quays: () =>
-    'The Grey Quays are on the timetable.\n\n'
-    + 'The Elves came down to see the first train and did not board it. They stood on the quay in '
-    + 'the manner of people watching weather, and when it left they went back to whatever it is '
-    + 'they do there.',
+    '회색 부두가 시각표에 올랐다.\n\n'
+    + '엘프들이 첫 열차를 보러 내려왔으나 타지는 않았다. 그들은 날씨를 보는 사람들처럼 '
+    + '부두에 서 있다가, 열차가 떠나자 그곳에서 하던 무엇이든으로 돌아갔다.',
 };
 
 /** The three-step thread that answers: does anything mind if you tunnel deep? */
 const DEEP_BORE = {
-  1: 'The gangs in the deep heading report a draught.\n\n'
-    + 'There is no shaft above them and no adit beside them and the air is moving anyway. Thrain '
-    + 'Ironmoot has been down. He has ordered the heading advanced with the timbers doubled, and he '
-    + 'has not said why.',
-  2: 'The deep heading has holed into a gallery.\n\n'
-    + 'It is not ours. Dressed stone, older than the Delvers will put a figure to, running across '
-    + 'our alignment at an angle that suggests it was going somewhere specific.\n\n'
-    + 'At the eastern end of it there is a door. The door is shut. The Authority has issued an '
-    + 'instruction that it remain shut and has been asked, politely, by whom.',
-  3: 'The door is open.\n\n'
-    + 'The night shift came up. All of them, which the Authority records with relief, and without '
-    + 'their lamps, which it records without any.\n\n'
-    + 'The deep heading is sealed: twelve feet of masonry and a second wall behind the first. The '
-    + 'Delvers laid both without being asked and invoiced for neither. Thrain Ironmoot has requested '
-    + 'reassignment to signalling.\n\n'
-    + 'The tunnel above remains in service. Trains are instructed not to stop in it.',
+  1: '심부 굴진면의 작업반이 바람을 보고한다.\n\n'
+    + '위에 갱도도, 옆에 갱구도 없는데 공기는 어쨌든 움직이고 있다. 스란 아이언무트가 '
+    + '내려갔다 왔다. 그는 동바리를 두 배로 하여 굴진을 계속하라 지시했고, 이유는 말하지 않았다.',
+  2: '심부 굴진면이 하나의 갱도에 구멍을 냈다.\n\n'
+    + '우리 것이 아니다. 다듬은 돌, 굴착단이 연대를 매기기를 꺼릴 만큼 오래된, 우리 선형을 '
+    + '가로질러 나는데, 그 각도는 어딘가 특정한 곳으로 향하고 있었음을 시사한다.\n\n'
+    + '그 동쪽 끝에 문이 하나 있다. 문은 닫혀 있다. 교통청은 닫힌 채로 두라는 지시를 내렸고, '
+    + '정중하게, 누구에게 그런 지시를 내리는 것이냐는 질문을 받았다.',
+  3: '문이 열려 있다.\n\n'
+    + '야간 반이 올라왔다. 전원이, 교통청은 이를 안도와 함께 기록한다. 등불은 없이, 이는 '
+    + '안도 없이 기록한다.\n\n'
+    + '심부 굴진면은 봉쇄되었다. 12피트의 석조와 그 뒤의 두 번째 벽. 굴착단은 요청받지 않고 '
+    + '둘 다 쌓았고 어느 것도 청구하지 않았다. 스란 아이언무트는 신호 담당으로의 전근을 요청했다.\n\n'
+    + '위쪽 터널은 운행을 계속한다. 열차는 그 안에서 정차하지 말라는 지시를 받았다.',
 };
 
 // The proactive corpus — reports that fire on the state of the realm
@@ -185,23 +181,23 @@ const FLAVOUR = [
   {
     id: 'hens', weight: 5, cooldown: 9,
     when: (s) => s.sites.some((x) => x.kind === 'shire' && x.connected),
-    text: (s) => `Mistress Amaranth Puddifoot writes to say the whistle frightens her hens and asks that it be changed to a bell. She has written eleven times. The hens have not commented.`,
+    text: (s) => `아마란스 퍼디풋 부인이 서신을 보내 왔다. 기적이 자기 암탉들을 놀라게 하니 종으로 바꿔 달라는 내용이다. 열한 번째 서신이다. 암탉들은 언급하지 않았다.`,
   },
   {
     id: 'hens2', weight: 3, cooldown: 14, after: 'hens',
     when: (s) => true,
-    text: () => `Mistress Puddifoot has written again. The letter contains a diagram. The diagram is of a bell.`,
+    text: () => `퍼디풋 부인이 또 서신을 보내 왔다. 서신에는 그림이 들어 있다. 그림은 종의 그림이다.`,
   },
   {
     id: 'lost_property', weight: 5, cooldown: 7,
     when: () => true,
     text: (s) => {
       const items = [
-        'one umbrella, black', 'a sword, unclaimed', 'a bundle of maps of somewhere else',
-        'a wedding ring and a note reading “no”', 'a live goose', 'a box of teeth, not human',
-        'nine identical grey cloaks', 'a bill of lading for a cargo we have never carried',
-        'a small harp, tuned', 'a hat with a hole burned through the crown',
-        'a child’s shoe, and only the one', 'a key, iron, to nothing on the system',
+        '검은 우산 한 점', '주인 없는 검 한 자루', '다른 어딘가의 지도 한 다발',
+        '결혼반지와 “아니오”라고 적힌 쪽지', '살아 있는 거위 한 마리', '사람의 것이 아닌 이빨 한 상자',
+        '똑같은 회색 망토 아홉 벌', '우리가 운송한 적 없는 화물의 운송장',
+        '조율된 작은 하프', '정수리에 탄 구멍이 난 모자',
+        '아이의 신발, 한쪽만', '노선 어디에도 맞지 않는 쇠열쇠',
       ];
       const two = () => {
         const a = pick(s.rng, items);
@@ -212,9 +208,9 @@ const FLAVOUR = [
       const [a, b] = two();
       const Cap = (t) => String(t).charAt(0).toUpperCase() + String(t).slice(1);
       return pick(s.rng, [
-        `Lost property, quarter to Michaelmas. Held: ${a}; ${b}. Claimed: none of it. The room is full and the surplus has been put in the room next door, which was also full.`,
-        `Lost property. The clerk asks for a ruling on ${a}, eleven months on the shelf now, and on ${b}, which he would like to take home. Ruling: no to both, and he is not to ask again in writing.`,
-        `Lost property, and a complaint attached. Handed in at the halt: ${a}. Handed in at the same halt, by the same man: ${b}. He says he found them on the train. The guard says he came in with them.`,
+        `분실물 보고, 미카엘 축제 분기. 보관 중: ${a}; ${b}. 찾아간 것: 없음. 보관실이 가득 차서 잉여분은 옆방에 두었는데, 옆방도 가득 찼다.`,
+        `분실물. 서기가 재가를 구한다. 선반에 올라온 지 11개월 된 ${a}에 대하여, 그리고 집에 가져가고 싶다는 ${b}에 대하여. 재가: 둘 다 불허. 서면으로 다시 묻지 말 것.`,
+        `분실물, 민원 한 건 첨부. 간이역에 접수됨: ${a}. 같은 간이역에, 같은 사람이 접수함: ${b}. 그는 열차에서 주웠다고 한다. 차장은 그가 가지고 탔다고 한다.`,
       ]);
     },
   },
@@ -223,55 +219,55 @@ const FLAVOUR = [
     when: (s) => s.links.length > 5,
     text: (s) => {
       const pc = 61 + Math.floor(s.rng() * 33);
-      return `Punctuality this period: ${pc} per cent. The Authority notes that the figure is calculated against the revised timetable, and that the timetable was revised in order to improve the figure.`;
+      return `이번 기간 정시율: ${pc}퍼센트. 교통청은 이 수치가 개정 시각표를 기준으로 산출되었으며, 시각표는 이 수치를 개선하기 위해 개정되었음을 밝혀 둔다.`;
     },
   },
   {
     id: 'dwarf_invoice', weight: 4, cooldown: 10,
     when: (s) => s.can.tunnel && s.regard.dwarf > 30,
-    text: () => `The Delvers have submitted an invoice itemised in a script the Authority cannot read, totalling an amount the Authority cannot dispute. It has been paid.`,
+    text: () => `굴착단이 교통청이 읽을 수 없는 문자로 세목을 적고, 교통청이 다툴 수 없는 액수로 합계를 낸 청구서를 제출하였다. 지급되었다.`,
   },
   {
     id: 'elf_objection', weight: 5, cooldown: 8,
     when: (s) => !s.elvesGone && s.regard.elf < 55,
     text: (s) => pick(s.rng, [
-      `A representation has been received from the Havens. It is nine lines long, it is in verse, and it is about a tree that is no longer there.`,
-      `The Elves object to the smoke. They have not said what they would like done about the smoke. They have simply established, at length, that they object to it.`,
-      `An Elvish deputation attended the Board and declined refreshment. They stayed four hours. They said nothing after the first ten minutes, and the minute-taker reports that this was worse.`,
+      `항구에서 진정서가 접수되었다. 아홉 줄이고, 운문이며, 더 이상 거기 없는 한 그루 나무에 관한 것이다.`,
+      `엘프들이 연기에 이의를 제기한다. 연기를 어떻게 해 주기를 바라는지는 말하지 않았다. 다만 장황하게, 자신들이 이의를 제기한다는 사실을 확립하였다.`,
+      `엘프 대표단이 이사회에 참석하여 다과를 사양하였다. 네 시간을 머물렀다. 처음 10분 이후 아무 말도 하지 않았으며, 기록 담당은 그것이 더 나빴다고 보고한다.`,
     ]),
   },
   {
     id: 'vurmath1', weight: 6, cooldown: 99, once: true,
     when: (s) => s.week > 5 && s.links.length > 6,
-    text: () => `Vurmath the Grey has taken an interest in the railway. He arrived unannounced at the works, asked eleven questions about coal, and left with a copy of the survey. He has offered his assistance, which the Authority has accepted, having no procedure for refusing it.`,
+    text: () => `회색의 부르마스가 철도에 관심을 보이고 있다. 그는 예고 없이 공사 현장에 나타나 석탄에 관해 열한 가지를 묻고 측량 도면 사본을 가지고 떠났다. 그는 협조를 제안했고, 교통청은 거절할 절차가 없으므로 수락하였다.`,
     chronicle: true,
   },
   {
     id: 'vurmath2', weight: 6, cooldown: 99, once: true, after: 'vurmath1',
     when: (s) => s.age >= 2 && s.smokeIndex > 8,
-    text: () => `Vurmath now styles himself Vurmath the White and has submitted proposals. He would like a branch to his tower, three additional smelters, and a seat on the Board. He has been given the branch. The Board is a matter for the Council, and the Council is not answering.`,
+    text: () => `부르마스는 이제 스스로를 백색의 부르마스라 칭하며 제안서를 제출하였다. 자기 탑까지의 지선, 제련소 세 개 추가, 이사회 의석을 원한다. 지선은 주어졌다. 이사회는 평의회 소관이며, 평의회는 답하지 않고 있다.`,
     chronicle: true,
   },
   {
     id: 'elberic', weight: 4, cooldown: 16,
     when: (s) => s.week > 8,
     text: (s) => pick(s.rng, [
-      `Elberic the Grey travelled from Brackenford to Amonhal without a ticket. When challenged he agreed that he had no ticket, complimented the guard on his diligence, and continued to have no ticket for the remainder of the journey.`,
-      `Elberic the Grey was seen on the ${pick(s.rng, ['down', 'up'])} platform, looking east. He declined to say what he was looking at. The Authority has looked east and seen nothing, which it has decided to find reassuring.`,
+      `회색의 엘베릭이 승차권 없이 브래큰포드에서 아몬할까지 여행하였다. 문제 삼자 그는 승차권이 없다는 데 동의하고, 차장의 근면함을 칭찬한 뒤, 남은 여정 내내 계속 승차권이 없었다.`,
+      `회색의 엘베릭이 ${pick(s.rng, ['하행', '상행'])} 승강장에서 동쪽을 바라보는 것이 목격되었다. 그는 무엇을 보고 있는지 말하기를 거절하였다. 교통청도 동쪽을 보았으나 아무것도 보이지 않았고, 이를 안심되는 일로 받아들이기로 하였다.`,
     ]),
   },
   {
     id: 'goblin_market', weight: 4, cooldown: 20, once: true,
     when: (s) => s.can.tunnel && s.links.some((L) => L.tunnels > 0),
-    text: () => `An unlicensed market has established itself in the middle of a tunnel. It trades at night, accepts no coin the Authority recognises, and pays a rent to somebody. The Authority has resolved to determine whom, after the summer timetable.`,
+    text: () => `무허가 시장이 터널 한가운데 자리 잡았다. 밤에 거래하고, 교통청이 아는 어떤 동전도 받지 않으며, 누군가에게 임대료를 내고 있다. 교통청은 여름 시각표 이후에 그 누군가를 밝혀내기로 결의하였다.`,
   },
   {
     id: 'barrow', weight: 4, cooldown: 12,
     when: (s) => s.links.some((L) => {
       const a = s.byId.get(L.a);
-      return a && REGION_NAME[a.region] === 'the Barrowdowns';
+      return a && REGION_NAME[a.region] === '배로우 언덕';
     }),
-    text: () => `Night services across the Barrowdowns are again running slow. Drivers report that the section takes longer than it is long. The Authority has re-measured the section. The section is the length it has always been.`,
+    text: () => `배로우 언덕을 지나는 야간 열차가 다시 느리게 달리고 있다. 기관사들은 그 구간이 길이보다 오래 걸린다고 보고한다. 교통청이 구간을 재측량하였다. 구간은 늘 그래 온 길이다.`,
   },
   {
     id: 'congested', weight: 7, cooldown: 6,
@@ -282,7 +278,7 @@ const FLAVOUR = [
       const L = s.links.find((x) => x.id === worst);
       const a = L && s.byId.get(L.a), b = L && s.byId.get(L.b);
       if (!a || !b) return null;
-      return `Freight is standing at ${a.name} for want of a path. The ${a.name}–${b.name} section is carrying everything it can and is being asked to carry more. Traffic recommends additional engines, in the tone of a department that has recommended this before.`;
+      return `${a.name}에 화물이 선로 부족으로 정차해 있다. ${a.name}–${b.name} 구간은 실을 수 있는 모든 것을 싣고 있으며 더 싣기를 요구받고 있다. 운수과는 기관차 증차를 건의한다. 이전에도 이를 건의한 적 있는 부서의 어조로.`;
     },
   },
   {
@@ -292,7 +288,7 @@ const FLAVOUR = [
       const big = s.sites.filter((x) => x.tier >= 3 && !x.abandoned);
       if (!big.length) return null;
       const c = pick(s.rng, big);
-      return `${c.name} has outgrown its station for the third time. The Authority has been offered land for a larger one, on terms, by a consortium that turns out on inspection to be the stationmaster.`;
+      return `${c.name}이(가) 세 번째로 역을 넘어서 성장하였다. 교통청에는 더 큰 역을 위한 토지가 조건부로 제안되었는데, 확인해 보니 그 컨소시엄은 역장이었다.`;
     },
   },
   {
@@ -310,16 +306,16 @@ const FLAVOUR = [
     text: (s) => {
       const st = s._cosmo;
       if (!st) return null;
-      return `${st.name} has acquired a quarter where four peoples live within a hundred yards of one another. There are three bakeries, none of which will acknowledge the others, and a dispute about bells that has now gone to the Council. Trade is up thirty per cent.`;
+      return `${st.name}에 네 민족이 백 야드 안에 사는 마을이 생겼다. 빵집이 세 곳 있고 어느 곳도 나머지를 인정하지 않으며, 종에 관한 분쟁은 평의회로 넘어갔다. 교역은 30퍼센트 증가하였다.`;
     },
   },
   {
     id: 'orc_commuters', weight: 8, cooldown: 9,
     when: (s) => s.concession && s.orcTradeTotal > 12,
     text: (s) => pick(s.rng, [
-      `Orkish passengers are now using the eastern services in numbers. They pay, they travel in silence, and they leave the carriages cleaner than they found them, which the Authority finds more unsettling than the alternative.`,
-      `A complaint has been received about orkish passengers on the 6:40. The complaint is that they queue. The Authority has declined to act on it.`,
-      `Traffic reports that eastbound freight is up again and that the consignees have begun asking for the timetable in advance. They have been sent the timetable. There was no reason not to send them the timetable. The Authority has thought about this several times since.`,
+      `오크 여객이 이제 동부 노선을 다수 이용하고 있다. 그들은 돈을 내고, 침묵 속에 여행하며, 객차를 탈 때보다 깨끗하게 두고 내린다. 교통청은 그 반대보다 이쪽이 더 불안하다고 본다.`,
+      `6시 40분 차의 오크 여객에 대한 민원이 접수되었다. 민원의 내용은 그들이 줄을 선다는 것이다. 교통청은 조치를 거절하였다.`,
+      `운수과는 동행 화물이 다시 늘었고 수하인들이 시각표를 미리 달라고 하기 시작했다고 보고한다. 시각표는 보내 주었다. 보내 주지 않을 이유가 없었다. 교통청은 이후 이 점을 여러 차례 곱씹었다.`,
     ]),
   },
 ];
@@ -344,17 +340,17 @@ export function hostPetition(s) {
   const heart = s.byId.get(H.heartId);
   return {
     id: 'the_host',
-    title: 'The Road They Are Coming Down Is Ours',
-    from: 'the Master of Works, in person, having not sat down',
-    body: `They are on the ${H.fromName ?? 'eastern'} road, and they are making better time than the `
-      + `Authority's own goods services, for the reason that it is the Authority's own road.\n\n`
-      + `Ahead of them: ${road.length} sections, and then ${heart?.name ?? 'the heart of the realm'}.\n\n`
-      + 'Works will do whichever of these the Director signs for, and would like it noted that '
-      + 'he has said, in this room, that there is no good answer.',
+    title: '그들이 내려오고 있는 길은 우리의 길이다',
+    from: '공사감독, 앉지도 않고 직접 옴',
+    body: `그들이 ${H.fromName ?? '동쪽'} 길 위에 있다. 그리고 교통청의 화물 열차보다 `
+      + `빠르게 오고 있다. 그것이 교통청 자신의 길이라는 이유에서다.\n\n`
+      + `그들의 앞: ${road.length}개 구간, 그다음은 ${heart?.name ?? '왕국의 심장'}.\n\n`
+      + '공사과는 청장이 결재하는 것 중 어느 것이든 실행할 것이며, 이 자리에서 '
+      + '좋은 답은 없다고 말했다는 점을 기록해 두기를 바란다.',
     options: [
       {
-        label: 'Fortify the road',
-        note: `Blockhouses and walled cuttings the whole length. ${fortifyCost} crowns, and upkeep after.`,
+        label: '선로를 요새화한다',
+        note: `전 구간에 망루와 벽 쌓은 절개지. ${fortifyCost}크라운, 이후 유지비 별도.`,
         apply: (st) => {
           let paid = 0;
           for (const L of road) {
@@ -366,16 +362,16 @@ export function hostPetition(s) {
           }
           st.treasury -= paid;
           st.host.answer = 'fortify';
-          st.note(`The road is being fortified along its whole length, at ${Math.round(paid)} crowns, `
-            + 'which the Authority does not have and has undertaken to find.\n\n'
-            + 'The works are of dressed stone and are going up in front of the host at very nearly '
-            + 'the speed the host is moving. Two gangs have asked to be relieved. Neither has been.',
+          st.note(`선로 전 구간의 요새화가 ${Math.round(paid)}크라운으로 진행되고 있다. `
+            + '교통청에 없는 돈이며, 마련하기로 약정하였다.\n\n'
+            + '공사는 다듬은 돌로 지어지고 있으며, 대군의 바로 앞에서, 대군이 움직이는 속도와 '
+            + '거의 같은 속도로 올라가고 있다. 두 개 작업반이 교대를 요청했다. 어느 쪽도 허락되지 않았다.',
             'grave', { chronicle: true });
         },
       },
       {
-        label: 'Requisition it for the evacuation',
-        note: 'Every train westward, full of people, carrying nothing that pays.',
+        label: '대피를 위해 징발한다',
+        note: '모든 열차가 서쪽으로, 사람으로 가득, 돈이 되는 것은 싣지 않는다.',
         apply: (st) => {
           st.host.answer = 'requisition';
           st.host.evacuating = true;
@@ -385,16 +381,15 @@ export function hostPetition(s) {
               site.fled = Math.min(1, (site.fled || 0) + 0.3);
             }
           }
-          st.note('Every service is requisitioned. The timetable has been suspended — not amended, '
-            + 'suspended — and the word appears in a minute of the Authority for the first time.\n\n'
-            + 'The trains are going west full and coming back empty, and they are carrying no '
-            + 'grain, no iron and no fares. The Authority is, from this week, a charity with '
-            + 'locomotives.', 'grave', { chronicle: true });
+          st.note('모든 열차가 징발되었다. 시각표는 정지되었다 — 개정이 아니라, '
+            + '정지 — 그리고 그 단어는 교통청의 속기록에 처음으로 등장하였다.\n\n'
+            + '열차들은 가득 채워 서쪽으로 가고 빈 채로 돌아온다. 곡물도, 철도, 운임도 '
+            + '싣지 않는다. 교통청은 이번 주부터 기관차를 가진 자선단체다.', 'grave', { chronicle: true });
         },
       },
       {
-        label: 'Tear up the road behind them',
-        note: 'The greatest thing you ever built, lifted. They cannot march on rails that are gone.',
+        label: '그들의 뒤로 선로를 걷어 낸다',
+        note: '당신이 지은 가장 위대한 것을, 걷어 낸다. 사라진 레일 위로는 행군할 수 없다.',
         apply: (st) => {
           st.host.answer = 'tearup';
           let lifted = 0;
@@ -405,10 +400,10 @@ export function hostPetition(s) {
           }
           st.markDirty();
           st.regard.men = Math.max(0, st.regard.men - 10);
-          st.note(`${lifted} sections have been lifted by the Authority's own gangs, working `
-            + 'from the west end back, ahead of the host.\n\n'
-            + 'The rails are stacked beside the formation. The Master of Works walked the last '
-            + 'mile of it and has not filed a report on what he saw, and has not been asked to.',
+          st.note(`${lifted}개 구간이 교통청 자신의 작업반에 의해 걷혔다. 서쪽 끝에서부터 `
+            + '거슬러, 대군의 앞에서 작업하였다.\n\n'
+            + '레일들은 노반 옆에 쌓여 있다. 공사감독은 마지막 1마일을 걸었으며, 본 것에 대한 '
+            + '보고서를 제출하지 않았고, 제출하라는 요구도 받지 않았다.',
             'grave', { chronicle: true, big: true });
         },
       },
@@ -420,29 +415,29 @@ const PETITIONS = [
   {
     id: 'wodenholt', once: true,
     when: (s) => s.week > 6 && s.links.length > 5,
-    title: 'The Onodrim Standing Committee on Right-of-Way',
-    from: 'Wodenholt',
-    body: `A delegation from Wodenholt has arrived at the works. It arrived over four days, which the Authority initially took for rudeness and now understands differently.
+    title: '오노드림 통행권 상임위원회',
+    from: '워든홀트',
+    body: `워든홀트에서 대표단이 공사 현장에 도착하였다. 도착하는 데 나흘이 걸렸는데, 교통청은 처음에 이를 무례로 여겼으나 이제는 다르게 이해한다.
 
-They wish it recorded that the wood is not available. They are willing to discuss a route around the wood. They are willing to discuss it at length.`,
+그들은 숲은 내줄 수 없다는 점을 기록하기를 바란다. 숲을 우회하는 노선은 논의할 용의가 있다. 아주 길게 논의할 용의가 있다.`,
     options: [
       {
-        label: 'Route around the wood',
-        note: 'Costs 180 crowns in resurveying. The Elves will hear of it.',
+        label: '숲을 우회하는 노선으로 한다',
+        note: '재측량에 180크라운이 든다. 엘프들이 듣게 될 것이다.',
         apply: (s) => {
           s.treasury -= 180;
           s.regard.elf += 9;
           s.woodCare = Math.min(0.9, s.woodCare + 0.15);
-          s.note('The line will go around Wodenholt. The resurvey is charged at 180 crowns, and the wood is entered on the working plans under its own name, at the delegation’s request, in full.', 'good', { chronicle: true });
+          s.note('선로는 워든홀트를 우회할 것이다. 재측량은 180크라운으로 계상되었고, 그 숲은 대표단의 요청에 따라, 그 자신의 이름으로, 전문으로, 실시 도면에 기입되었다.', 'good', { chronicle: true });
         },
       },
       {
-        label: 'Proceed as surveyed',
-        note: 'Saves the money. Wodenholt has a long memory and a slow one.',
+        label: '측량된 대로 진행한다',
+        note: '돈은 아낀다. 워든홀트는 기억이 길고, 느리다.',
         apply: (s) => {
           s.regard.elf -= 14;
           s._entAngry = true;
-          s.note('The Authority has elected to proceed as surveyed. The delegation was informed. It did not reply, which has been minuted as assent.', 'bad', { chronicle: true });
+          s.note('교통청은 측량된 대로 진행하기로 하였다. 대표단에게 통달되었다. 회신이 없었으며, 이는 동의로 기록되었다.', 'bad', { chronicle: true });
         },
       },
     ],
@@ -450,28 +445,28 @@ They wish it recorded that the wood is not available. They are willing to discus
   {
     id: 'grain_levy', once: true,
     when: (s) => s.week > 9 && s.sites.some((x) => x.kind === 'shire' && x.tier >= 2),
-    title: 'A Petition of the Greenhollow',
-    from: 'the Halflings',
-    body: `Forty-one signatures, several of them the same signature. The Greenhollow observes that its grain now feeds mountains it has never seen, at prices set in Amonhal, and that a fair share of the fare would not be unreasonable.
+    title: '그린할로우의 탄원',
+    from: '하플링들',
+    body: `마흔한 개의 서명, 그중 몇은 같은 서명이다. 그린할로우는 지적한다. 자기들의 곡물이 이제 한 번도 본 적 없는 산들을 먹이고 있으며, 가격은 아몬할에서 정해지고 있고, 운임의 공정한 몫을 나누는 것이 무리한 일은 아닐 것이라고.
 
-They have costed their proposal. The costing is legible and, irritatingly, correct.`,
+그들은 제안의 비용을 산출해 왔다. 산출은 읽기 쉽고, 짜증 날 정도로, 정확하다.`,
     options: [
       {
-        label: 'Grant the rebate',
-        note: 'A standing charge on fares. The Halflings will remember it.',
+        label: '환급을 허가한다',
+        note: '운임에 상시 부담금이 생긴다. 하플링들은 기억할 것이다.',
         apply: (s) => {
           s.fareRebate = 0.12;
           s.regard.halfling += 16;
-          s.note('The rebate is granted: a twelfth part of the fare on Greenhollow grain, standing until revoked. A barrel arrived at the office by way of thanks. Ale, dark, nine gallons.', 'good', { chronicle: true });
+          s.note('환급이 허가되었다. 그린할로우 곡물 운임의 12분의 1, 철회될 때까지 유효하다. 감사의 뜻으로 통 하나가 사무실에 도착했다. 흑맥주, 아홉 갤런.', 'good', { chronicle: true });
         },
       },
       {
-        label: 'Decline, with regret',
-        note: 'Keeps the revenue. Unrest in the Greenhollow.',
+        label: '유감과 함께 거절한다',
+        note: '수입은 지킨다. 그린할로우에 동요.',
         apply: (s) => {
           s.regard.halfling -= 15;
           for (const st of s.sites) if (st.culture === 'halfling') st.unrest = Math.min(1, st.unrest + 0.3);
-          s.note('The petition is declined with regret. The regret runs to a page and a half, was signed on the Thursday, and went down to the Greenhollow by the morning service.', 'bad', { chronicle: true });
+          s.note('탄원은 유감과 함께 거절되었다. 유감은 한 장 반이며, 목요일에 서명되었고, 아침 열차로 그린할로우에 내려갔다.', 'bad', { chronicle: true });
         },
       },
     ],
@@ -479,33 +474,33 @@ They have costed their proposal. The costing is legible and, irritatingly, corre
   {
     id: 'concession_offer', once: true,
     when: (s) => s.age >= 2 && !s.concession && s.week > 13,
-    title: 'An Approach from the East',
-    from: 'the Eastern Party',
-    body: `A letter has arrived at the Authority. It was not delivered; it was found, on the Director's desk, in the morning.
+    title: '동쪽으로부터의 접근',
+    from: '동쪽의 당사자',
+    body: `교통청에 서신 한 통이 도착하였다. 배달된 것이 아니다. 아침에, 청장의 책상 위에서, 발견되었다.
 
-It proposes tariffs. The tariffs are extraordinary — four times what any western consignment returns, paid in ashglass and iron, in advance. The terms are otherwise unobjectionable. The Authority has read them eleven times looking for the objection.
+서신은 운임을 제안한다. 운임은 파격적이다 — 어떤 서쪽 화물이 벌어들이는 것의 네 배, 잿빛유리와 철로, 선불로. 나머지 조건은 문제가 없다. 교통청은 문제를 찾으려고 열한 번을 읽었다.
 
-There is no signature. There is a mark.`,
+서명이 없다. 표记가 하나 있다.`,
     options: [
       {
-        label: 'Accept the concession',
-        note: 'Enormous revenue. Every crate moved east feeds the Shadow.',
+        label: '특혜를 수락한다',
+        note: '막대한 수입. 동쪽으로 가는 모든 상자가 그림자를 먹인다.',
         apply: (s) => {
           s.concession = true;
           s.treasury += 400;
           s.shadow += 6;
           s.regard.elf -= 10;
-          s.note('The concession is accepted. The advance has cleared: 400 crowns, entered under eastern receipts, a head of account that did not exist last week.', 'grave', { chronicle: true });
+          s.note('특혜가 수락되었다. 선금이 입금되었다. 400크라운, 동부 수입 항목으로 기입되었다. 지난주에는 존재하지 않던 계정 과목이다.', 'grave', { chronicle: true });
         },
       },
       {
-        label: 'Return it unanswered',
-        note: 'Forgoes the money. The Council will ask why.',
+        label: '답하지 않고 돌려보낸다',
+        note: '돈은 포기한다. 평의회가 이유를 물을 것이다.',
         apply: (s) => {
           s.regard.men -= 6;
           s.regard.elf += 12;
           s.shadow = Math.max(0, s.shadow - 4);
-          s.note('The letter has been returned unanswered. It is not clear to whom it was returned. It is no longer on the desk.', 'good', { chronicle: true });
+          s.note('서신은 답 없이 반송되었다. 누구에게 반송되었는지는 분명하지 않다. 책상 위에 더는 없다.', 'good', { chronicle: true });
         },
       },
     ],
@@ -513,33 +508,33 @@ There is no signature. There is a mark.`,
   {
     id: 'plague_quarantine',
     when: (s) => s.sites.some((x) => x.plague > 0.3 && x.connected),
-    title: 'A Matter of Public Health',
-    from: 'the Surgeons of Amonhal',
+    title: '공중 보건에 관한 건',
+    from: '아몬할의 의사들',
     body: (s) => {
       const sick = s.sites.filter((x) => x.plague > 0.3 && x.connected);
       const n = sick[0];
-      return `The sweating sickness is at ${n ? n.name : 'a station on the trunk'} and it is travelling by rail, because everything travels by rail now.
+      return `발한역이 ${n ? n.name : '간선의 한 역'}에 와 있다. 그리고 그것은 철도로 이동하고 있다. 이제 모든 것이 철도로 이동하기 때문이다.
 
-The Surgeons request closure of the affected stations. Traffic points out that closure will strand the grain. Both are correct, and they have been arguing in the corridor for two days.`;
+의사들은 해당 역들의 폐쇄를 요청한다. 운수과는 폐쇄가 곡물을 발 묶이게 할 것이라 지적한다. 둘 다 옳으며, 이틀째 복도에서 다투고 있다.`;
     },
     options: [
       {
-        label: 'Close the stations',
-        note: 'Stops the spread. Freight stops with it.',
+        label: '역들을 폐쇄한다',
+        note: '확산을 멈춘다. 화물도 함께 멈춘다.',
         apply: (s) => {
           for (const st of s.sites) if (st.plague > 0.2) { st.quarantined = true; st.quarantineWeeks = 3; }
           s.regard.men += 5;
-          s.note('The affected stations are closed. The grain is standing in wagons at Brackenford and the Authority is being written to about it hourly.', 'plain', { chronicle: true });
+          s.note('해당 역들이 폐쇄되었다. 곡물은 브래큰포드의 차량 안에 서 있고, 교통청에는 매시각 서신이 오고 있다.', 'plain', { chronicle: true });
         },
       },
       {
-        label: 'Keep the line open',
-        note: 'Freight keeps moving. So does the sickness.',
+        label: '선로를 열어 둔다',
+        note: '화물은 계속 움직인다. 병도 마찬가지다.',
         apply: (s) => {
           for (const st of s.sites) if (st.plague > 0.15) st.plague += 0.25;
           s.regard.halfling -= 8;
           s.regard.men -= 4;
-          s.note('The line stays open. The reasoning is recorded in the minute book. It runs to four pages.', 'bad', { chronicle: true });
+          s.note('선로는 열린 채로 둔다. 그 논거는 속기록에 기록되어 있다. 네 장에 이른다.', 'bad', { chronicle: true });
         },
       },
     ],
@@ -595,9 +590,9 @@ export function createEvents() {
         const list = names.slice(0, 4).map((x) => x.st.name).join(', ');
         const more = names.length > 4 ? ` and ${names.length - 4} more` : '';
         s2.note(
-          `Returns for the week show falling numbers at ${list}${more}.\n\n`
-          + 'Traffic has been asked whether these places have anything in common. '
-          + 'Traffic has answered that they are all on the same line, and has left the room.',
+          `이번 주 보고서는 ${list}${more}의 감소하는 수치를 보인다.\n\n`
+          + '운수과에 이 마을들의 공통점이 있는지 물었다. '
+          + '운수과는 모두 같은 선로 위에 있다고 답하고, 방을 나갔다.',
           'bad',
         );
       }
@@ -606,12 +601,12 @@ export function createEvents() {
       const names = abandonQueue.splice(0, abandonQueue.length).map((x) => x.name);
       if (names.length === 1) {
         const c = fromCorpus(s2, 'ABANDONED', null, { place: names[0] });
-        s2.note(c ? c.text : `${names[0]} is empty. The last family left on foot, in the direction of the railway they were promised.`,
+        s2.note(c ? c.text : `${names[0]}은(는) 비었다. 마지막 가구가 도보로, 약속받았던 철도의 방향으로 떠났다.`,
           'bad', { chronicle: true });
       } else {
         s2.note(
-          `Struck from the register this week: ${names.join(', ')}.\n\n`
-          + 'Their signboards have been taken down and stored, on the reasoning that the names may be wanted again.',
+          `이번 주 등록부에서 삭제됨: ${names.join(', ')}.\n\n`
+          + '역명판들은 내려 보관되었다. 이름이 다시 필요해질 수도 있다는 판단에서다.',
           'bad', { chronicle: true },
         );
       }
@@ -710,31 +705,29 @@ export function createEvents() {
     const need = Math.round(6 + s.rng() * 7);
     const weeks = 4;
     s.comm.offer(s, {
-      kind: 'siege', class: 'freight', client: 'the Crown',
+      kind: 'siege', class: 'freight', client: '왕실',
       good: 'arms', need, to: st.id, weeks,
       fee: priceOf('arms', need, weeks, 1.5),
       urgent: true,
-      title: `${st.name} is invested`,
-      body: `Riders came in overnight. ${st.name} is surrounded and is asking for arms, `
-        + `by rail, because there is no other way in that anybody would survive.\n\n`
-        + `${need} loads of arms, within ${weeks} weeks. The Crown will pay. `
-        + `The Crown has also observed, in writing, that it has no other means of getting them there.`,
+      title: `${st.name} 포위됨`,
+      body: `밤사이 기병이 들이닥쳤다. ${st.name}이(가) 포위되었고 무기를 요청하고 있다. `
+        + `철도로, 누군가 살아남아 들어갈 수 있는 다른 길이 없기 때문이다.\n\n`
+        + `${weeks}주 이내에 무기 ${need}적재분. 왕실이 지급한다. `
+        + `왕실은 또한 서면으로, 그것을 그곳에 보낼 다른 수단이 없음을 밝혔다.`,
       onDone: (s2, c) => {
         const site = s2.byId.get(c.to);
         s2.regard.men = Math.min(100, s2.regard.men + 14);
-        s2.note(`The siege of ${site?.name ?? 'the watch'} is lifted. The arms went up in ordinary `
-          + 'goods wagons under a tarpaulin marked AGRICULTURAL IMPLEMENTS. The garrison '
-          + 'commander has asked for the tarpaulin to keep.', 'good', { chronicle: true });
+        s2.note(`${site?.name ?? '초소'}의 포위가 풀렸다. 무기는 농기구라고 적힌 방수포를 `
+          + '덮은 일반 화차로 올라갔다. 수비대장은 그 방수포를 갖고 싶다고 요청했다.', 'good', { chronicle: true });
       },
       onFail: (s2, c) => {
         const site = s2.byId.get(c.to);
         if (site) { site.abandoned = true; s2.markDirty(); }
         s2.regard.men = Math.max(0, s2.regard.men - 20);
         s2.shadow = Math.min(100, s2.shadow + 6);
-        s2.note(`${site?.name ?? 'The watch'} has fallen.\n\n`
-          + 'The Authority is able to state the exact quantity of arms standing in its yards on the '
-          + 'day it fell, because the Authority counts things. That figure has been removed from the '
-          + 'published return.', 'grave', { chronicle: true, big: true });
+        s2.note(`${site?.name ?? '초소'}이(가) 함락되었다.\n\n`
+          + '함락된 날 교통청의 조차장에 서 있던 무기의 정확한 수량을 교통청은 밝힐 수 있다. '
+          + '교통청은 세는 기관이기 때문이다. 그 수치는 공표된 보고서에서 삭제되었다.', 'grave', { chronicle: true, big: true });
       },
     });
     return true;
@@ -749,38 +742,37 @@ export function createEvents() {
     if (quays && havens.length && !s.elvesGone) {
       const from = pick(s.rng, havens);
       if (from.id !== quays.id) options.push({
-        kind: 'pilgrims', client: 'the Havens', from: from.id, to: quays.id, weeks: 6,
-        need: 26, label: 'passage west',
-        title: 'Passage to the Grey Quays',
-        body: `A party from ${from.name} asks for passage to the Grey Quays. Forty-one of them, `
-          + 'with baggage they will not let anybody else carry.\n\n'
-          + 'They have not said whether they intend to come back, and the clerk who asked has '
-          + 'apologised.',
+        kind: 'pilgrims', client: '항구', from: from.id, to: quays.id, weeks: 6,
+        need: 26, label: '서쪽으로의 여정',
+        title: '회색 부두로 가는 길',
+        body: `${from.name}에서 일행이 회색 부두로 가는 여정을 청한다. 마흔한 명, `
+          + '다른 누구에게도 맡기지 않을 짐과 함께.\n\n'
+          + '돌아올 생각인지는 말하지 않았으며, 물은 서기가 사과하였다.',
       });
     }
     const burgs = kindsOf('burg');
     if (burgs.length >= 2) {
       const [a, b] = s.rng.shuffled(burgs).slice(0, 2);
       options.push({
-        kind: 'fair', client: 'the Marchfolk', from: a.id, to: b.id, weeks: 4,
-        need: 20, label: 'excursion traffic',
-        title: `The ${b.name} fair`,
-        body: `${b.name} holds its fair in a month and expects half the Marchlands to attend. `
-          + `${a.name} would like a train, or several.\n\n`
-          + 'Traffic notes that the last time the Authority ran an excursion the return working was '
-          + 'four hours late and nobody minded, which it has decided not to plan around.',
+        kind: 'fair', client: '변경의 백성', from: a.id, to: b.id, weeks: 4,
+        need: 20, label: '임시 여객 수송',
+        title: `${b.name}의 장`,
+        body: `${b.name}이(가) 한 달 뒤 장을 열며 변경 지대의 절반이 올 것으로 예상한다. `
+          + `${a.name}은(는) 열차를, 아니면 여러 열차를 원한다.\n\n`
+          + '운수과는 지난번 교통청이 임시 열차를 운행했을 때 회송이 네 시간 늦었으나 아무도 '
+          + '개의치 않았음을 밝히며, 이를 계획에 반영하지 않기로 하였다.',
       });
     }
     const delves = kindsOf('delve');
     if (delves.length && burgs.length) {
       const from = pick(s.rng, delves), to = pick(s.rng, burgs);
       options.push({
-        kind: 'delegation', client: 'the Khazadrim', from: from.id, to: to.id, weeks: 5,
-        need: 14, label: 'a delegation',
-        title: 'A delegation, travelling in state',
-        body: `Thrain Ironmoot is going to ${to.name} to argue about gauge, and will not go by road.\n\n`
-          + 'He requires a carriage, a second carriage for the documents, and an assurance that the '
-          + 'train will not be late. Two of those three can be provided.',
+        kind: 'delegation', client: '카자드림', from: from.id, to: to.id, weeks: 5,
+        need: 14, label: '대표단',
+        title: '대표단, 위풍당당한 여행',
+        body: `스란 아이언무트가 궤간을 놓고 논쟁하러 ${to.name}에 간다. 도로로는 가지 않겠다고 한다.\n\n`
+          + '그는 객차 한 량, 서류를 위한 두 번째 객차, 그리고 열차가 늦지 않을 것이라는 보증을 '
+          + '요구한다. 그중 둘은 제공할 수 있다.',
       });
     }
     if (!options.length) return false;
@@ -800,22 +792,22 @@ export function createEvents() {
     const st = pick(s.rng, sick);
     const need = 4;
     s.comm.offer(s, {
-      kind: 'physic', class: 'freight', client: 'the Surgeons of Amonhal',
+      kind: 'physic', class: 'freight', client: '아몬할의 의사들',
       good: 'athelas', need, to: st.id, weeks: 4,
       fee: priceOf('athelas', need, 4, 1.4),
       urgent: true,
-      title: `Athelas for ${st.name}`,
-      body: `The Surgeons want athelas at ${st.name}, and athelas grows in one place on this `
-        + 'continent and is picked by people who do not hurry.\n\n'
-        + 'Four loads. The Surgeons have costed the alternative, which is a quarantine, and have '
-        + 'attached the costing. It is not a document the Authority enjoyed reading.',
+      title: `${st.name}에 아셀라스를`,
+      body: `의사들이 ${st.name}에 아셀라스를 원한다. 아셀라스는 이 대륙에서 한 곳에서만 `
+        + '자라며, 서두르지 않는 이들이 채집한다.\n\n'
+        + '네 적재분. 의사들은 대안, 즉 격리의 비용을 산출하여 첨부하였다. 교통청이 '
+        + '즐겁게 읽은 문서는 아니었다.',
       onDone: (s2, c) => {
         const site = s2.byId.get(c.to);
         if (site) { site.plague = 0; site.quarantined = false; s2.markDirty(); }
         s2.regard.halfling = Math.min(100, s2.regard.halfling + 6);
         s2.regard.elf = Math.min(100, s2.regard.elf + 8);
-        s2.note(`The sickness at ${site?.name ?? 'the station'} is broken. The Surgeons have thanked `
-          + 'the Elves. The Elves have replied that they were not thanked for the wood.', 'good');
+        s2.note(`${site?.name ?? '그 역'}의 병이 물러났다. 의사들은 엘프들에게 감사하였다. `
+          + '엘프들은 숲에 대해서는 감사받지 않았다고 회신하였다.', 'good');
       },
       onFail: (s2, c) => {
         const site = s2.byId.get(c.to);
@@ -835,40 +827,38 @@ export function createEvents() {
       const st = pick(s.rng, delves);
       const need = 10 + Math.round(s.rng() * 8);
       opts.push({
-        kind: 'forge', client: 'the Khazadrim', good: 'grain', need, to: st.id, weeks: 5,
+        kind: 'forge', client: '카자드림', good: 'grain', need, to: st.id, weeks: 5,
         fee: priceOf('grain', need, 5, 1.25),
-        title: `${st.name} is short of bread`,
-        body: `${st.name} has iron, coal, stone and no food whatever, which is the ordinary `
-          + 'condition of a delve and becomes an emergency about twice a year.\n\n'
-          + `${need} loads of grain. They have offered to pay in advance, in coin they have struck `
-          + 'themselves, which the Council has agreed to accept after some discussion about the face.',
+        title: `${st.name}의 빵 부족`,
+        body: `${st.name}에는 철과 석탄과 돌이 있고 먹을 것은 전혀 없다. 이것이 광산의 `
+          + '통상적 상태이며, 일 년에 두 번 정도 비상 사태가 된다.\n\n'
+          + `곡물 ${need}적재분. 그들은 직접 주조한 동전으로 선불하겠다고 제안했고, 평의회는 `
+          + '동전의 얼굴에 관해 논의한 끝에 받기로 하였다.',
       });
     }
     if (burgs.length) {
       const st = pick(s.rng, burgs);
       const need = 2;
       opts.push({
-        kind: 'mithril', client: 'the Council', good: 'mithril', need, to: st.id, weeks: 8,
+        kind: 'mithril', client: '평의회', good: 'mithril', need, to: st.id, weeks: 8,
         fee: priceOf('mithril', need, 8, 1.1),
-        title: 'A quantity of mithril, for the Crown',
-        body: `The Council requires two loads of mithril delivered to ${st.name}. It has not said `
-          + 'what for.\n\n'
-          + 'Mithril comes out of exactly those delves that have a shaft deep enough to reach it, in '
-          + 'quantities best described as a nuisance to schedule. The fee reflects this. The fee is '
-          + 'the largest single figure in the Authority’s history.',
+        title: '일정량의 미스릴, 왕실용',
+        body: `평의회는 미스릴 두 적재분을 ${st.name}에 납품하기를 요구한다. 용도는 밝히지 않았다.\n\n`
+          + '미스릴은 그것이 닿을 만큼 깊은 갱을 가진 광산에서만, 일정 짜기에 곤란하다고 '
+          + '표현하는 것이 가장 적절한 양만큼 나온다. 운임은 이를 반영한다. 이 운임은 교통청 '
+          + '역사상 가장 큰 단일 수치다.',
       });
     }
     if (burgs.length && s.sites.some((x) => x.kind === 'shire' && x.connected)) {
       const st = pick(s.rng, burgs);
       const need = 8;
       opts.push({
-        kind: 'wedding', client: 'the House of ' + st.name, good: 'wine', need, to: st.id, weeks: 3,
+        kind: 'wedding', client: st.name + ' 가문', good: 'wine', need, to: st.id, weeks: 3,
         fee: priceOf('wine', need, 3, 1.3),
-        title: `A wedding at ${st.name}`,
-        body: `There is to be a wedding at ${st.name} and there is not enough wine in the Marchlands `
-          + 'to hold it.\n\n'
-          + 'Eight loads, within three weeks, and the Authority is asked to understand that the date '
-          + 'cannot move. The Authority does understand. The Authority has been married.',
+        title: `${st.name}의 혼례`,
+        body: `${st.name}에 혼례가 있으며 변경 지대에는 그것을 치를 만한 술이 부족하다.\n\n`
+          + '3주 이내에 여덟 적재분. 날짜는 옮길 수 없음을 이해해 주기를 교통청에 바란다. '
+          + '교통청은 이해한다. 교통청도 혼인해 보았다.',
       });
     }
     if (!opts.length) return false;
@@ -925,13 +915,13 @@ export function createEvents() {
     s.treasury += advance;
     s.errandAdvance = advance;
     s.note(
-      `A consignment has been booked with the Authority. One item, small, carried by hand. `
-      + `Origin ${west.name}. Destination Mount Wrack. The booking is countersigned by the Council, by the Havens, and by a third party whose seal the clerk did not recognise and has been told not to ask about.\n\n`
-      + `The docket specifies: do not weigh it, do not open it, do not leave it standing on a platform. `
-      + `Under “value” the shipper has written “no”.\n\n`
-      + `Enclosed with the docket, without explanation or conditions, is a draft on the Treasury `
-      + `for ${advance} crowns. The Secretary observes that this is roughly what it would cost to `
-      + `build a railway to Mount Wrack, and that nobody has said so.`,
+      `교통청에 하물 한 건이 접수되었다. 물품 하나, 작고, 손으로 운반되는 것. `
+      + `발송지 ${west.name}. 도착지 랙 산. 접수증에는 평의회와 항구와, 서기가 알아보지 못한 인장의 제3자가 부서되어 있는데, 서기는 묻지 말라는 지시를 받았다.\n\n`
+      + `전표에는 명시되어 있다. 무게를 재지 말 것, 열지 말 것, 승강장에 세워 두지 말 것. `
+      + `“가액” 란에 발송인은 “없음”이라고 적었다.\n\n`
+      + `전표에 설명도 조건도 없이 동봉된 것은 금고로부터의 ${advance}크라운 어음이다. `
+      + `서기관은 이것이 대략 랙 산까지 철도를 놓는 비용이라는 점, 그리고 아무도 그렇다고 `
+      + `말하지 않았다는 점을 지적한다.`,
       // the errand plate was engraved at the start of the project and never attached
       'grave', { chronicle: true, big: true, plate: 'errand' },
     );
@@ -955,9 +945,9 @@ export function createEvents() {
           e.at = railhead.id;
           if (!e.moved) {
             e.moved = true;
-            s.note(`The consignment has been taken by cart to ${railhead.name}, the nearest place `
-              + `the Authority actually reaches. The carter was not told what it was and did not ask, `
-              + `which the Secretary notes is the first sensible thing anyone has done about it.`, 'plain');
+            s.note(`하물이 수레로 ${railhead.name}(으)로 옮겨졌다. 교통청이 실제로 닿는 `
+              + `가장 가까운 곳이다. 마부는 그것이 무엇인지 듣지 못했고 묻지도 않았는데, `
+              + `서기관은 이것이 이 건으로 누군가가 한 첫 번째 분별 있는 행동이라고 적는다.`, 'plain');
           }
         }
       }
@@ -970,12 +960,11 @@ export function createEvents() {
       // the game going untold.
       if (goal && s.firsts?.first_wrack && !goal.connected && !e.saidCut) {
         e.saidCut = true;
-        s.note(`The road to ${goal.name} was opened in week ${s.firsts.first_wrack} and is `
-          + `open no longer.\n\n`
-          + 'The consignment has been carried back to the last station the Authority still '
-          + 'holds. It has not been opened. The Secretary has asked Works for a date by which '
-          + 'the road can be made good, and Works has asked the Secretary for the loan of the '
-          + 'gangs that are presently rebuilding everything else.',
+        s.note(`${goal.name}으로 가는 선로는 ${s.firsts.first_wrack}주에 개통되었고, `
+          + `더 이상 열려 있지 않다.\n\n`
+          + '하물은 교통청이 아직 지키고 있는 마지막 역으로 되돌려 보내졌다. 열리지 않았다. '
+          + '서기관은 공사과에 선로 복구 기일을 물었고, 공사과는 서기관에게 현재 다른 모든 '
+          + '것을 재건하고 있는 작업반들의 대여를 요청하였다.',
           'bad', { chronicle: true, big: true });
       }
 
@@ -1026,13 +1015,13 @@ export function createEvents() {
             // Count the initials for real. A fixed "four times" is the template tic in
             // miniature: a number that looks like bookkeeping and is decoration.
             e.initials = (e.initials || 3) + 1;
-            const nth = e.initials === 4 ? 'a fourth time'
-              : e.initials === 5 ? 'a fifth time'
-              : e.initials === 6 ? 'a sixth time' : `for the ${e.initials}th time`;
-            s.note(`The consignment has gone forward to ${far.site.name}, which is as far as the `
-              + `Authority's metals reach.\n\n`
-              + `From the buffer stops to ${goal.name}: ${miles} miles, and no rail on any of it. `
-              + `The docket has been re-dated and initialled ${nth}.`,
+            const nth = e.initials === 4 ? '네 번째'
+              : e.initials === 5 ? '다섯 번째'
+              : e.initials === 6 ? '여섯 번째' : `${e.initials}번째`;
+            s.note(`하물이 ${far.site.name}(으)로 보내졌다. 교통청의 레일이 닿는 `
+              + `최종점이다.\n\n`
+              + `차막이에서 ${goal.name}까지: ${miles}마일, 그 어느 곳에도 레일은 없다. `
+              + `전표에는 새 날짜가 적히고 ${nth}로 서명이 추가되었다.`,
               'plain', { chronicle: true });
           }
         } else if (far && e.lastGap === undefined) {
@@ -1050,21 +1039,21 @@ export function createEvents() {
       // cannot act on mood; they can act on the name of a gap.
       const here = s.byId.get(e.at), goal = s.byId.get(e.to);
       const why = !goal || !goal.connected
-        ? `no rail reaches ${goal ? goal.name : 'the destination'} at all`
+        ? `${goal ? goal.name : '목적지'}에는 레일이 전혀 닿지 않는다`
         : !here || !here.connected
-          ? `nothing reaches ${here ? here.name : 'the consignment'}, where it is standing`
-          : `the road is not continuous: there is track at ${here.name} and track at ${goal.name}, `
-            + `and no run of rail joining the two`;
+          ? `하물이 서 있는 ${here ? here.name : '그곳'}에는 아무것도 닿지 않는다`
+          : `선로가 잇기지 않았다: ${here.name}에도 선로가 있고 ${goal.name}에도 선로가 있으나, `
+            + `둘을 잇는 레일이 없다`;
       if (e.weeks > 2 && !e.nagged1) {
         e.nagged1 = true;
-        s.note(`The Council enquires after the consignment. It is at ${here ? here.name : 'the railhead'}, `
-          + `in a locked drawer. The Authority has replied that the route is in hand.\n\n`
-          + `The route is not in hand: ${why}.`, 'bad');
+        s.note(`평의회가 하물의 소재를 문의하였다. 하물은 ${here ? here.name : '선로 종점'}의 `
+          + `잠긴 서랍 안에 있다. 교통청은 노선이 추진 중이라고 회답하였다.\n\n`
+          + `노선은 추진 중이 아니다: ${why}.`, 'bad');
       } else if (e.weeks > 5 && !e.nagged2) {
         e.nagged2 = true;
-        s.note(`The Council enquires again. The tone of the enquiry has changed. The consignment `
-          + `remains in the drawer, and the drawer is now guarded, which nobody ordered.\n\n`
-          + `The obstacle is unchanged: ${why}.`, 'bad');
+        s.note(`평의회가 다시 문의하였다. 문의의 어조가 달라졌다. 하물은 여전히 서랍 안에 있고, `
+          + `서랍에는 이제 경계가 붙어 있다. 누구도 명하지 않은 일이다.\n\n`
+          + `장애는 변함이 없다: ${why}.`, 'bad');
       }
       return;
     }
@@ -1100,7 +1089,7 @@ export function createEvents() {
           const a = s.byId.get(data.link.a), b = s.byId.get(data.link.b);
           if (!a || !b) break;
           if (data.survey.tunnels > 0) {
-            s.note(pick(s.rng, TUNNEL_LINES)((REGION_NAME[a.region] ?? 'hills').replace(/^the /, '')), 'good');
+            s.note(pick(s.rng, TUNNEL_LINES)((REGION_NAME[a.region] ?? '산지').replace(/^the /, '')), 'good');
           } else {
           {
             const c = fromCorpus(s, 'OPENED', null, {
@@ -1114,38 +1103,38 @@ export function createEvents() {
           break;
         }
         case 'commission_offered':
-          s.note(`${data.commission.title}. Asked by ${data.commission.client}.`,
+          s.note(`${data.commission.title}. 의뢰인: ${data.commission.client}.`,
             data.commission.urgent ? 'bad' : 'plain');
           s.audio?.('petition');
           break;
         case 'commission_done':
-          s.note(`Commission discharged: ${data.commission.title}. `
-            + `${Math.round(data.commission.fee)} crowns received.`, 'good');
+          s.note(`의뢰 완수: ${data.commission.title}. `
+            + `${Math.round(data.commission.fee)}크라운을 수령하였다.`, 'good');
           s.audio?.('coin');
           break;
         case 'commission_failed':
-          s.note(`Commission not discharged: ${data.commission.title}. `
-            + 'The Authority has entered the reason in the register and the register is not '
-            + 'persuaded.', 'bad');
+          s.note(`의뢰 미완수: ${data.commission.title}. `
+            + '교통청은 사유를 장부에 기입하였으며 장부는 납득하지 못하고 '
+            + '있다.', 'bad');
           break;
 
         case 'works': {
           const L = data.link, st = data.site;
           const a = L ? s.byId.get(L.a) : null, b = L ? s.byId.get(L.b) : null;
-          const where = a && b ? `${a.name}–${b.name}` : (st?.name ?? 'the works');
+          const where = a && b ? `${a.name}–${b.name}` : (st?.name ?? '공사 현장');
           if (data.kind === 'double') {
-            s.note(`Second road laid, ${where}. The Delvers were pleased to be asked and have said `
-              + 'so at a length that has been minuted.', 'good');
+            s.note(`복선 부설, ${where}. 굴착단은 요청받은 것을 기뻐하며 `
+              + '기록될 만한 길이로 그렇게 말하였다.', 'good');
             s.audio?.('build_works');
           } else if (data.kind === 'regrade') {
-            s.note(`Gradients eased on the ${where} section. Nine chains of it are now level that `
-              + 'were not level before.', 'good');
+            s.note(`${where} 구간의 구배가 완화되었다. 아홉 체인이 이제 `
+              + '수평이 되었다. 이전에는 수평이 아니었다.', 'good');
           } else if (data.kind === 'fortify') {
-            s.note(`Blockhouses on the ${where} section, and the cuttings walled. `
-              + 'The Wardens have moved in and put up curtains.', 'good');
+            s.note(`${where} 구간에 망루가 서고 절개지에 벽이 쌓였다. `
+              + '파수꾼들이 이사 와서 커튼을 걸었다.', 'good');
           } else if (data.kind === 'station') {
-            s.note(`Station works at ${where}. A second platform, a canopy, and a room in which `
-              + 'to wait rather than merely to stand.', 'good');
+            s.note(`${where} 역 공사. 두 번째 승강장, 지붕, 그리고 그저 서 있지 않고 `
+              + '기다릴 수 있는 방.', 'good');
           }
           break;
         }
@@ -1158,17 +1147,17 @@ export function createEvents() {
             culture: st.culture,
           });
           const FOUNDED = [
-            () => `There is a place at ${st.name} that was not there last year.\n\n`
-              + 'Nobody granted it, nobody surveyed it, and nobody has told the Council. It has '
-              + 'eleven roofs, a well, and a man who says he is the stationmaster of a station the '
-              + 'Authority has not built.',
-            () => `${st.name}, ${lore ? lore.name : 'the wilds'}. Founded, in the sense that people are living there.\n\n`
-              + 'The Authority has added it to the register under protest, the protest being its own, '
-              + 'on the grounds that this is how the last four came about as well.',
-            () => `Application received from ${st.name} for a halt, a signboard, and a name in the timetable.\n\n`
-              + 'The application is written on the back of a bill of lading for our own coal. They are '
-              + 'not asking whether the railway will come. They are asking when.',
-            () => `New entry: ${st.name}. Reason for entry: it is there.`,
+            () => `${st.name}에 작년에는 없던 곳이 생겼다.\n\n`
+              + '누구도 허가하지 않았고, 측량하지 않았으며, 평의회에 알리지도 않았다. 그곳에는 '
+              + '열한 개의 지붕과 우물 하나와, 교통청이 짓지 않은 역의 역장이라고 주장하는 '
+              + '사내가 있다.',
+            () => `${st.name}, ${lore ? lore.name : '황야'}. 건립됨, 사람이 살고 있다는 의미에서.\n\n`
+              + '교통청은 이의를 제기하며 등록부에 추가하였다. 이의는 교통청 자신의 것이며, '
+              + '근거는 지난 네 곳도 이렇게 생겨났다는 것이다.',
+            () => `${st.name}에서 간이역과 역명판과 시각표상의 이름을 요청하는 신청서가 접수되었다.\n\n`
+              + '신청서는 우리 석탄의 운송장 뒷면에 쓰여 있다. 그들은 철도가 올 것인지를 '
+              + '묻지 않는다. 언제 오는지를 묻는다.',
+            () => `신규 등록: ${st.name}. 등록 사유: 거기 있다.`,
           ];
           s.note(c ? c.text : FOUNDED[Math.floor(s.rng() * FOUNDED.length)](), 'good',
             c ? { form: c.form, entryId: c.id } : {});
@@ -1183,8 +1172,8 @@ export function createEvents() {
             .map(([g]) => ({ g, got: st.got[g] || 0 }))
             .sort((a, b) => b.got - a.got)[0];
           const cause = top && top.got > 0.4
-            ? ` The ${GOODS[top.g].name.toLowerCase()} is arriving.`
-            : ' The railway is credited, at some length, by the railway.';
+            ? ` ${GOODS[top.g].name}이(가) 들어오고 있다.`
+            : ' 철도가, 상당한 분량으로, 철도 자신의 공으로 돌리고 있다.';
           {
             const c = fromCorpus(s, 'GREW', null, {
               site: st, place: st.name, region: st.region,
@@ -1200,8 +1189,8 @@ export function createEvents() {
           const st = data.site;
           const worst = (s.needsOf(st) || []).find((n) => n.why);
           const cause = worst
-            ? ` It is short of ${GOODS[worst.good].name.toLowerCase()}: ${worst.why}.`
-            : ' Nothing has arrived for some time.';
+            ? ` ${GOODS[worst.good].name}이(가) 부족하다: ${worst.why}.`
+            : ' 한동안 아무것도 도착하지 않았다.';
           declineQueue.push({ st, cause });
           break;
         }
@@ -1214,20 +1203,20 @@ export function createEvents() {
           // sixteen charters would be wallpaper rather than an occasion.
           const firstCharter = !s._charterPlateShown;
           s._charterPlateShown = true;
-          s.note(`Charter granted: ${data.charter.name}. ${data.charter.note ?? ''}`.trim(), 'good',
+          s.note(`칙허 수여: ${data.charter.name}. ${data.charter.note ?? ''}`.trim(), 'good',
             firstCharter ? { chronicle: true, plate: 'charter' } : { chronicle: true });
           break;
         }
         case 'insolvent':
-          if (data.weeks === 1) s.note('The Authority is overdrawn. The Council has been informed by the Council\'s own auditors, which is the worst way for the Council to be informed of anything.', 'bad');
+          if (data.weeks === 1) s.note('교통청이 당좌 초과 상태다. 평의회는 평의회 자신의 감사관들에 의해 이를 알게 되었다. 평의회가 무엇인가를 알게 되는 방법 중 가장 나쁜 방법이다.', 'bad');
           else if (data.weeks >= 4 && !s.over) { s.over = 'dismissed'; }
-          else s.note(`Overdrawn for a ${['', 'first', 'second', 'third', 'fourth'][Math.min(4, data.weeks)]} week. The Secretary has begun using the word "retrenchment" in meetings.`, 'bad');
+          else s.note(`${['', '첫', '두', '세', '네'][Math.min(4, data.weeks)]} 번째 주 연속 당좌 초과. 서기관이 회의에서 "긴축"이라는 단어를 쓰기 시작했다.`, 'bad');
           break;
         case 'incident': {
           const L = data.link;
           const a = s.byId.get(L.a);
           // bare, because every template supplies its own article
-          const rn = (a ? (REGION_NAME[a.region] ?? 'wilds') : 'wilds').replace(/^the /, '');
+          const rn = (a ? (REGION_NAME[a.region] ?? '황야') : '황야').replace(/^the /, '');
           const roll = s.rng();
           const incKind = roll < 0.68 ? 'block' : roll < 0.90 ? 'beast' : 'wrath';
           const incC = fromCorpus(s, 'INCIDENTS', incKind, {
@@ -1258,23 +1247,23 @@ export function createEvents() {
           // paperwork about the end of its world, and paperwork does not raise its
           // voice.
           if (data.stage === 2 && !data.link) {
-            s.note('Traffic reports that the eastern halts have stopped sending their weekly returns. Not late. Stopped.\n\n'
-              + 'The Authority has written to each of them. The letters have not come back, which the Secretary observes is not the same as being answered.',
+            s.note('운수과는 동부 간이역들이 주간 보고서 보내기를 멈췄다고 보고한다. 늦은 것이 아니다. 멈췄다.\n\n'
+              + '교통청은 각 역에 서신을 보냈다. 서신들은 돌아오지 않았다. 서기관은 그것이 회답받은 것과는 다르다고 지적한다.',
               'grave', { chronicle: true });
           } else if (data.stage === 2 && data.link) {
             s.note(data.held
-              ? `The road at ${data.where} was attacked in the night and held. The blockhouse is scarred and standing, the gangers are accounted for, and the line will be open again within the week.\n\n`
-                + 'The Master of Works has asked that the cost of the blockhouse be entered again, in a larger hand, beside this week’s return.'
-              : `The road at ${data.where} is gone. Not blocked — gone: the rails lifted, the sleepers burnt, the embankment opened in four places.\n\n`
-                + 'It can be made good. It will cost what it cost the first time, and rather more.',
+              ? `${data.where}의 선로가 밤중에 공격받았으나 지켜졌다. 망루는 흉터투성이로 서 있고, 작업반은 전원 확인되었으며, 선로는 이번 주 안에 다시 열릴 것이다.\n\n`
+                + '공사감독은 망루의 비용을 이번 주 보고서 옆에 다시, 더 큰 글씨로, 기입해 달라 요청하였다.'
+              : `${data.where}의 선로가 사라졌다. 막힌 것이 아니라 — 사라졌다: 레일은 걷히고, 침목은 불탔으며, 성토는 네 곳이 뜯겼다.\n\n`
+                + '복구할 수는 있다. 처음 들었던 비용, 그리고 그보다 다소 더 들 것이다.',
               'bad', { chronicle: true });
           } else if (data.stage === 3) {
-            s.note('The westbound services are full and the eastbound are empty, and no timetable the Authority prints will change that this month.\n\n'
-              + 'People are coming west along the line, with what they can carry. The stationmasters have stopped asking for tickets. Nobody instructed them to stop, and nobody has instructed them to start again.',
+            s.note('서행 열차는 가득 찼고 동행 열차는 비어 있으며, 교통청이 인쇄하는 어떤 시각표도 이번 달에는 그것을 바꾸지 못한다.\n\n'
+              + '사람들이 들 수 있는 것을 들고 선로를 따라 서쪽으로 오고 있다. 역장들은 승차권을 요구하기를 그만두었다. 그만두라 지시한 이도, 다시 시작하라 지시한 이도 없다.',
               'grave', { chronicle: true, big: true });
           } else if (data.stage === 4) {
-            s.note(`A host has come out of the east and is moving on the Authority’s own road, from ${data.from} toward ${data.to}.\n\n`
-              + 'The Surveyor has been asked how fast. He has answered that they are moving at the speed of the road — which the Authority built, and eased, and doubled — and that he would rather not put a date on it in writing.',
+            s.note(`대군이 동쪽에서 나와 교통청 자신의 길 위를, ${data.from}에서 ${data.to}(으)로 이동하고 있다.\n\n`
+              + '측량관에게 어느 속도인지 물었다. 그는 그들이 선로의 속도로 움직이고 있다고 답했다 — 교통청이 놓고, 완화하고, 복선으로 만든 — 그리고 기일을 서면으로 적고 싶지는 않다고 덧붙였다.',
               'grave', { chronicle: true, big: true, plate: 'age3' });
             s.audio?.('doom');
           }
@@ -1282,11 +1271,11 @@ export function createEvents() {
         }
         case 'age':
           if (data.age === 2) {
-            s.note('The Authority has been reconstituted with an enlarged mandate and a smaller building. Traffic is up. Everything is up. The Council has begun using the word “Age”, capitalised, which is never a good sign in a minute.', 'plain', { chronicle: true, big: true });
+            s.note('교통청은 확대된 권한과 더 작은 청사로 재편되었다. 수송량이 늘었다. 모든 것이 늘었다. 평의회가 “시대”라는 단어를 대문자로 쓰기 시작했는데, 속기록에서 좋은 징조인 적은 없다.', 'plain', { chronicle: true, big: true });
           } else if (data.age === 3) {
             s.note(
-              'A memorandum has been circulated to all stationmasters. It is one page. It concerns what to do if the eastern services do not stop where they are timetabled to stop.\n\n'
-              + 'It does not say what to do. It says whom to tell.',
+              '전 역장에게 회람 한 통이 돌려졌다. 한 장이다. 동부 열차가 시각표상 정차할 곳에서 정차하지 않을 경우의 대처에 관한 것이다.\n\n'
+              + '무엇을 하라고는 적혀 있지 않다. 누구에게 알리라고 적혀 있다.',
               // The `age3` plate was drawn and then never attached to anything, so the
               // single most important moment in the game arrived without its picture.
               'grave', { chronicle: true, big: true, plate: 'age3' },
@@ -1299,26 +1288,26 @@ export function createEvents() {
           // player can slow the felling, run fewer smoking works, or simply go and
           // serve a haven — all of which lift elf regard.
           s.note(data.why === 'smoke'
-            ? 'A letter from the Havens, shorter than their letters usually are.\n\n'
-              + `“The smoke of your works has been counted at ${data.smoke} parts. We do not `
-              + 'ask you to stop. We are telling you what we are counting, and that we have '
-              + 'begun to discuss among ourselves what the counting is for.”\n\n'
-              + 'The Secretary notes that the Havens have never before mentioned a number.'
-            : 'A letter from the Havens. It concerns the timetable, at length, and the '
-              + 'condition of a bridge the Authority did not build.\n\n'
-              + 'The last paragraph observes that no service of the Authority has called at '
-              + 'a haven this quarter, and that the Elves had not expected one, and that they '
-              + 'mention it only so that it is written down somewhere.',
+            ? '항구에서 온 서신. 평소의 그들의 서신보다 짧다.\n\n'
+              + `“당신들 공사의 연기를 세어 보니 ${data.smoke}이었다. 멈추라고 요구하지는 `
+              + '않는다. 우리가 무엇을 세고 있는지, 그리고 그 세는 것이 무엇을 위한 것인지를 '
+              + '우리끼리 논의하기 시작했다는 사실을 알리는 것이다.”\n\n'
+              + '서기관은 항구가 숫자를 언급한 것이 처음이라고 적는다.'
+            : '항구에서 온 서신. 시각표에 관한 것으로, 장황하며, 교통청이 짓지 않은 '
+              + '다리 하나의 상태에 관한 것이기도 하다.\n\n'
+              + '마지막 문단은 이번 분기 교통청의 열차가 어느 항구에도 들르지 않았음을, '
+              + '엘프들은 기대하지도 않았음을, 그리고 어딘가에 기록으로 남기 위해서만 이를 '
+              + '언급한다고 적고 있다.',
             'bad', { chronicle: true });
           break;
         case 'elves_warn':
-          s.note('The Havens have given notice. Not of a grievance — of a departure. The Authority is asked to note that the ships at the Grey Quays are being provisioned, and to draw its own conclusions, which it has.', 'grave', { chronicle: true });
+          s.note('항구가 통고를 보내 왔다. 불만의 통고가 아니다 — 떠남의 통고다. 회색 부두의 배들에 식량이 실리고 있음을 유의하고, 스스로 결론을 도출하기를 교통청은 요청받았다. 교통청은 도출하였다.', 'grave', { chronicle: true });
           break;
         case 'elves_depart':
           s.note(
-            'The Elves have gone from the Grey Quays. They went at dawn, without ceremony, and they took the lamps.\n\n'
-            + 'The havens are standing empty and in good order. Nothing has been broken and nothing has been left behind except, at Lorindel, a single ticket, unpunched, for a journey the Authority does not run and cannot find in any timetable.\n\n'
-            + 'Lore has been struck from the schedule of carried goods. There is no longer anywhere to carry it from.',
+            '엘프들이 회색 부두를 떠났다. 새벽에, 의식 없이 떠났고, 등불들을 가져갔다.\n\n'
+            + '항구들은 비어 있으나 정돈된 채 서 있다. 부서진 것도 없고 남겨진 것도 없다. 다만 로린델에, 펀칭되지 않은 승차권 한 장, 교통청이 운행하지 않으며 어떤 시각표에서도 찾을 수 없는 여정의 것.\n\n'
+            + '지식은 운송 품목표에서 삭제되었다. 더 이상 실어 올 곳이 없다.',
             'grave', { chronicle: true, big: true },
           );
           s.audio?.('depart');
@@ -1360,7 +1349,7 @@ export function createEvents() {
           break;
         }
         case 'plague_spread':
-          s.note(`The sickness has reached ${data.to.name}. It came on the 9:20 from ${data.from.name}, in a carriage the Authority had cleaned and certified.`, 'bad');
+          s.note(`병이 ${data.to.name}에 닿았다. ${data.from.name}발 9시 20분 차로 왔다. 교통청이 청소하고 증명한 객차 안에서.`, 'bad');
           break;
       }
     },
@@ -1385,7 +1374,7 @@ export function createEvents() {
           const L = pick(s.rng, cand);
           L.destroyed = true;
           s.markDirty();
-          s.note('The section through Wodenholt is gone. The trees are back. They are the same trees, at the same ages, which the Authority\'s botanist confirms is not possible and has asked to stop being consulted about.', 'grave', { chronicle: true });
+          s.note('워든홀트를 지나던 구간이 사라졌다. 나무들이 돌아왔다. 같은 나무들이, 같은 나이로. 교통청의 식물학자는 이것이 불가능함을 확인하고 이 건에 대해서는 더 이상 자문받지 않기를 요청하였다.', 'grave', { chronicle: true });
           s.audio?.('ent');
         }
       }
@@ -1417,7 +1406,7 @@ export function createEvents() {
         if (cand.length) {
           const st = pick(s.rng, cand);
           st.plague = 0.4;
-          s.note(`A sweating sickness has been reported at ${st.name}. The Surgeons are calling it a local matter. ${st.name} has a station, four services a day, and connections to eleven other places.`, 'bad', { chronicle: true });
+          s.note(`${st.name}에 발한역이 보고되었다. 의사들은 이를 국지적 사안이라 부르고 있다. ${st.name}에는 역이 있고, 하루 네 편이 운행되며, 열한 곳과 연결되어 있다.`, 'bad', { chronicle: true });
         }
       }
 
@@ -1431,8 +1420,8 @@ export function createEvents() {
           const st = pick(s.rng, cand);
           s.dragonAt = st.id;
           const c = fromCorpus(s, 'CROSSING', 'dragon_wakes', { site: st, place: st.name });
-          s.note(c ? c.text : (st.name + ' has stopped loading ore. The Delvers will not say why, and '
-            + 'the Authority has been asked to move its rolling stock back a mile and to stop asking.'),
+          s.note(c ? c.text : (st.name + '이(가) 광석 싣기를 멈췄다. 굴착단은 이유를 말하지 않으며, '
+            + '교통청은 차량을 1마일 뒤로 옮기고 더 이상 묻지 말라는 요청을 받았다.'),
             'grave', { chronicle: true, big: true, plate: 'dragon' });
           s.audio?.('dragon');
           // everything touching that delve becomes markedly less safe
@@ -1470,91 +1459,91 @@ export function createEvents() {
 
 export const ENDINGS = {
   errand: {
-    title: 'The Consignment Was Delivered',
+    title: '하물은 배달되었다',
     tone: 'good',
-    body: (s) => `The item reached Mount Wrack on the eastbound service, in a locked drawer, in the guard's van, under a docket describing it as "sundries".
+    body: (s) => `그 물품은 동행 열차로, 잠긴 서랍 안, 차장의 차 안, "잡화"라 적힌 전표 아래, 랙 산에 도착하였다.
 
-What happened to it afterwards is not the Authority's concern and does not appear in the Authority's records. What appears in the Authority's records is that the consignment was collected at ${s.byId.get(s.errand?.from)?.name ?? 'its origin'}, carried ${Math.round(s.links.reduce((n, L) => n + L.length, 0))} units of line, transferred without loss, and signed for.
+그 뒤 그것에 무슨 일이 일어났는지는 교통청의 소관이 아니며 교통청의 기록에도 나타나지 않는다. 교통청의 기록에 나타나는 것은, 그 하물이 ${s.byId.get(s.errand?.from)?.name ?? '발송지'}에서 접수되어 ${Math.round(s.links.reduce((n, L) => n + L.length, 0))}단위의 선로를 운반되고, 손실 없이 인계되며, 서명 수령되었다는 사실이다.
 
-The Shadow in the east is gone. The Ashenreach services have been suspended pending a review of demand. Two hundred orkish season tickets have been refunded, which took longer than the war.
+동쪽의 그림자는 사라졌다. 잿빛벌판 노선은 수요 검토가 있을 때까지 운행이 정지되었다. 이백 장의 오크 정기권이 환불되었는데, 전쟁보다 오래 걸렸다.
 
-The Director is commended. The commendation is filed. Below it, in the same folder, is a note from the Traffic department observing that the trunk line was built to carry grain, and that on the one occasion it was asked to carry something else, it did.`,
+청장은 표창되었다. 표창은 기록되었다. 그 아래, 같은 서류철에, 운수과의 쪽지가 있다. 간선은 곡물을 싣기 위해 놓였으며, 다른 무언가를 실어 달라는 단 한 번의 요청에, 그것을 실었다고.`,
   },
   lost_errand: {
-    title: 'The Consignment Did Not Arrive',
+    title: '하물은 도착하지 않았다',
     tone: 'grave',
-    body: () => `The eastbound service was stopped between stations. The guard's van was opened. The drawer was opened.
+    body: () => `동행 열차는 역과 역 사이에서 멈췄다. 차장의 차가 열렸다. 서랍이 열렸다.
 
-There is no further entry.
+이후의 기록은 없다.
 
-The Authority's final act was to publish the winter timetable, which it did, on time, to a realm that had stopped needing one. It was a good timetable. Punctuality that quarter was ninety-one per cent, the best figure in the Authority's history, and there was nobody left to whom the figure could usefully be reported.`,
+교통청의 마지막 행위는 겨울 시각표를 발행한 것이었다. 정시에, 더 이상 시각표를 필요로 하지 않게 된 왕국을 향하여. 좋은 시각표였다. 그 분기의 정시율은 91퍼센트, 교통청 역사상 최고의 수치였고, 그 수치를 유용하게 보고받을 이는 남아 있지 않았다.`,
   },
   shadow: {
-    title: 'The East Came West',
+    title: '동쪽이 서쪽으로 왔다',
     tone: 'grave',
-    body: (s) => `They came on the rails. Of course they came on the rails — it was the only sensible way to come, and the Authority had spent ${s.week} weeks making it sensible.
+    body: (s) => `그들은 레일 위로 왔다. 당연히 레일 위로 왔다 — 그것이 유일하게 합리적인 방법이었고, 교통청은 ${s.week}주를 들여 그것을 합리적으로 만들어 두었다.
 
-The trunk line held to the end. The engines ran, the signals worked, the couplings did not fail. Every part of the system the Authority was responsible for performed exactly as designed, at speed, in the wrong direction, carrying the wrong thing.
+간선은 끝까지 버텼다. 기관차는 달렸고, 신호는 작동했고, 연결기는 끊어지지 않았다. 교통청이 책임졌던 체계의 모든 부분은 설계된 그대로 정확히 작동하였다. 전속력으로, 잘못된 방향으로, 잘못된 것을 싣고.
 
-The last entry in the register is a request from the stationmaster at Brackenford for a replacement lamp. It was approved.`,
+장부의 마지막 기록은 브래큰포드 역장의 등불 교체 요청이다. 승인되었다.`,
   },
   dismissed: {
-    title: 'The Director Is Thanked For Their Service',
+    title: '청장은 그간의 노고에 감사받았다',
     tone: 'bad',
-    body: (s) => `The Authority is overdrawn by an amount the Council has described in session as "creative".
+    body: (s) => `교통청은 평의회가 회의에서 "창의적"이라고 표현한 액수만큼 당좌 초과 상태다.
 
-The Director is thanked for their service. A pension has been calculated and, in view of the accounts, calculated again.
+청장은 그간의 노고에 감사받았다. 연금이 산정되었고, 회계를 고려하여, 다시 산정되었다.
 
-The railway remains. ${s.links.length} sections of line, ${s.connectedCount()} places joined to one another that were not joined before, and a tunnel under the Sundering Peaks that will be there when everyone who argued about it is not. The Council will appoint a successor who will be more careful with money and will build none of it.`,
+철도는 남는다. ${s.links.length}개의 구간, 이전에는 이어지지 않았던 ${s.connectedCount()}곳의 연결, 그리고 선더링 산맥 아래의 터널 하나 — 그것을 놓고 다투었던 모든 이가 없어진 뒤에도 그곳에 있을 것이다. 평의회는 돈에 더 신중한 후임을 임명할 것이며, 그는 이 중 아무것도 짓지 않을 것이다.`,
   },
   concord: {
-    title: 'Nobody Is Speaking To The Authority',
+    title: '아무도 교통청과 말하지 않는다',
     tone: 'bad',
-    body: () => `The Halflings have stopped signing for deliveries. The Delvers have withdrawn their engineers and, with them, the right to use their designs. The Havens are empty. The Council meets without inviting the Director and minutes the meetings as if it had.
+    body: () => `하플링들이 배달 수령 서명을 그만두었다. 굴착단은 기사들을 철수시켰고, 그들과 함께 도면 사용권도 거둬갔다. 항구는 비었다. 평의회는 청장을 부르지 않고 회의하며, 부른 것처럼 속기록을 작성한다.
 
-The line is intact. Nothing is moving on it.
+선로는 온전하다. 그 위를 움직이는 것이 없다.
 
-A railway is not track. A railway is an agreement about track, and the agreement has lapsed.`,
+철도는 선로가 아니다. 철도는 선로에 관한 약정이며, 그 약정은 소멸하였다.`,
   },
   // ── the three ways Age III ends ────────────────────────────────────────
   held: {
-    title: 'The Road Held',
+    title: '선로는 버텨냈다',
     tone: 'good',
-    body: (s) => `They came down the ${s.host?.fromName ?? 'eastern'} road at the speed the Authority had built it to carry, and at ${s.byId.get(s.host?.heartId)?.name ?? 'the heart of the realm'} they stopped.
+    body: (s) => `그들은 교통청이 실을 수 있도록 지어 둔 속도로 ${s.host?.fromName ?? '동쪽'} 길을 내려왔고, ${s.byId.get(s.host?.heartId)?.name ?? '왕국의 심장'}에서 멈췄다.
 
-Not defeated. Stopped. The blockhouses are standing, the cuttings are walled, and the Master of Works has walked the length of it twice and signed for it both times.
+패배한 것이 아니다. 멈춘 것이다. 망루들은 서 있고, 절개지에는 벽이 있으며, 공사감독은 그 전 구간을 두 번 걸어 두 번 모두 검수에 서명하였다.
 
-${s.connectedCount()} places are still joined to one another. ${Math.round(s.stats.loadsMoved)} loads have been carried, and a great many of them in the last four weeks were people.
+${s.connectedCount()}곳이 여전히 서로 이어져 있다. ${Math.round(s.stats.loadsMoved)}적재분이 운반되었고, 지난 4주간의 그 상당수는 사람이었다.
 
-The winter timetable is being drawn up. It will be provisional. Everything, the Secretary observes, is now provisional, and the Authority has decided that it can live with that.`,
+겨울 시각표가 작성되고 있다. 잠정일 것이다. 서기관이 말하듯, 이제 모든 것이 잠정이며, 교통청은 그것과 함께 살 수 있다고 판단하였다.`,
   },
   sundered: {
-    title: 'The Road Was Lifted',
+    title: '선로는 걷혔다',
     tone: 'grave',
-    body: (s) => `The Authority tore up its own railway, working westward, ahead of the host, and it worked well. They are not coming any further, because there is nothing left to come down.
+    body: (s) => `교통청은 자신의 철도를 걷어 냈다. 서쪽으로, 대군의 앞에서 작업하며. 그리고 그것은 잘 먹혔다. 그들은 더 이상 오지 않는다. 내려올 것이 남아 있지 않기 때문이다.
 
-The rails are stacked beside the formation in ${s.host?.road?.length ?? 'several'} places. They have been counted. Nobody has said what they are to be used for.
+레일들은 ${s.host?.road?.length ?? '여러'} 곳의 노반 옆에 쌓여 있다. 수는 세어졌다. 무엇에 쓸 것인지는 아무도 말하지 않았다.
 
-${Math.round(s.stats.loadsMoved)} loads were carried before the lifting, over ${Math.round(s.stats.builtLength ?? 0) || 'many'} miles of road that the Authority surveyed, priced, built, eased and then took up with its own hands.
+걷히기 전까지 ${Math.round(s.stats.loadsMoved)}적재분이 운반되었다. 교통청이 측량하고, 견적 내고, 짓고, 완화하고, 그리고 자기 손으로 걷어 낸, ${Math.round(s.stats.builtLength ?? 0) || '수많은'} 마일의 선로 위에서.
 
-The Director's minute on the matter is one line: "It was the right thing and I would like it recorded that I did not want to."`,
+청장의 이 건에 대한 기록은 한 줄이다. "옳은 일이었다. 그리고 내가 원하지 않았다는 사실을 기록해 두기 바란다."`,
   },
   overrun: {
-    title: 'The East Came West Along the Line',
+    title: '동쪽이 선로를 따라 서쪽으로 왔다',
     tone: 'grave',
-    body: (s) => `They reached ${s.byId.get(s.host?.heartId)?.name ?? 'the heart of the realm'} on the Authority's own metals, on time, at a speed the Authority had spent ${s.week} weeks and every crown it could raise making possible.
+    body: (s) => `그들은 교통청 자신의 레일 위로, 정시에, 교통청이 ${s.week}주와 마련할 수 있는 모든 크라운을 들여 가능하게 만든 속도로, ${s.byId.get(s.host?.heartId)?.name ?? '왕국의 심장'}에 도착하였다.
 
-The last return filed from the office is a punctuality figure. It is the best one ever recorded.
+사무실에서 제출된 마지막 보고서는 정시율 수치다. 기록된 것 중 최고다.
 
-${s.connectedCount()} places were joined. ${Math.round(s.stats.loadsMoved)} loads were carried. The road was good. The road was very good.`,
+${s.connectedCount()}곳이 이어져 있었다. ${Math.round(s.stats.loadsMoved)}적재분이 운반되었다. 선로는 좋았다. 선로는 아주 좋았다.`,
   },
   survived: {
-    title: 'The Authority Continues',
+    title: '교통청은 계속된다',
     tone: 'good',
-    body: (s) => `No crisis, this quarter. Receipts are up. The Shadow in the east is where it was, doing what it does, and the eastbound services run to it four times a day carrying grain, iron and, since the spring, tourists.
+    body: (s) => `이번 분기, 위기 없음. 수입은 늘었다. 동쪽의 그림자는 있던 곳에 있으며 하던 일을 하고 있고, 동행 열차는 하루 네 번 그곳으로 곡물과 철과, 봄부터는, 관광객을 싣고 간다.
 
-${s.connectedCount()} places are joined to one another. ${Math.round(s.stats.loadsMoved)} loads have been carried. The Greenhollow feeds mountains it has never seen. A halfling in Nether Wembly can be in Amonhal by dinner, and complains about the journey, which is how the Authority knows it has succeeded.
+${s.connectedCount()}곳이 서로 이어져 있다. ${Math.round(s.stats.loadsMoved)}적재분이 운반되었다. 그린할로우는 한 번도 본 적 없는 산들을 먹인다. 네더 웸블리의 하플링은 저녁까지 아몬할에 갈 수 있고, 여정을 불평한다. 그것이 교통청이 성공했음을 아는 방법이다.
 
-The winter timetable is at the printers. It is provisional.`,
+겨울 시각표는 인쇄소에 있다. 잠정이다.`,
   },
 };
