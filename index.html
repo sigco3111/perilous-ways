@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Perilous Ways — mass transit for an age of doom</title>
-<meta name="description" content="You are Director of the Realm Transit Authority. Lay track across a continent of halflings, dwarves, elves and orcs, and discover what a railway is actually for.">
+<title>Perilous Ways — 종말의 시대를 위한 대중교통</title>
+<meta name="description" content="당신은 왕국 교통청의 청장입니다. 하플링과 드워프, 엘프와 오크의 대륙에 선로를 놓고, 철도가 진정 무엇을 위한 것인지 알아내세요.">
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🚂</text></svg>">
 <script type="importmap">
@@ -26,9 +26,9 @@
 <div id="boot">
   <div class="boot-inner">
     <h1>PERILOUS WAYS</h1>
-    <p class="sub">Mass transit for an age of doom</p>
+    <p class="sub">종말의 시대를 위한 대중교통</p>
     <div class="boot-bar"><i></i></div>
-    <p class="boot-status">surveying the realm…</p>
+    <p class="boot-status">왕국을 측량하는 중…</p>
   </div>
 </div>
 
@@ -36,20 +36,20 @@
 <div id="title" hidden>
   <div class="title-card">
     <h1>PERILOUS WAYS</h1>
-    <p class="sub">Being an account of the Realm Transit Authority,<br>its triumphs and its incidents</p>
+    <p class="sub">왕국 교통청의 기록,<br>그 위업과 사건사고에 관하여</p>
     <div class="brief">
-      <p>You are Director of the Authority. You do not fight, rule, or quest. You
-      lay track, buy engines, and answer correspondence.</p>
-      <p>A Delve produces iron and cannot grow food. A Shire grows food and has no
-      tools. Neither can do anything about this without you.</p>
-      <p class="dim">Everything that happens to the realm afterwards is, technically, your fault.</p>
+      <p>당신은 교통청의 청장입니다. 싸우지도, 다스리지도, 모험을 떠나지도 않습니다.
+      선로를 놓고, 기관차를 사고, 서신에 답할 뿐입니다.</p>
+      <p>델브는 철을 캐내지만 식량을 기르지 못합니다. 샤이어는 식량을 기르지만 연장이 없습니다.
+      당신 없이는 어느 쪽도 이 문제를 해결할 수 없습니다.</p>
+      <p class="dim">그 뒤 왕국에 벌어지는 모든 일은, 엄밀히 말해, 전적으로 당신의 탓입니다.</p>
     </div>
     <div class="seedrow">
-      <label>Realm <input id="seedInput" type="text" maxlength="18" spellcheck="false"></label>
-      <button id="reroll" class="ghost" title="Generate a different realm">↻</button>
+      <label>왕국 <input id="seedInput" type="text" maxlength="18" spellcheck="false"></label>
+      <button id="reroll" class="ghost" title="다른 왕국을 생성합니다">↻</button>
     </div>
-    <button id="begin" class="big">Take up the post</button>
-    <p class="creds">drag to look · scroll to zoom · click a settlement, then another, to survey a line<br>then set what it carries, what it charges, and where it calls</p>
+    <button id="begin" class="big">취임하기</button>
+    <p class="creds">드래그로 둘러보기 · 스크롤로 확대 · 정착지를 클릭하고 이어서 다른 정착지를 클릭하면 노선을 측량합니다<br>그다음 무엇을 싣고, 얼마를 받고, 어디에 정차할지를 정하세요</p>
   </div>
 </div>
 
@@ -59,42 +59,42 @@
   <!-- top bar -->
   <header id="topbar">
     <div class="brand">PERILOUS&nbsp;WAYS</div>
-    <div class="stat" id="stWeek"><b>—</b><span>week</span></div>
-    <div class="stat money" id="stMoney"><b>—</b><span>crowns</span></div>
-    <div class="stat" id="stFlow"><b>—</b><span>per week</span></div>
-    <div class="stat" id="stPros"><b>—</b><span>prosperity</span></div>
-    <div class="stat" id="stConcord"><b>—</b><span>concord</span></div>
-    <div class="stat shadow" id="stShadow"><b>—</b><span>the east</span></div>
+    <div class="stat" id="stWeek"><b>—</b><span>주</span></div>
+    <div class="stat money" id="stMoney"><b>—</b><span>크라운</span></div>
+    <div class="stat" id="stFlow"><b>—</b><span>주당</span></div>
+    <div class="stat" id="stPros"><b>—</b><span>번영</span></div>
+    <div class="stat" id="stConcord"><b>—</b><span>화합</span></div>
+    <div class="stat shadow" id="stShadow"><b>—</b><span>동쪽</span></div>
     <div class="spacer"></div>
-    <button id="charterBtn" hidden title="The Council is waiting on you">A charter awaits</button>
-    <button id="ledgerBtn" title="Receipts, flows and bottlenecks">Ledger</button>
-    <button id="commBtn" title="What the realm is asking you to move">Commissions</button>
+    <button id="charterBtn" hidden title="평의회가 기다리고 있습니다">칙허가 도착했습니다</button>
+    <button id="ledgerBtn" title="수지, 흐름, 병목">장부</button>
+    <button id="commBtn" title="왕국이 당신에게 옮겨 달라 청하는 것들">의뢰</button>
     <div class="speeds">
-      <button data-speed="0" title="Pause (space)">❙❙</button>
+      <button data-speed="0" title="일시정지 (스페이스)">❙❙</button>
       <button data-speed="1" class="on">1×</button>
       <button data-speed="2">2×</button>
       <button data-speed="4">4×</button>
     </div>
-    <button id="muteBtn" class="ghost" title="Mute">♪</button>
+    <button id="muteBtn" class="ghost" title="음소거">♪</button>
   </header>
 
   <!-- left: peoples + fleet -->
   <aside id="leftpanel">
     <!-- the standing orders: a light guided opening -->
     <section class="card" id="guide" hidden>
-      <h3>Standing Orders <button id="guideSkip" class="ghost sm" title="Dismiss">✕</button></h3>
+      <h3>상시 지령 <button id="guideSkip" class="ghost sm" title="닫기">✕</button></h3>
       <div id="guideBody"></div>
     </section>
 
     <section class="card" id="fleetCard">
-      <h3>The Fleet</h3>
-      <div class="fleetline"><span>Engines</span><b id="fEngines">—</b></div>
-      <div class="fleetline"><span>Wagons each</span><b id="fCars">—</b></div>
-      <div class="fleetline"><span>Charters</span><b id="fCharters">—</b></div>
+      <h3>차량대</h3>
+      <div class="fleetline"><span>기관차</span><b id="fEngines">—</b></div>
+      <div class="fleetline"><span>편성당 차량</span><b id="fCars">—</b></div>
+      <div class="fleetline"><span>칙허</span><b id="fCharters">—</b></div>
       <div id="lineList"></div>
     </section>
     <section class="card" id="concordCard">
-      <h3>Concord</h3>
+      <h3>화합</h3>
       <div id="regardList"></div>
     </section>
   </aside>
@@ -104,7 +104,7 @@
 
   <!-- right: the register -->
   <aside id="register">
-    <h3>The Register <button id="regToggle" class="ghost sm" title="Collapse">▾</button></h3>
+    <h3>기록부 <button id="regToggle" class="ghost sm" title="접기">▾</button></h3>
     <div id="logList"></div>
   </aside>
 
@@ -129,7 +129,7 @@
   </div>
 </div>
 
-<noscript><p style="color:#eee;font:16px serif;padding:2rem">Perilous Ways needs JavaScript and WebGL.</p></noscript>
+<noscript><p style="color:#eee;font:16px serif;padding:2rem">Perilous Ways를 실행하려면 JavaScript와 WebGL이 필요합니다.</p></noscript>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>
