@@ -325,8 +325,8 @@ function installMethods(s) {
   /** Price a link without committing to it. */
   s.survey = (aId, bId, opts = {}) => {
     const a = s.byId.get(aId), b = s.byId.get(bId);
-    if (!a || !b || a.id === b.id) return { ok: false, reason: 'pick two different places' };
-    if (s.linkBetween(aId, bId)) return { ok: false, reason: 'already built' };
+    if (!a || !b || a.id === b.id) return { ok: false, reason: '서로 다른 두 곳을 고르시오' };
+    if (s.linkBetween(aId, bId)) return { ok: false, reason: '이미 건설되었다' };
     const existing = new Set();
     for (const L of s.links) for (const c of L.cells) existing.add(c);
     const r = surveyLink(world, a, b, s.can, {
@@ -346,10 +346,10 @@ function installMethods(s) {
 
   /** Commit a surveyed link. */
   s.build = (survey) => {
-    if (!survey || !survey.ok) return { ok: false, reason: 'nothing surveyed' };
-    if (survey.price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (!survey || !survey.ok) return { ok: false, reason: '측량된 것이 없다' };
+    if (survey.price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     const a = s.byId.get(survey.a), b = s.byId.get(survey.b);
-    if (s.linkBetween(survey.a, survey.b)) return { ok: false, reason: 'already built' };
+    if (s.linkBetween(survey.a, survey.b)) return { ok: false, reason: '이미 건설되었다' };
 
     const L = {
       id: s.links.length + 1,
@@ -491,18 +491,18 @@ function installMethods(s) {
     if (!L) return null;
     const cap = s.borrowingPower(lender);
     let refuse = null;
-    if ((s.regard[L.people] ?? 50) < 12) refuse = `${L.name} will not see you.`;
-    else if (L.people === 'elf' && s.elvesGone) refuse = 'The Havens are empty.';
-    else if (cap < 60) refuse = 'They do not think you good for any more.';
+    if ((s.regard[L.people] ?? 50) < 12) refuse = `${L.name} 측이 만나 주지 않는다.`;
+    else if (L.people === 'elf' && s.elvesGone) refuse = '항구는 비어 있다.';
+    else if (cap < 60) refuse = '더는 감당할 수 없다고 판단한 모양이다.';
     return { ...L, cap, refuse };
   };
 
   s.borrow = (lender, amount) => {
     const offer = s.lenderOffer(lender);
-    if (!offer) return { ok: false, reason: 'no such lender' };
+    if (!offer) return { ok: false, reason: '그런 대부자가 없다' };
     if (offer.refuse) return { ok: false, reason: offer.refuse };
     const sum = Math.round(clamp(amount, 60, offer.cap));
-    if (sum < 60) return { ok: false, reason: 'not worth the paperwork' };
+    if (sum < 60) return { ok: false, reason: '서류 작업할 가치도 없다' };
     const debt = {
       id: s.nextDebtId++, lender, principal: sum, owed: sum,
       rate: offer.rate, took: s.week, term: offer.term, missed: 0,
@@ -518,7 +518,7 @@ function installMethods(s) {
     const d = s.debts.find((x) => x.id === debtId);
     if (!d) return { ok: false };
     const pay = Math.min(Math.max(0, amount), d.owed, Math.max(0, s.treasury));
-    if (pay <= 0) return { ok: false, reason: 'nothing to pay it with' };
+    if (pay <= 0) return { ok: false, reason: '갚을 돈이 없다' };
     d.owed -= pay;
     s.treasury -= pay;
     if (d.owed <= 0.5) {
@@ -541,9 +541,9 @@ function installMethods(s) {
   s.doubleTrack = (linkId) => {
     const L = s.links.find((x) => x.id === linkId);
     if (!L) return { ok: false };
-    if (L.doubled) return { ok: false, reason: 'already double track' };
+    if (L.doubled) return { ok: false, reason: '이미 복선이다' };
     const price = s.worksPrice.double(L);
-    if (price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     s.treasury -= price;
     s.stats.built += price;
     s.buildSpendWeek = (s.buildSpendWeek || 0) + price;
@@ -559,9 +559,9 @@ function installMethods(s) {
   s.regrade = (linkId) => {
     const L = s.links.find((x) => x.id === linkId);
     if (!L) return { ok: false };
-    if ((L.regrade || 1) <= 0.8) return { ok: false, reason: 'already eased as far as it will go' };
+    if ((L.regrade || 1) <= 0.8) return { ok: false, reason: '더는 완화할 수 없을 만큼 완화되었다' };
     const price = s.worksPrice.regrade(L);
-    if (price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     s.treasury -= price;
     s.stats.built += price;
     s.buildSpendWeek = (s.buildSpendWeek || 0) + price;
@@ -576,9 +576,9 @@ function installMethods(s) {
   s.fortify = (linkId) => {
     const L = s.links.find((x) => x.id === linkId);
     if (!L) return { ok: false };
-    if (L.fortified) return { ok: false, reason: 'already fortified' };
+    if (L.fortified) return { ok: false, reason: '이미 보강되었다' };
     const price = s.worksPrice.fortify(L);
-    if (price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     s.treasury -= price;
     s.stats.built += price;
     L.fortified = true;
@@ -779,9 +779,9 @@ function installMethods(s) {
   s.repair = (linkId) => {
     const L = s.links.find((x) => x.id === linkId);
     if (!L) return { ok: false };
-    if (!L.destroyed && !L.closed) return { ok: false, reason: 'nothing to make good' };
+    if (!L.destroyed && !L.closed) return { ok: false, reason: '복구할 것이 없다' };
     const price = s.worksPrice.repair(L);
-    if (price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     s.treasury -= price;
     s.stats.built += price;
     s.buildSpendWeek = (s.buildSpendWeek || 0) + price;
@@ -796,9 +796,9 @@ function installMethods(s) {
   s.stationWorks = (siteId) => {
     const st = s.byId.get(siteId);
     if (!st || st.abandoned) return { ok: false };
-    if ((st.works || 0) >= 3) return { ok: false, reason: 'as large a station as the place can bear' };
+    if ((st.works || 0) >= 3) return { ok: false, reason: '그 고장이 감당할 수 있는 가장 큰 역이다' };
     const price = s.worksPrice.station(st);
-    if (price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     s.treasury -= price;
     s.stats.built += price;
     st.works = (st.works || 0) + 1;
@@ -859,16 +859,16 @@ function installMethods(s) {
     const people = c.style;
     const regard = s.regard[people] ?? 50;
     let refuse = null;
-    if (people === 'elf' && s.elvesGone) refuse = 'The Havens are empty.';
-    else if (people === 'orc' && !s.concession) refuse = 'No concession has been granted.';
-    else if (regard < 18) refuse = `${c.builder} will not build for the Authority.`;
+    if (people === 'elf' && s.elvesGone) refuse = '항구는 비어 있다.';
+    else if (people === 'orc' && !s.concession) refuse = '특허권이 허가되지 않았다.';
+    else if (regard < 18) refuse = `${c.builder} 측이 교통청을 위해 만들어 주지 않는다.`;
     return { ...c, price: s.enginePrice(clsKey), refuse };
   };
   s.buyEngine = (clsKey) => {
     const offer = s.engineOffer(clsKey);
-    if (!offer) return { ok: false, reason: 'no such class' };
+    if (!offer) return { ok: false, reason: '그런 차급이 없다' };
     if (offer.refuse) return { ok: false, reason: offer.refuse };
-    if (offer.price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (offer.price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     s.treasury -= offer.price;
     s.stats.built += offer.price;
     const eng = s.fleet.build(clsKey, s.week);
@@ -885,9 +885,9 @@ function installMethods(s) {
   s.overhaul = (engineId) => {
     const e = s.engineById(engineId);
     if (!e) return { ok: false };
-    if ((e.condition ?? 1) > 0.92) return { ok: false, reason: 'it is in good order already' };
+    if ((e.condition ?? 1) > 0.92) return { ok: false, reason: '이미 상태가 양호하다' };
     const price = s.overhaulPrice(e);
-    if (price > s.treasury) return { ok: false, reason: 'the Authority cannot pay for it' };
+    if (price > s.treasury) return { ok: false, reason: '교통청이 그 비용을 감당할 수 없다' };
     s.treasury -= price;
     e.condition = 1;
     e.overhauls = (e.overhauls || 0) + 1;
@@ -916,7 +916,7 @@ function installMethods(s) {
   s.enginesFree = () => { s.syncFleet(); return s.engines.filter((e) => e.lineId === null).length; };
 
   s.createLine = (stops, policy = 'mixed') => {
-    if (stops.length < 2) return { ok: false, reason: 'a line wants at least two stops' };
+    if (stops.length < 2) return { ok: false, reason: '노선에는 적어도 두 개의 정차역이 필요하다' };
     const c = LINE_COLOURS[s.lines.length % LINE_COLOURS.length];
     const line = {
       id: s.lines.length + 1,
@@ -944,7 +944,7 @@ function installMethods(s) {
     const on = s.enginesOf(lineId);
     if (want > on.length) {
       const idle = s.engines.filter((e) => e.lineId === null);
-      if (idle.length < want - on.length) return { ok: false, reason: 'no engines to spare' };
+      if (idle.length < want - on.length) return { ok: false, reason: '여유 기관차가 없다' };
       // send the engine whose class suits what the line is for
       const wantStyle = STYLE_FOR_POLICY[line.policy] || 'dwarf';
       idle.sort((a, b) => (b.style === wantStyle) - (a.style === wantStyle));
@@ -993,9 +993,9 @@ function installMethods(s) {
    */
   s.addStop = (lineId, siteId) => {
     const line = s.lines.find((l) => l.id === lineId);
-    if (!line) return { ok: false, reason: 'no such service' };
-    if (line.stops.includes(siteId)) return { ok: false, reason: 'already a stop on this service' };
-    if (line.stops.length >= 9) return { ok: false, reason: 'nine calls is enough for one service' };
+    if (!line) return { ok: false, reason: '그런 노선이 없다' };
+    if (line.stops.includes(siteId)) return { ok: false, reason: '이미 이 노선의 정차역이다' };
+    if (line.stops.length >= 9) return { ok: false, reason: '한 노선에 정차역 아홉 곳이면 충분하다' };
     // Join at whichever END is actually nearer by rail. End-first meant a call
     // adjacent to the FIRST stop was still appended at the tail whenever the
     // network happened to connect it there too, and the service ran the whole line,
@@ -1008,13 +1008,13 @@ function installMethods(s) {
       return { ok: true, at: 'end' };
     }
     if (toFirst) { line.stops.unshift(siteId); return { ok: true, at: 'start' }; }
-    return { ok: false, reason: 'no track joins it to either end of this service' };
+    return { ok: false, reason: '이 노선의 양쪽 끝 어디와도 선로로 이어지지 않는다' };
   };
 
   s.removeStop = (lineId, siteId) => {
     const line = s.lines.find((l) => l.id === lineId);
     if (!line) return { ok: false };
-    if (line.stops.length <= 2) return { ok: false, reason: 'a service wants at least two calls' };
+    if (line.stops.length <= 2) return { ok: false, reason: '노선에는 적어도 두 개의 정차역이 필요하다' };
     line.stops = line.stops.filter((id) => id !== siteId);
     return { ok: true };
   };
@@ -1043,7 +1043,7 @@ function installMethods(s) {
     const line = s.lines.find((l) => l.id === lineId);
     if (!line) return { ok: false };
     const i = line.stops.indexOf(siteId);
-    if (i <= 0 || i >= line.stops.length - 1) return { ok: false, reason: 'split at a middle call' };
+    if (i <= 0 || i >= line.stops.length - 1) return { ok: false, reason: '중간 정차역에서 나누시오' };
     const tail = line.stops.slice(i);
     line.stops = line.stops.slice(0, i + 1);
     const r = s.createLine(tail, line.policy);
@@ -1257,12 +1257,12 @@ function installMethods(s) {
 
       // anyone with demand and no reachable supplier at all
       for (const c of consumers) {
-        if (c.st.quarantined) { noteWhy(c.st, g, 'station closed'); continue; }
-        if (!pairs.some((pp) => pp.c === c)) noteWhy(c.st, g, 'no connected source');
+        if (c.st.quarantined) { noteWhy(c.st, g, '역이 폐쇄됨'); continue; }
+        if (!pairs.some((pp) => pp.c === c)) noteWhy(c.st, g, '연결된 공급지 없음');
       }
 
       for (const { p, c, h } of pairs) {
-        if (p.avail <= 0.02) { noteWhy(c.st, g, 'source has none to spare'); continue; }
+        if (p.avail <= 0.02) { noteWhy(c.st, g, '공급지에 여유분 없음'); continue; }
         const want = c.remain;
         if (want <= 0.02) continue;
         let room = Infinity, tightest = null;
@@ -1274,12 +1274,12 @@ function installMethods(s) {
           s.congestion.set(tightest, (s.congestion.get(tightest) || 0) + 1);
           const L = s.links.find((x) => x.id === tightest);
           const at = L ? (s.byId.get(L.a)?.name || '') : '';
-          noteWhy(c.st, g, cap.get(tightest) > 0 ? `capacity short at ${at}` : 'no service on the line');
+          noteWhy(c.st, g, cap.get(tightest) > 0 ? `${at}에서 수송력 부족` : '선로에 운행 노선 없음');
           continue;
         }
         // transfers lose a little unless the Interchange Act has passed
         const loss = Math.pow(1 - s.transferLoss, h.transfers);
-        if (loss < 0.34) noteWhy(c.st, g, 'too many changes');
+        if (loss < 0.34) noteWhy(c.st, g, '환승이 너무 많음');
         const terms = pathTerms(h.hops);
         const raw = Math.min(p.avail, (want / Math.max(0.15, loss)) * terms.demandMul, room);
         if (raw <= 0.02) continue;
@@ -1446,7 +1446,7 @@ function installMethods(s) {
     if (winter && !s._winterNoted) {
       s._winterNoted = true;
       if (s.links.some((L) => L.freezes)) {
-        s.note('The Frostmarch sections are drifted over. They will open when they open. The Authority has published a revised timetable with the northern services omitted rather than delayed, which the Council considers optimistic bookkeeping.', 'plain');
+        s.note('프로스트마치 구간이 눈에 파묻혔다. 열릴 때가 되면 열릴 것이다. 교통청은 북부 노선을 지연이 아니라 생략으로 처리한 수정 시각표를 발표했는데, 평의회는 이를 낙관적인 장부 정리라 여기고 있다.', 'plain');
       }
     }
     if (!winter) s._winterNoted = false;
@@ -1591,15 +1591,15 @@ function installMethods(s) {
         const first = s.byId.get(line.stops[0])?.name ?? 'the line';
         const last = s.byId.get(line.stops[line.stops.length - 1])?.name ?? 'the far end';
         s.note(where.length
-          ? `THE ROAD IS CUT AT ${String(where[0]).toUpperCase()}. NO SERVICE CAN BE WORKED `
-            + `BETWEEN ${first.toUpperCase()} AND ${last.toUpperCase()} UNTIL IT IS MADE GOOD. `
-            + `THE ENGINES ARE STANDING.`
-          : `Service between ${first} and ${last} is suspended. The road will not resolve end to end `
-            + `and Traffic cannot say why, which is itself a thing to report.`, 'bad', { chronicle: true });
+          ? `선로가 ${String(where[0])} 구간에서 끊겼다. 복구되기 전까지 ${first}와 ${last} 사이에는 `
+            + `어떤 운행도 불가능하다. `
+            + `기관차들은 멈춰 서 있다.`
+          : `${first}와 ${last} 사이의 운행이 중단되었다. 선로가 끝에서 끝까지 이어지지 않으며, `
+            + `운수과도 그 이유를 설명하지 못하고 있는데, 그 자체가 보고할 만한 일이다.`, 'bad', { chronicle: true });
       } else if (!severed && line.severed) {
         line.severed = false;
-        s.note(`The road is open again. Working resumed over the whole length of the `
-          + `${s.byId.get(line.stops[0])?.name ?? 'line'} service.`, 'good');
+        s.note(`선로가 다시 열렸다. `
+          + `${s.byId.get(line.stops[0])?.name ?? '해당'} 노선의 전 구간에서 운행이 재개되었다.`, 'good');
       }
       const ids = resolved || [];
       const uniq = [...new Set(ids)];
@@ -1647,10 +1647,10 @@ function installMethods(s) {
         e.condition = clamp((e.condition ?? 1) - (worked / 1000) * 0.055 * c.wear, 0, 1);
         if (e.condition < 0.34 && !e.warned) {
           e.warned = true;
-          s.note(`${e.name} has been stopped by the shed foreman, who declines to sign for her. `
-            + `${Math.round(e.dist).toLocaleString('en-GB')} units run since new`
-            + `${e.overhauls ? `, ${e.overhauls} overhaul${e.overhauls > 1 ? 's' : ''}` : ''}. `
-            + `She will work if she is made to, and less of the train will arrive.`, 'bad');
+          s.note(`${e.name}이(가) 차고 반장에 의해 운행 정지되었다. 반장은 인수 서명을 거부했다. `
+            + `신차 이후 주행 ${Math.round(e.dist).toLocaleString('en-GB')}`
+            + `${e.overhauls ? `, 전면 정비 ${e.overhauls}회` : ''}. `
+            + `억지로 굴리면 굴러가겠지만, 열차의 도착분은 줄어들 것이다.`, 'bad');
         } else if (e.condition > 0.6) e.warned = false;
       }
       let worst = null, worstLoad = 0;
@@ -1695,26 +1695,26 @@ function installMethods(s) {
         s.regard[L.people] = clamp((s.regard[L.people] ?? 50) - 3.5, 0, 100);
         if (d.missed === 2 || d.missed === 5) {
           s.note(d.lender === 'delvers'
-            ? `Ironmoot & Sons write to say that the payment is late. The letter is one line long and encloses a copy of the terms, with the relevant clause underlined twice.`
+            ? `아이언무트 & 선스에서 납입이 늦었다는 서신을 보내 왔다. 한 줄짜리 편지에 약정서 사본이 동봉되어 있고, 해당 조항에 밑줄이 두 번 그어져 있다.`
             : d.lender === 'crown'
-              ? `The Crown has not been paid and has not mentioned it, which the Secretary finds considerably worse than a demand.`
-              : `Nothing has come from the Havens about the missed payment. The Authority would prefer a letter.`,
+              ? `왕실은 납입금을 받지 못했고, 아무 말도 하지 않았다. 서기관은 이것이 독촉장보다 훨씬 나쁘다고 생각한다.`
+              : `납입 누락에 대해 항구에서 아무 소식도 없다. 교통청으로서는 편지 한 통이라도 오는 편이 낫다.`,
             'bad');
         }
       }
       if (d.owed <= 0.5) {
         s.debts = s.debts.filter((x) => x.id !== d.id);
         if (d.lender === 'havens') s.havenBond = s.debts.some((x) => x.lender === 'havens');
-        s.note(`The debt to ${L.name} is discharged. ${Math.round(d.principal)} crowns borrowed, `
-          + `${Math.round(d.principal * (1 + d.rate * Math.max(1, s.week - d.took)))} repaid, and the paper returned.`, 'good');
+        s.note(`${L.name}에 대한 부채가 청산되었다. ${Math.round(d.principal)}크라운을 빌려 `
+          + `${Math.round(d.principal * (1 + d.rate * Math.max(1, s.week - d.took)))}크라운을 갚았고, 증서는 반환되었다.`, 'good');
       }
     }
     // The Havens lend on a condition, and they are watching.
     if (s.havenBond && s.orcTradeTotal > (s.havenBondOrcMark ?? s.orcTradeTotal) + 4) {
       s.havenBondOrcMark = s.orcTradeTotal;
       s.regard.elf = clamp(s.regard.elf - 12, 0, 100);
-      s.note('The Havens have written once about the bond, and once only. They lent on a '
-        + 'condition, the condition has not been kept, and they do not intend to discuss it.', 'bad',
+      s.note('항구에서 채권에 대해 딱 한 번, 단 한 번만 서신을 보내 왔다. 그들은 '
+        + '조건을 걸고 빌려 주었고, 조건은 지켜지지 않았으며, 논의할 뜻이 없다고 한다.', 'bad',
         { chronicle: true });
     }
     s.debtOwed = s.debts.reduce((n, d) => n + d.owed, 0);
@@ -1836,7 +1836,7 @@ function installMethods(s) {
         const felling = s.smokeIndex > 8;
         s.emit('elves_unease', {
           smoke: Math.round(s.smokeIndex),
-          why: felling ? 'smoke' : 'neglect',
+          why: felling ? '연기' : '방치',
         });
       }
       if (s.regard.elf > 40) s.elfUnease = false;
@@ -1868,9 +1868,9 @@ function installMethods(s) {
       }
       if (!s.shameNoted && s.week > 4) {
         s.shameNoted = true;
-        s.note('A question has been asked in Council about what the Authority carries out '
-          + 'of the eastern holds, and who loads it. The Authority has answered that it '
-          + 'carries what is presented at the platform. The question has been asked again.', 'bad');
+        s.note('교통청이 동쪽 홀드에서 무엇을 싣고 오는지, 누가 그것을 적재하는지에 대한 질의가 '
+          + '평의회에서 제기되었다. 교통청은 승강장에 반입되는 것을 실을 뿐이라고 답했다. '
+          + '같은 질의가 다시 제기되었다.', 'bad');
       }
     }
     if (groves > 0) s.regard.elf = clamp(s.regard.elf + groves * 0.45, 0, 100);
@@ -1949,9 +1949,9 @@ function installMethods(s) {
       s.charterOffer = null;
       s.charterLapses = null;
       const lapseLines = [
-        `The Council rose without reaching the item. ${lapsed[0].name} stands adjourned to no date.`,
-        `Minute: the charter was not moved, no member being willing to move it. The papers have gone back to the shelf they came from.`,
-        `The item lapsed. The Secretary has entered it as “not reached”, which is the form used when a thing has been avoided on purpose.`,
+        `평의회가 안건에 이르지 못한 채 산회했다. ${lapsed[0].name}은(는) 기약 없이 연기되었다.`,
+        `속기록: 칙허안은 발의되지 않았다. 발의하려는 의원이 없었다. 서류들은 원래 있던 선반으로 돌아갔다.`,
+        `안건이 폐기되었다. 서기관은 '미상정'으로 기록했는데, 이는 일부러 회피했을 때 쓰는 형식이다.`,
       ];
       s.note(lapseLines[Math.floor(s.rng() * lapseLines.length)] ?? lapseLines[0], 'wry');
     }
@@ -2237,14 +2237,14 @@ function installMethods(s) {
       places: live.length,
     };
 
-    const was = (v, p) => (p === null || p === undefined ? '' : `, against ${p} last year`);
+    const was = (v, p) => (p === null || p === undefined ? '' : `, 전년도 ${p}`);
     const L = [];
-    L.push(`THE AUTHORITY’S ANNUAL REPORT. Year ${year}, to the quarter day.`);
+    L.push(`교통청 연차 보고서. 제${year}년, 분기 결산일 기준.`);
     L.push('');
-    L.push(`Road open at the year’s end: ${now.road} miles${was(now.road, prev && prev.road)}.`);
-    L.push(`Places served: ${served}${was(served, prev && prev.served)}.`);
-    L.push(`Loads carried since the Authority was founded: ${carried.toLocaleString('en-GB')}`
-      + `${prev ? `, of which ${(carried - prev.carried).toLocaleString('en-GB')} this year` : ''}.`);
+    L.push(`연말 기준 개통 선로: ${now.road}마일${was(now.road, prev && prev.road)}.`);
+    L.push(`수송 지점: ${served}곳${was(served, prev && prev.served)}.`);
+    L.push(`교통청 창립 이후 누적 수송량: ${carried.toLocaleString('en-GB')}`
+      + `${prev ? `, 그중 올해 ${(carried - prev.carried).toLocaleString('en-GB')}` : ''}.`);
 
     // ONE THING THAT CHANGED THIS YEAR, and never the same thing twice. The first
     // draft printed the same sentence about the largest place in year one and year
@@ -2255,7 +2255,7 @@ function installMethods(s) {
     const cands = [];
     if (prev && prev.biggest && biggest && prev.biggest !== biggest.name) {
       cands.push(['overtook',
-        `${biggest.name} has passed ${prev.biggest} and is now the largest place on the system.`]);
+        `${biggest.name}이(가) ${prev.biggest}을(를) 추월해 이제 노선망에서 가장 큰 고장이 되었다.`]);
     }
     // a place founded since the last report, which is the railway making the map
     const born = live.filter((x) => (x.founded ?? 0) > (prev ? prev.week : 0));
@@ -2263,30 +2263,30 @@ function installMethods(s) {
       const b0 = born.sort((x, y) => y.pop - x.pop)[0];
       cands.push(['born',
         born.length === 1
-          ? `${b0.name} did not exist last year. It has ${Math.round(b0.pop)} people in it and has asked for a siding.`
-          : `${born.length} places have been entered on the map that were not on it last year. `
-            + `The largest, ${b0.name}, has ${Math.round(b0.pop)} people and no church.`]);
+          ? `${b0.name}은(는) 작년에는 존재하지 않았다. 지금은 ${Math.round(b0.pop)}명이 살고 있으며 측선을 요청해 왔다.`
+          : `작년 지도에 없던 곳 ${born.length}곳이 지도에 올랐다. `
+            + `가장 큰 곳인 ${b0.name}의 인구는 ${Math.round(b0.pop)}명이고 교회는 없다.`]);
     }
     // a milestone crossed this year
     for (const [id, wk] of Object.entries(s.firsts || {})) {
       if (prev && wk <= prev.week) continue;
       const what = {
-        first_bridge: 'the first bridge', first_pass: 'the first pass',
-        first_bore: 'the first bore', first_marsh: 'the first causeway',
-        first_wood: 'the first road through the wood', first_east: 'the eastern road',
-        first_wrack: 'the road to Mount Wrack', first_quays: 'the road to the Grey Quays',
+        first_bridge: '첫 번째 교량', first_pass: '첫 번째 고갯길',
+        first_bore: '첫 번째 굴착', first_marsh: '첫 번째 둑길',
+        first_wood: '숲을 관통하는 첫 노선', first_east: '동쪽 노선',
+        first_wrack: '랙 산으로 가는 노선', first_quays: '회색 부두로 가는 노선',
       }[id];
-      if (what) cands.push(['first:' + id, `${what[0].toUpperCase()}${what.slice(1)} was opened in week ${wk}.`]);
+      if (what) cands.push(['first:' + id, `${what}이(가) ${wk}주차에 개통되었다.`]);
     }
     if (biggest) {
       const firstReached = s.links
         .filter((x) => x.a === biggest.id || x.b === biggest.id)
         .reduce((m, x) => Math.min(m, x.builtWeek ?? s.week), Infinity);
       cands.push(['big', Number.isFinite(firstReached)
-        ? `${biggest.name} had ${TIER_NAME[Math.max(0, biggest.tier - 1)]} written against it when the `
-          + `Authority first reached it in week ${firstReached}. It is a ${TIER_NAME[biggest.tier]} of `
-          + `${now.biggestPop} now.`
-        : `${biggest.name} is the largest place ${served > 0 ? 'on the system' : 'in the realm, which the Authority does not yet reach'}, at ${now.biggestPop}.`]);
+        ? `교통청이 ${firstReached}주차에 처음 닿았을 때 ${biggest.name}의 기록은 `
+          + `${TIER_NAME[Math.max(0, biggest.tier - 1)]}(이)었다. 지금은 인구 `
+          + `${now.biggestPop}의 ${TIER_NAME[biggest.tier]}이다.`
+        : `${biggest.name}은(는) ${served > 0 ? '노선망에서' : '왕국에서'} 가장 큰 고장이고, 인구는 ${now.biggestPop}이다${served > 0 ? '' : '. 교통청은 아직 그곳에 닿지 못했다'}.`]);
     }
     // Whose opinion of the Authority moved most, named without editorial.
     if (prev && prev.regard) {
@@ -2298,22 +2298,22 @@ function installMethods(s) {
       if (worstKey && Math.abs(worstDelta) > 12) {
         const who = CULTURES[worstKey]?.theName ?? worstKey;
         cands.push(['regard', worstDelta < 0
-          ? `${who} think less of the Authority than they did a year ago, by a margin the `
-            + 'Secretary has declined to put a number to in the printed version.'
-          : `${who} think better of the Authority than they did a year ago. No minute records why.`]);
+          ? `${who}의 교통청에 대한 평가가 1년 전보다 나빠졌다. 그 폭이 어느 정도인지, `
+            + '서기관은 인쇄본에 수치를 적기를 거부했다.'
+          : `${who}의 교통청에 대한 평가가 1년 전보다 좋아졌다. 그 이유를 기록한 속기록은 없다.`]);
       }
     }
     // What the Authority owes, which is a fact about its future.
     if ((s.debtOwed ?? 0) > 40) {
-      cands.push(['debt', `Outstanding against the Authority at the quarter day: `
-        + `${Math.round(s.debtOwed)} crowns. The lenders have been written to and have not replied, `
-        + 'which is customary and is not reassuring.']);
+      cands.push(['debt', `분기 결산일 현재 교통청의 미상환 부채: `
+        + `${Math.round(s.debtOwed)}크라운. 대부자들에게 서신을 보냈으나 회신이 없는데, `
+        + '이는 관례적이긴 하나 안심할 일은 아니다.']);
     }
     // The fleet, as a fact about wear rather than a count.
     const worn = s.engines.filter((e) => (e.condition ?? 1) < 0.5).length;
     if (worn > 0) {
-      cands.push(['worn', `${worn} engine${worn > 1 ? 's are' : ' is'} out of the road and `
-        + `awaiting the shops. ${worn > 1 ? 'They have' : 'She has'} run what ${worn > 1 ? 'they were' : 'she was'} asked to run.`]);
+      cands.push(['worn', `기관차 ${worn}대가 선로를 벗어나 공장 입고를 기다리고 있다. `
+        + `요구된 만큼 달려 왔다.`]);
     }
     const chosen = cands.find(([k]) => !said.has(k)) || null;
     if (chosen) { now.toldKey = chosen[0]; L.push(''); L.push(chosen[1]); }
@@ -2328,23 +2328,23 @@ function installMethods(s) {
     if (gone.length) {
       L.push('');
       L.push(gone.length === 1
-        ? `${gone[0]} is empty and has been struck from the timetable.`
-        : `Struck from the timetable this year: ${gone.slice(0, 4).join(', ')}`
-          + `${gone.length > 4 ? `, and ${gone.length - 4} other${gone.length - 4 > 1 ? 's' : ''}` : ''}.`);
+        ? `${gone[0]}은(는) 비어 있으며 시각표에서 삭제되었다.`
+        : `올해 시각표에서 삭제된 곳: ${gone.slice(0, 4).join(', ')}`
+          + `${gone.length > 4 ? ` 외 ${gone.length - 4}곳` : ''}.`);
     }
     // Said twice and then let alone: a standing absence repeated every year is a tic,
     // and the silence speaks better once the register stops mentioning it.
     if (s.elvesGone && s.annals.filter((a) => a.saidElves).length < 2) {
       now.saidElves = true;
-      L.push('Nothing has been heard from the Grey Quays.');
+      L.push('회색 부두에서 아무 소식도 들리지 않는다.');
     }
 
     // The thing the Authority is proudest of, stated without pride.
     const deepest = Math.round(s.deepestBore || 0);
     if (deepest > 6) {
       L.push('');
-      L.push(`The deepest working under the Peaks stands at ${deepest} fathoms. `
-        + 'It is ventilated, timbered and signed for.');
+      L.push(`산맥 아래 가장 깊은 굴착은 ${deepest}패덤에 이른다. `
+        + '환기와 동바리가 갖춰져 있고 검수 서명도 끝났다.');
     }
     // End on a fact, per VOICE.md, not on a remark about the report.
     const worst = s.links.filter((x) => !x.destroyed)
@@ -2352,8 +2352,8 @@ function installMethods(s) {
     if (worst) {
       const wa = s.byId.get(worst.a), wb = s.byId.get(worst.b);
       L.push('');
-      L.push(`The busiest section is ${wa?.name ?? '?'} to ${wb?.name ?? '?'}, `
-        + `running at ${Math.round((worst.load ?? 0) * 100)} per cent of what it can carry.`);
+      L.push(`가장 붐비는 구간은 ${wa?.name ?? '?'}—${wb?.name ?? '?'}로, `
+        + `수송 가능량의 ${Math.round((worst.load ?? 0) * 100)}퍼센트로 운행되고 있다.`);
     }
 
     s.annals.push(now);
@@ -2473,4 +2473,4 @@ function installMethods(s) {
   });
 
   return s;
-}
+      }
