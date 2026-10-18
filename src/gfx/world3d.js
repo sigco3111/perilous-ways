@@ -596,13 +596,13 @@ export function createWorld3D(world, sim, scene, sceneApi) {
       if (nameEl.textContent !== site.name) nameEl.textContent = site.name;
       const rising = site.pop > (TIER_POP[site.tier] || 1) * 1.25;
       const falling = site.pop < (TIER_POP[site.tier] || 1) * 0.75 && site.tier > 0;
-      const sub = site.quarantined ? 'closed'
-        : !site.connected ? 'unserved'
-        : site.satisfaction < 0.45 ? 'short'
+      const sub = site.quarantined ? '격리됨'
+        : !site.connected ? '미연결'
+        : site.satisfaction < 0.45 ? '부족'
         : site.tier >= 2 ? `${TIER_NAME[site.tier]}${rising ? ' ↑' : ''}`
-        : rising ? 'growing ↑' : falling ? 'failing ↓' : '';
+        : rising ? '성장 중 ↑' : falling ? '쇠퇴 ↓' : '';
       if (subEl.textContent !== sub) subEl.textContent = sub;
-      el.classList.toggle('warn', sub === 'short' || sub === 'closed');
+      el.classList.toggle('warn', sub === '부족' || sub === '격리됨');
     }
   }
 
