@@ -314,7 +314,7 @@ function legend(num, cap) {
     + p(`M${BX} 247h256M${VW - BX - 256} 247h256`, 1.2)
     + rp(`M${BX} 250.5h256M${VW - BX - 256} 250.5h256`, 0.7)
     + rp('M320 244l5 4.5-5 4.5-5-4.5z', 0.9)
-    + `<text x="${mid}" y="270" font-size="10.5" letter-spacing="2.6" fill="${SOFT}">PLATE ${num}.</text>`
+    + `<text x="${mid}" y="270" font-size="10.5" letter-spacing="2.6" fill="${SOFT}">도판 ${num}.</text>`
     + `<text x="${mid}" y="288" font-size="${n2(fs)}" letter-spacing="${n2(ls)}">${esc(t)}</text>`
     + '</g>';
 }
@@ -361,7 +361,7 @@ function ctxOf(id, c) {
     rng,
   };
 }
-const wk = (c) => (c.week ? ` · WEEK ${c.week}` : '');
+const wk = (c) => (c.week ? ` · ${c.week}주차` : '');
 const at = (c, fallback) => (c.place ? c.place : fallback);
 
 let seq = 0;
@@ -428,7 +428,7 @@ function first_bridge(c) {
   s += `<g transform="translate(214,222) rotate(-4)">${fp('M-22 0C-14 7 14 7 22 0C10 3 -12 3 -22 0Z')}`
     + p('M-22 0C-14 7 14 7 22 0', 1.6) + p('M-18 -4C-8 1 10 1 18 -4', 1.1) + p('M0 -3v-9', 1.2) + '</g>';
   s += figure(150, 206, 19) + figure(163, 208, 17.5, 1);
-  return { u, s, cap: `THE FIRST GIRDER CROSSING · ${at(c, 'BRACKENFORD')}${wk(c)}` };
+  return { u, s, cap: `최초의 트러스교 · ${at(c, '브래큰포드')}${wk(c)}` };
 }
 
 /* ═══ II. THE FIRST BORE ═════════════════════════════════════════════ */
@@ -491,7 +491,7 @@ function first_bore(c) {
   // the ground, dark and worked over
   s += hp(`M${BX} ${BB}V232q120-22 300-20t${BX + BW - 300} 16V${BB}z`, u, 'w', 0.75)
     + p(`M${BX} 232q120-22 300-20t${BX + BW - 300} 16`, 1.6);
-  return { u, s, cap: `THE FIRST BORE · ${at(c, 'THE SUNDERING PEAKS')} · CONTRACTORS, THE KHAZADRIM` };
+  return { u, s, cap: `최초의 굴착 · ${at(c, '선더링 산맥')} · 시공, 카자드림` };
 }
 
 /* ═══ III. THE CAUSEWAY ══════════════════════════════════════════════
@@ -568,7 +568,7 @@ function first_marsh(c) {
   s += p('M424 238q4-24 0-36M436 240q1-26 6-34M448 236q-2-22 2-30M512 238q5-22 2-32M526 240q-1-24 5-32M540 236q3-20 0-28',
     1.2);
   s += hp(`M${BX} ${BB}V230q90-10 180-2t${BW - 180} -8V${BB}z`, u, 'n', 0.5);
-  return { u, s, cap: 'THE CAUSEWAY OVER THE WEEPING MARSH · PILES DRIVEN TO NO KNOWN BOTTOM' };
+  return { u, s, cap: '우는 습지 위의 둑길 · 끝이 닿지 않는 말뚝' };
 }
 
 /* ═══ IV. THE WOODLAND SECTION ═══════════════════════════════════════
@@ -629,7 +629,7 @@ function first_wood(c) {
     + `<circle cx="${VPX + 3}" cy="${VPY + 12}" r="6" fill="none" stroke="${INK}" stroke-width="0.9"/>`;
   // and the dark of the wood pressing in at the frame
   s += `<g opacity="0.5">${hr(u, 'g', BX, BY, 62, BH)}${hr(u, 'g', BX + BW - 62, BY, 62, BH)}</g>`;
-  return { u, s, cap: `THE WOODLAND SECTION · ${c.region || 'ELDERWOOD'} · CLEARANCE STILL DISPUTED` };
+  return { u, s, cap: `삼림 구간 · ${c.region || '엘더우드'} · 벌채 허가는 여전히 분쟁 중` };
 }
 
 /* ═══ V. THE EASTERN GAP ═════════════════════════════════════════════
@@ -673,7 +673,7 @@ function first_east(c) {
     + fp(`M${tx - 7} ${ty - 30}h14v8h-14z`) + p(`M${tx + 6} ${ty - 27}h11`, 1.6)
     + p(`M${tx} ${ty - 30}v-5`, 1.1);
   s += figure(tx + 26, ty + 2, 22, 1);
-  return { u, s, cap: `THE EASTERN GAP FROM THE WEST · ${at(c, 'THE SUNDERING PEAKS')}` };
+  return { u, s, cap: `서쪽에서 바라본 동쪽 틈새 · ${at(c, '선더링 산맥')}` };
 }
 
 /* ═══ VI. MOUNT WRACK ════════════════════════════════════════════════
@@ -807,7 +807,7 @@ function first_wrack(c) {
     + p('M15 222C60 208 110 210 158 222C196 231 220 234 252 238', 2.2);
   s += p('M40 230q9-9 16 0M92 226q8-9 15 0M140 234q9-9 16 1', 1);
   s += figure(196, 224, 21) + figure(210, 227, 19, 1);
-  return { u, s, cap: `MOUNT WRACK FROM THE HEAD OF THE LINE · ${at(c, 'THE ASHENREACH')}${wk(c)}` };
+  return { u, s, cap: `선로 끝에서 바라본 랙 산 · ${at(c, '잿빛벌판')}${wk(c)}` };
 }
 
 /* Lettering inside a plate, for the one plate that is a measured drawing. */
@@ -862,7 +862,7 @@ function first_quays(c) {
     + p('M-19 -22h38v16h-38z', 2.2) + p('M-19 -22l38 16M19 -22l-38 16', 1)
     + fp('M-15 -26h9v5h-9zM6 -26h9v5H6z') + '</g>';
   s += figure(468, 179, 21) + figure(70, 142, 13);
-  return { u, s, cap: `THE GREY QUAYS AT ${at(c, 'SILVERHITHE')} · THE LINE ENDS AT THE BUFFER STOP` };
+  return { u, s, cap: `${at(c, '실버하이드')}의 회색 부두 · 선로는 차단기에서 끝난다` };
 }
 
 /* ═══ VIII. SECTION ON A—B ═══════════════════════════════════════════
@@ -932,7 +932,7 @@ function deep_bore(c) {
     + fp(`M${BX} 224h30v5h-30zM${BX + 60} 224h30v5h-30z`)
     + txt(15, 221, '0', 7.5, 1, SOFT) + txt(135, 229, '100 ft', 7.5, 1.2, SOFT);
   s += txt(22, GL - 6, 'a', 9, 1, SOFT) + txt(618, GL - 6, 'b', 9, 1, SOFT, 'end');
-  return { u, s, cap: `SECTION ON A—B · ${at(c, 'THE DEEP BORE')} · OUR WORKS, AND THE OTHER GALLERY` };
+  return { u, s, cap: `A—B 단면 · ${at(c, '대굴착')} · 우리의 갱도, 그리고 다른 쪽 갱도` };
 }
 
 /* ═══ IX. TAKING SHIP ════════════════════════════════════════════════
@@ -989,7 +989,7 @@ function elves_depart(c) {
   const shore = `M${BX} ${BB}V218q40-10 84-4t92 14 96 4V${BB}z`;
   s += hp(shore, u, 'g', 0.85) + hp(shore, u, 'c', 0.4) + p(`M${BX} 218q40-10 84-4t92 14 96 4`, 1.9);
   s += p('M40 228q9-9 16 0M100 226q8-10 15-1M170 236q9-10 16 0M240 234q9-10 16 0', 1);
-  return { u, s, cap: 'TAKING SHIP FROM THE GREY QUAYS · THE LAMPS WERE LEFT CLEAN AND EMPTY' };
+  return { u, s, cap: '회색 부두에서의 출항 · 등불은 깨끗이 비운 채 남겨 두었다' };
 }
 
 /* ═══ X. THE DEEP CHAMBER ════════════════════════════════════════════
@@ -1064,7 +1064,7 @@ function dragon(c) {
     + 'M180 70q18-8 16-20M370 66q-18-8-14-20', 1, `stroke="${PAPER}" opacity="0.45"`);
   // the rails going in, and stopping being anybody's business
   s += track(300, BB + 6, 120, 292, 200, 40, 10);
-  return { u, s, cap: `THE DEEP CHAMBER AT ${at(c, 'DHURUNZOL')} · THE SURVEY ENDS AT THIS POINT` };
+  return { u, s, cap: `${at(c, '두룬졸')}의 깊은 방 · 측량은 이 지점에서 끝난다` };
 }
 
 /* ═══ XI. THE SHAFT ══════════════════════════════════════════════════
@@ -1153,7 +1153,7 @@ function balrog(c) {
   s += fp(`M${BX} 150h44v6h-44z`) + p(`M${BX} 150h44v6h-44z`, 1.4);
   s += figure(38, 150, 22, 1);
   s += p('M60 152q26 3 46 10', 1.1, 'stroke-dasharray="4 5" opacity="0.6"');
-  return { u, s, cap: 'THE SHAFT BELOW THE LOWEST GALLERY · THE LIGHT IS COMING UP' };
+  return { u, s, cap: '가장 아래 갱도 밑의 수직갱 · 빛이 올라오고 있다' };
 }
 
 /* ═══ XII. THREE TREES ═══════════════════════════════════════════════ */
@@ -1237,7 +1237,7 @@ function ent(c) {
     + p(`M${px + 81} ${py - 2}a9 4 0 1 0 18 0a9 4 0 1 0 -18 0`, 0.8)
     + p(`M${px + 44} ${py + 8}h26v7h-26z`, 1.2);
   s += hp(`M${BX} ${BB}V230q60-8 120-4t150 8 ${BW - 270} -6V${BB}z`, u, 'b', 0.4);
-  return { u, s, cap: `THREE TREES STANDING IN THE RIGHT-OF-WAY · ${c.region || 'WODENHOLT'} · THE PEGS WERE RETURNED` };
+  return { u, s, cap: `노선 안에 서 있는 세 그루의 나무 · ${c.region || '워든홀트'} · 측량 말뚝은 돌려주었다` };
 }
 
 /* ═══ XIII. THE LOCKED DRAWER ════════════════════════════════════════ */
@@ -1294,7 +1294,7 @@ function errand(c) {
     + `<circle cx="-48" cy="14" r="11" fill="none" stroke="${RED_D}" stroke-width="1"/>`
     + p('M-53 9l10 10M-53 19l10-10', 1, `stroke="${PAPER}" opacity="0.7"`) + '</g>';
   s += txt(190, 108, `docket no. ${c.n > 0 ? Math.round(c.n) : 4}`, 8.5, 1.6, SOFT);
-  return { u, s, cap: `THE LOCKED DRAWER, GUARD'S VAN · CONTENTS: ONE ITEM, NOT DESCRIBED` };
+  return { u, s, cap: `차장차의 잠긴 서랍 · 내용물: 물품 하나, 기재 없음` };
 }
 
 /* ═══ XIV. THE BEACONS ═══════════════════════════════════════════════ */
@@ -1348,7 +1348,7 @@ function age3(c) {
   // and the man who lit it, keeping back from it
   s += figure(238, 214, 24, 1);
   s += p('M232 214q-6-16 4-24', 1.2);
-  return { u, s, cap: `THE BEACONS ANSWERING · ${at(c, 'BEACON HARDY')} TO THE HORIZON${wk(c)}` };
+  return { u, s, cap: `응답하는 봉화들 · ${at(c, '하디 봉화대')}에서 지평선까지${wk(c)}` };
 }
 
 /* Runes drawn as strokes, so no font is needed and nothing can arrive as tofu. */
@@ -1418,7 +1418,7 @@ function charter(c) {
     + `<path d="${RUNE_D[c.culture] || RUNE_D.seal}" fill="none" stroke="${RED}" stroke-width="2.8" stroke-linecap="square"/></g>`;
   // and the wax that ran when it was struck
   s += rp(`M${CX - 30} ${CY + 34}q10 10 30 10t30-10`, 1, 'opacity="0.6"');
-  return { u, s, cap: 'THE SEAL OF THE PERILOUS WAYS AUTHORITY · AFFIXED THIS DAY' };
+  return { u, s, cap: '페릴러스 웨이즈 교통청의 인장 · 이 날에 찍다' };
 }
 
 /* ═══ XVI. THE OFFICE ════════════════════════════════════════════════ */
@@ -1480,7 +1480,7 @@ function dismissed(c) {
     + p('M-15 -3q0-18 15-18t15 18', 1.8) + p('M-14 -8q10-5 28 0', 1.2, 'opacity="0.8"') + '</g>';
   // and a hook with nothing on it
   s += p('M120 148q0 10 8 10t6-8', 1.6);
-  return { u, s, cap: `THE DIRECTOR'S OFFICE, VACATED · THE TIMETABLE LEFT AS FOUND` };
+  return { u, s, cap: `비워진 청장의 집무실 · 시각표는 본래 그대로 두고 떠나다` };
 }
 
 /* ── the register of plates ───────────────────────────────────────── */
@@ -1516,4 +1516,4 @@ export function plate(id, ctx) {
   } catch (e) {
     return '';
   }
-}
+             }
