@@ -207,7 +207,7 @@ export function locoElevation(key, opts = {}) {
   }
 
   return `<svg class="loco" viewBox="0 0 104 44" width="${w}" role="img"
-    aria-label="side elevation of the ${key} class">
+    aria-label="${key}급 기관차 측면도">
     <defs>${hatch(uid + 'h', 26)}</defs>${g}</svg>`;
 }
 
@@ -266,7 +266,7 @@ export function consistStrip(cars, opts = {}) {
       + `<circle cx="${x + 17}" cy="26" r="1.8" fill="none" stroke="${INK}" stroke-width="0.8"/>`;
   });
   return `<svg class="consist" viewBox="0 0 ${w} 30" width="${opts.w || Math.min(300, w * 2.4)}"
-    role="img" aria-label="the train: ${list.join(', ') || 'no wagons'}">${g}</svg>`;
+    role="img" aria-label="열차: ${list.join(', ') || '차량 없음'}">${g}</svg>`;
 }
 
 export const WAGON_ART_KEYS = Object.keys(WAGON_ART);
