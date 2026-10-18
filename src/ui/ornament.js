@@ -21,13 +21,13 @@ export const CULTURE_RUNE = {
 
 /** The historical name of each of those runes, for the tooltip. */
 export const RUNE_NAME = {
-  halfling: 'hægl', dwarf: 'thorn', elf: 'sigel',
-  men: 'mann', orc: 'eolh', watch: 'tir',
+  halfling: '하이글', dwarf: '쏜', elf: '시겔',
+  men: '만', orc: '에올', watch: '티르',
 };
 
 const CULTURE_TITLE = {
-  halfling: 'Halflings', dwarf: 'Dwarves', elf: 'Elves',
-  men: 'Men of the Marches', orc: 'the Eastern Party', watch: 'a watch',
+  halfling: '하플링', dwarf: '드워프', elf: '엘프',
+  men: '변경의 인간', orc: '동쪽 세력', watch: '초소',
 };
 
 /** ᛜ (ing) is a lozenge and makes the best centred ornament; ᛞ (dæg) is the
@@ -43,7 +43,7 @@ export function sigil(culture) {
   const r = CULTURE_RUNE[key];
   if (!r) return '';
   const name = CULTURE_TITLE[key] || '';
-  const title = RUNE_NAME[key] ? `${name} · rune ${RUNE_NAME[key]}` : name;
+  const title = RUNE_NAME[key] ? `${name} · 룬 문자 ${RUNE_NAME[key]}` : name;
   return `<span class="rune" title="${esc(title)}">${r}</span>`;
 }
 
