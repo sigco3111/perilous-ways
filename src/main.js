@@ -35,7 +35,7 @@ function fatal(kind, detail) {
     + `Reload to try again. If this persists the realm seed may be at fault — try another.`;
   document.body.appendChild(box);
   const bs = $('boot');
-  if (bs && !bs.hidden) bs.querySelector('.boot-status').textContent = 'failed — see below';
+  if (bs && !bs.hidden) bs.querySelector('.boot-status').textContent = '실패 — 아래를 보시오';
 }
 
 addEventListener('error', (e) => fatal('script error', `${e.message}\n${e.filename}:${e.lineno}`));
